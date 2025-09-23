@@ -1,4 +1,6 @@
-This is a web application written using the Phoenix web framework.
+This is a web application written using the Phoenix web framework and Ash.
+
+It is a tool for checking and confirming important information when planning a conference. Hotel bookings for speakers, confirming activity reports, storing travel plans and more.
 
 ## Project guidelines
 
@@ -262,8 +264,8 @@ custom classes must fully style the input
 <!-- usage-rules-header -->
 # Usage Rules
 
-**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below. 
-Before attempting to use any of these packages or to discover if you should use them, review their 
+**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below.
+Before attempting to use any of these packages or to discover if you should use them, review their
 usage rules to understand the correct patterns, conventions, and best practices.
 <!-- usage-rules-header-end -->
 
@@ -326,7 +328,7 @@ mix usage_rules.docs Enum.zip/1
 
 ## Searching Documentation
 
-You should also consult the documentation of any tools you are using, early and often. The best 
+You should also consult the documentation of any tools you are using, early and often. The best
 way to accomplish this is to use the `usage_rules.search_docs` mix task. Once you have
 found what you are looking for, use the links in the search results to get more detail. For example:
 
