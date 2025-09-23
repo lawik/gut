@@ -35,3 +35,5 @@ gut-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Allow having a sample sessionize.json file without accidentally committing it.
+sessionize.json
