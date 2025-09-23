@@ -8,5 +8,6 @@ defmodule Gut.Accounts do
   resources do
     resource Gut.Accounts.Token
     resource Gut.Accounts.User
+    resource Gut.Accounts.Speaker
   end
 end
