@@ -41,6 +41,8 @@ defmodule Gut.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:cinder, "~> 0.6"},
+      {:ash_ai, "~> 0.2"},
       {:usage_rules, "~> 0.1", only: [:dev]},
       {:picosat_elixir, "~> 0.2"},
       {:sourceror, "~> 1.8", only: [:dev, :test]},
