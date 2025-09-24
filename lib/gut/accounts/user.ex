@@ -100,6 +100,11 @@ defmodule Gut.Accounts.User do
     policy action_type(:create) do
       authorize_if actor_attribute_equals(:type, :system)
     end
+
+    policy action_type(:read) do
+      authorize_if actor_attribute_equals(:type, :system)
+      authorize_if actor_attribute_equals(:role, :admin)
+    end
   end
 
   attributes do

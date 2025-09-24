@@ -50,7 +50,7 @@ defmodule Gut.Conference.Speaker do
 
   policies do
     policy always() do
-      authorize_if always()
+      authorize_if actor_present()
     end
   end
 

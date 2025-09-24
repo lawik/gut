@@ -109,7 +109,7 @@ defmodule GutWeb.SpeakerDetailLive do
                 </div>
                 
     <!-- Travel Duration -->
-                <%= if @speaker.arrival_date and @speaker.leaving_date do %>
+                <%= if @speaker.arrival_date && @speaker.leaving_date do %>
                   <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div class="flex items-center">
                       <.icon name="hero-clock" class="h-5 w-5 text-blue-600 mr-2" />
