@@ -2,10 +2,13 @@ defmodule GutWeb.SpeakersLive do
   use GutWeb, :live_view
   use Cinder.Table.UrlSync
 
-  on_mount {GutWeb.LiveUserAuth, :live_user_optional}
+  on_mount {GutWeb.LiveUserAuth, :live_user_required}
 
   def mount(_params, _session, socket) do
-    socket = assign(socket, :current_scope, nil)
+    socket =
+      socket
+      |> assign(:current_scope, nil)
+
     {:ok, socket}
   end
 
@@ -16,15 +19,9 @@ defmodule GutWeb.SpeakersLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="px-4 sm:px-6 lg:px-8 py-8">
+    <Layouts.app flash={@flash} current_scope={@current_scope} page_title="Speakers">
+      <div class="py-8">
         <div class="sm:flex sm:items-center">
-          <div class="sm:flex-auto">
-            <h1 class="text-2xl font-semibold leading-6 text-gray-900">Speakers</h1>
-            <p class="mt-2 text-sm text-gray-700">
-              A list of all speakers including their travel and hotel information.
-            </p>
-          </div>
           <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <.link
               patch={~p"/speakers/new"}
@@ -38,7 +35,7 @@ defmodule GutWeb.SpeakersLive do
         <div class="mt-8">
           <Cinder.Table.table
             id="speakers-table"
-            resource={Gut.Accounts.Speaker}
+            resource={Gut.Conference.Speaker}
             actor={@current_user}
             url_state={@url_state}
             theme="modern"
@@ -139,7 +136,7 @@ defmodule GutWeb.SpeakersLive do
   end
 
   def handle_event("delete", %{"id" => id}, socket) do
-    case Gut.Accounts.destroy_speaker(id, actor: socket.assigns.current_user) do
+    case Gut.Conference.destroy_speaker(id, actor: socket.assigns.current_user) do
       {:ok, _speaker} ->
         socket =
           socket

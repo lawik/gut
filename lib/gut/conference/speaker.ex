@@ -1,7 +1,7 @@
-defmodule Gut.Accounts.Speaker do
+defmodule Gut.Conference.Speaker do
   use Ash.Resource,
     otp_app: :gut,
-    domain: Gut.Accounts,
+    domain: Gut.Conference,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer]
 

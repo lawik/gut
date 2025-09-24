@@ -61,7 +61,7 @@ config :spark,
 config :gut,
   ecto_repos: [Gut.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Gut.Accounts]
+  ash_domains: [Gut.Accounts, Gut.Conference]
 
 # Configures the endpoint
 config :gut, GutWeb.Endpoint,

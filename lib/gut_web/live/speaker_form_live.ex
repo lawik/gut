@@ -1,10 +1,10 @@
 defmodule GutWeb.SpeakerFormLive do
   use GutWeb, :live_view
 
-  on_mount {GutWeb.LiveUserAuth, :live_user_optional}
+  on_mount {GutWeb.LiveUserAuth, :live_user_required}
 
   def mount(%{"id" => id}, _session, socket) do
-    speaker = Gut.Accounts.get_speaker!(id, actor: socket.assigns.current_user)
+    speaker = Gut.Conference.get_speaker!(id, actor: socket.assigns.current_user)
     form = AshPhoenix.Form.for_update(speaker, :update) |> to_form()
 
     socket =
@@ -19,7 +19,7 @@ defmodule GutWeb.SpeakerFormLive do
   end
 
   def mount(_params, _session, socket) do
-    form = AshPhoenix.Form.for_create(Gut.Accounts.Speaker, :create) |> to_form()
+    form = AshPhoenix.Form.for_create(Gut.Conference.Speaker, :create) |> to_form()
 
     socket =
       socket

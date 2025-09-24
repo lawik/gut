@@ -40,6 +40,11 @@ defmodule Gut.Accounts.User do
   actions do
     defaults [:read]
 
+    create :create do
+      accept [:email]
+      primary? true
+    end
+
     read :get_by_subject do
       description "Get a user by the subject claim in a JWT"
       argument :subject, :string, allow_nil?: false
@@ -90,6 +95,10 @@ defmodule Gut.Accounts.User do
   policies do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
       authorize_if always()
+    end
+
+    policy action_type(:create) do
+      authorize_if actor_attribute_equals(:type, :system)
     end
   end
 

@@ -1,11 +1,11 @@
 defmodule GutWeb.SpeakerDetailLive do
   use GutWeb, :live_view
 
-  on_mount {GutWeb.LiveUserAuth, :live_user_optional}
+  on_mount {GutWeb.LiveUserAuth, :live_user_required}
 
   def mount(%{"id" => id}, _session, socket) do
     speaker =
-      Gut.Accounts.get_speaker!(id,
+      Gut.Conference.get_speaker!(id,
         actor: socket.assigns.current_user,
         load: [:user]
       )
