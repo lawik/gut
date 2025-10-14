@@ -38,12 +38,12 @@ defmodule GutWeb.SpeakersLive do
             resource={Gut.Conference.Speaker}
             actor={@current_user}
             url_state={@url_state}
-            theme="modern"
+            theme="daisy_ui"
             page_size={[default: 25, options: [10, 25, 50, 100]]}
             row_click={fn speaker -> JS.navigate(~p"/speakers/#{speaker.id}") end}
           >
             <:col :let={speaker} field="full_name" filter sort label="Full Name">
-              <div class="font-medium text-gray-900">{speaker.full_name}</div>
+              <div class="font-medium">{speaker.full_name}</div>
             </:col>
 
             <:col :let={speaker} field="first_name" filter sort label="First Name">
@@ -114,7 +114,7 @@ defmodule GutWeb.SpeakersLive do
               <div class="flex space-x-2">
                 <.link
                   patch={~p"/speakers/#{speaker.id}/edit"}
-                  class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                  class="text-sm font-medium"
                 >
                   Edit
                 </.link>
