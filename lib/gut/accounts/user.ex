@@ -41,9 +41,15 @@ defmodule Gut.Accounts.User do
     defaults [:read]
 
     create :create do
-      accept [:email]
+      accept [:email, :role]
       primary? true
     end
+
+    update :update do
+      accept [:email, :role]
+    end
+
+    destroy :destroy
 
     read :get_by_subject do
       description "Get a user by the subject claim in a JWT"
@@ -99,9 +105,21 @@ defmodule Gut.Accounts.User do
 
     policy action_type(:create) do
       authorize_if actor_attribute_equals(:type, :system)
+      authorize_if actor_attribute_equals(:role, :admin)
     end
 
     policy action_type(:read) do
+      authorize_if actor_attribute_equals(:type, :system)
+      authorize_if actor_attribute_equals(:role, :admin)
+      authorize_if actor_attribute_equals(:role, :user)
+    end
+
+    policy action_type(:update) do
+      authorize_if actor_attribute_equals(:type, :system)
+      authorize_if actor_attribute_equals(:role, :admin)
+    end
+
+    policy action_type(:destroy) do
       authorize_if actor_attribute_equals(:type, :system)
       authorize_if actor_attribute_equals(:role, :admin)
     end
@@ -113,6 +131,13 @@ defmodule Gut.Accounts.User do
     attribute :email, :ci_string do
       allow_nil? false
       public? true
+    end
+
+    attribute :role, :atom do
+      constraints one_of: [:user, :admin]
+      allow_nil? false
+      public? true
+      default :user
     end
   end
 

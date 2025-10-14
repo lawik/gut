@@ -52,6 +52,9 @@ defmodule GutWeb.Layouts do
             <.link navigate={~p"/speakers"} class="btn btn-ghost">Speakers</.link>
           </li>
           <li>
+            <.link navigate={~p"/users"} class="btn btn-ghost">Team</.link>
+          </li>
+          <li>
             <.theme_toggle />
           </li>
         </ul>

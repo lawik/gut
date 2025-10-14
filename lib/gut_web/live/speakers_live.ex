@@ -2,6 +2,8 @@ defmodule GutWeb.SpeakersLive do
   use GutWeb, :live_view
   use Cinder.Table.UrlSync
 
+  require Logger
+
   on_mount {GutWeb.LiveUserAuth, :live_user_required}
 
   def mount(_params, _session, socket) do
@@ -145,7 +147,8 @@ defmodule GutWeb.SpeakersLive do
 
         {:noreply, socket}
 
-      {:error, _error} ->
+      {:error, error} ->
+        Logger.error("Failed to delete speaker #{id}: #{inspect(error)}")
         {:noreply, put_flash(socket, :error, "Failed to delete speaker")}
     end
   end
