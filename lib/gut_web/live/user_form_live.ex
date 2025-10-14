@@ -22,7 +22,9 @@ defmodule GutWeb.UserFormLive do
   end
 
   def mount(_params, _session, socket) do
-    form = AshPhoenix.Form.for_create(Gut.Accounts.User, :create) |> to_form()
+    form =
+      AshPhoenix.Form.for_create(Gut.Accounts.User, :create, actor: socket.assigns.current_user)
+      |> to_form()
 
     socket =
       socket

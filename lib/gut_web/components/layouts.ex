@@ -61,7 +61,7 @@ defmodule GutWeb.Layouts do
       </div>
     </header>
 
-    <main class="py-20">
+    <main class="">
       {render_slot(@inner_block)}
     </main>
 

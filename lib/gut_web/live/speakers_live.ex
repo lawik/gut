@@ -22,25 +22,26 @@ defmodule GutWeb.SpeakersLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} page_title="Speakers">
-      <div class="py-8">
-        <div class="sm:flex sm:items-center">
+      <div class="">
+        <div class="sm:flex sm:items-center absolute top-16 right-4">
           <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <.link
               patch={~p"/speakers/new"}
               class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Add Speaker
+              Add speaker
             </.link>
           </div>
         </div>
 
-        <div class="mt-8">
+        <div class="">
           <Cinder.Table.table
             id="speakers-table"
             resource={Gut.Conference.Speaker}
             actor={@current_user}
             url_state={@url_state}
             theme="daisy_ui"
+            filters_label="Find speakers"
             page_size={[default: 25, options: [10, 25, 50, 100]]}
             row_click={fn speaker -> JS.navigate(~p"/speakers/#{speaker.id}") end}
           >
