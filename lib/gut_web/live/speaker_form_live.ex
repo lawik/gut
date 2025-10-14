@@ -5,11 +5,14 @@ defmodule GutWeb.SpeakerFormLive do
 
   def mount(%{"id" => id}, _session, socket) do
     speaker = Gut.Conference.get_speaker!(id, actor: socket.assigns.current_user)
-    form = AshPhoenix.Form.for_update(speaker, :update) |> to_form()
+
+    form =
+      AshPhoenix.Form.for_update(speaker, :update, actor: socket.assigns.current_user)
+      |> to_form()
 
     socket =
       socket
-      |> assign(:page_title, "Edit Speaker")
+      |> assign(:page_title, "Editing #{speaker.full_name}")
       |> assign(:speaker, speaker)
       |> assign(:form, form)
       |> assign(:action, :edit)
@@ -23,7 +26,7 @@ defmodule GutWeb.SpeakerFormLive do
 
     socket =
       socket
-      |> assign(:page_title, "New Speaker")
+      |> assign(:page_title, "Adding new speaker")
       |> assign(:speaker, nil)
       |> assign(:form, form)
       |> assign(:action, :new)
@@ -38,7 +41,7 @@ defmodule GutWeb.SpeakerFormLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
+    <Layouts.app flash={@flash} current_scope={@current_scope} page_title={@page_title}>
       <div class="px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto">
         <div class="mb-8">
           <.link
@@ -130,8 +133,7 @@ defmodule GutWeb.SpeakerFormLive do
 
   def handle_event("save", %{"form" => params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.form,
-           params: params,
-           actor: socket.assigns.current_user
+           params: params
          ) do
       {:ok, _speaker} ->
         action_text = if socket.assigns.action == :new, do: "created", else: "updated"
