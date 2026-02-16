@@ -29,8 +29,7 @@ defmodule GutWeb.SponsorsLive do
             resource={Gut.Conference.Sponsor}
             actor={@current_user}
             url_state={@url_state}
-            theme="daisy_ui"
-            filters_label="Find sponsors"
+            theme={GutWeb.CinderTheme}
             page_size={[default: 25, options: [10, 25, 50, 100]]}
             row_click={fn sponsor -> JS.navigate(~p"/sponsors/#{sponsor.id}") end}
           >

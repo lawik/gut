@@ -55,7 +55,7 @@ defmodule GutWeb.Layouts do
             <.link navigate={~p"/sponsors"} class="btn btn-ghost">Sponsors</.link>
           </li>
           <li>
-            <.link navigate={~p"/users"} class="btn btn-ghost">Team</.link>
+            <.link navigate={~p"/users"} class="btn btn-ghost">Users</.link>
           </li>
           <li>
             <div class="dropdown dropdown-end">

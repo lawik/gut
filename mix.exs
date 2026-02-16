@@ -48,7 +48,7 @@ defmodule Gut.MixProject do
       {:sourceror, "~> 1.8", only: [:dev, :test]},
       {:oban, "~> 2.0"},
       {:tidewave, "~> 0.5", only: [:dev]},
-      {:live_debugger, "~> 0.4", only: [:dev]},
+      #{:live_debugger, "~> 0.4", only: [:dev]},
       {:oban_web, "~> 2.0"},
       {:ash_oban, "~> 0.4"},
       {:ash_admin, "~> 0.13"},

@@ -12,10 +12,11 @@ defmodule GutWeb.AuthController do
         _ -> "You are now signed in"
       end
 
+    process_pending_invites(user)
+
     conn
     |> delete_session(:return_to)
     |> store_in_session(user)
-    # If your resource has a different name, update the assign name here (i.e :current_admin)
     |> assign(:current_user, user)
     |> put_flash(:info, message)
     |> redirect(to: return_to)
@@ -51,5 +52,33 @@ defmodule GutWeb.AuthController do
     |> clear_session(:gut)
     |> put_flash(:info, "You are now signed out")
     |> redirect(to: return_to)
+  end
+
+  defp process_pending_invites(user) do
+    case Gut.Accounts.list_pending_invites_for_email(user.email, actor: user) do
+      {:ok, invites} ->
+        Enum.each(invites, fn invite ->
+          case invite.resource_type do
+            :speaker ->
+              with {:ok, speaker} <-
+                     Gut.Conference.get_speaker(invite.resource_id, actor: user) do
+                Gut.Conference.update_speaker!(speaker, %{user_id: user.id}, actor: user)
+                Gut.Accounts.update_user!(user, %{role: :speaker}, actor: user)
+              end
+
+            :sponsor ->
+              with {:ok, sponsor} <-
+                     Gut.Conference.get_sponsor(invite.resource_id, actor: user) do
+                Gut.Conference.update_sponsor!(sponsor, %{user_id: user.id}, actor: user)
+                Gut.Accounts.update_user!(user, %{role: :sponsor}, actor: user)
+              end
+          end
+
+          Gut.Accounts.accept_invite!(invite, actor: user)
+        end)
+
+      _ ->
+        :ok
+    end
   end
 end

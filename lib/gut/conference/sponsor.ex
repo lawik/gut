@@ -22,7 +22,8 @@ defmodule Gut.Conference.Sponsor do
         :confirmed,
         :sponsorship_level,
         :logos_received,
-        :announced
+        :announced,
+        :user_id
       ]
     end
 
@@ -35,7 +36,8 @@ defmodule Gut.Conference.Sponsor do
         :confirmed,
         :sponsorship_level,
         :logos_received,
-        :announced
+        :announced,
+        :user_id
       ]
     end
   end
@@ -94,5 +96,11 @@ defmodule Gut.Conference.Sponsor do
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
+  end
+
+  relationships do
+    belongs_to :user, Gut.Accounts.User do
+      public? true
+    end
   end
 end

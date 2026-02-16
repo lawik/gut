@@ -29,8 +29,7 @@ defmodule GutWeb.SpeakersLive do
             resource={Gut.Conference.Speaker}
             actor={@current_user}
             url_state={@url_state}
-            theme="daisy_ui"
-            filters_label="Find speakers"
+            theme={GutWeb.CinderTheme}
             page_size={[default: 25, options: [10, 25, 50, 100]]}
             row_click={fn speaker -> JS.navigate(~p"/speakers/#{speaker.id}") end}
           >

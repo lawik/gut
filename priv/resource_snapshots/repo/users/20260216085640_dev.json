@@ -26,7 +26,7 @@
     },
     {
       "allow_nil?": false,
-      "default": "\"user\"",
+      "default": "\"staff\"",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
@@ -42,7 +42,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "FACC267FB9566AB708110B2E7DBB63FB477FFCE8ADC3D5948AC8508D72F7FACF",
+  "hash": "EEB7FF63F77F389F0CDB46772EA210E6B35006930DE12802960AAE60DD45D53D",
   "identities": [
     {
       "all_tenants?": false,

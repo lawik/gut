@@ -75,6 +75,12 @@ defmodule GutWeb.UserFormLive do
               </div>
 
               <.input field={@form[:email]} type="email" label="Email Address" required />
+              <.input
+                field={@form[:role]}
+                type="select"
+                label="Role"
+                options={[{"Staff", "staff"}, {"Speaker", "speaker"}, {"Sponsor", "sponsor"}]}
+              />
             </div>
 
             <div :if={@form.errors != []} class="mt-8 flex space-x-3">

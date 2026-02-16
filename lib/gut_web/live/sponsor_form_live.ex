@@ -4,7 +4,11 @@ defmodule GutWeb.SponsorFormLive do
   on_mount {GutWeb.LiveUserAuth, :live_user_required}
 
   def mount(%{"id" => id}, _session, socket) do
-    sponsor = Gut.Conference.get_sponsor!(id, actor: socket.assigns.current_user)
+    sponsor =
+      Gut.Conference.get_sponsor!(id,
+        actor: socket.assigns.current_user,
+        load: [:user]
+      )
 
     form =
       AshPhoenix.Form.for_update(sponsor, :update, actor: socket.assigns.current_user)
@@ -17,12 +21,14 @@ defmodule GutWeb.SponsorFormLive do
       |> assign(:form, form)
       |> assign(:action, :edit)
       |> assign(:current_scope, nil)
+      |> assign(:invite_email, "")
+      |> assign(:connected_user, sponsor.user)
 
     {:ok, socket}
   end
 
   def mount(_params, _session, socket) do
-    form = AshPhoenix.Form.for_create(Gut.Conference.Sponsor, :create) |> to_form()
+    form = AshPhoenix.Form.for_create(Gut.Conference.Sponsor, :create, actor: socket.assigns.current_user) |> to_form()
 
     socket =
       socket
@@ -31,6 +37,8 @@ defmodule GutWeb.SponsorFormLive do
       |> assign(:form, form)
       |> assign(:action, :new)
       |> assign(:current_scope, nil)
+      |> assign(:invite_email, "")
+      |> assign(:connected_user, nil)
 
     {:ok, socket}
   end
@@ -74,6 +82,32 @@ defmodule GutWeb.SponsorFormLive do
 
               <.input field={@form[:name]} type="text" label="Sponsor Name" required />
               <.input field={@form[:sponsorship_level]} type="text" label="Sponsorship Level" />
+
+              <div class="sm:col-span-2 mt-8">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">User Account</h3>
+              </div>
+
+              <div class="sm:col-span-2">
+                <%= if @connected_user do %>
+                  <div class="flex items-center gap-3 mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <.icon name="hero-check-circle" class="h-5 w-5 text-green-600" />
+                    <div>
+                      <p class="text-sm font-medium text-green-900">Connected to user account</p>
+                      <p class="text-sm text-green-700">{@connected_user.email}</p>
+                    </div>
+                  </div>
+                <% end %>
+                <.input
+                  name="invite_email"
+                  type="email"
+                  label={if @connected_user, do: "Change user (email)", else: "Invite user (email)"}
+                  value={@invite_email}
+                  placeholder="Enter email to connect or invite a user"
+                />
+                <p class="mt-1 text-xs text-gray-500">
+                  If the user exists, they will be linked directly. Otherwise, a magic link invite will be sent.
+                </p>
+              </div>
 
               <div class="sm:col-span-2 mt-8">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Outreach</h3>
@@ -127,16 +161,19 @@ defmodule GutWeb.SponsorFormLive do
     """
   end
 
-  def handle_event("validate", %{"form" => params}, socket) do
+  def handle_event("validate", %{"form" => params} = all_params, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.form, params)
-    {:noreply, assign(socket, :form, form)}
+    invite_email = Map.get(all_params, "invite_email", socket.assigns.invite_email)
+    {:noreply, socket |> assign(:form, form) |> assign(:invite_email, invite_email)}
   end
 
-  def handle_event("save", %{"form" => params}, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.form,
-           params: params
-         ) do
-      {:ok, _sponsor} ->
+  def handle_event("save", %{"form" => params} = all_params, socket) do
+    invite_email = Map.get(all_params, "invite_email", "") |> String.trim()
+
+    case AshPhoenix.Form.submit(socket.assigns.form, params: params) do
+      {:ok, sponsor} ->
+        socket = handle_invite_email(socket, sponsor, invite_email)
+
         action_text = if socket.assigns.action == :new, do: "created", else: "updated"
 
         socket =
@@ -148,6 +185,29 @@ defmodule GutWeb.SponsorFormLive do
 
       {:error, form} ->
         {:noreply, assign(socket, :form, form)}
+    end
+  end
+
+  defp handle_invite_email(socket, _sponsor, ""), do: socket
+
+  defp handle_invite_email(socket, sponsor, email) do
+    actor = socket.assigns.current_user
+
+    case Gut.Accounts.get_user_by_email(email, actor: actor) do
+      {:ok, user} ->
+        Gut.Conference.update_sponsor!(sponsor, %{user_id: user.id}, actor: actor)
+        Gut.Accounts.update_user!(user, %{role: :sponsor}, actor: actor)
+        socket
+
+      {:error, _} ->
+        Gut.Accounts.request_magic_link(email)
+
+        Gut.Accounts.create_invite!(
+          %{email: email, resource_type: :sponsor, resource_id: sponsor.id},
+          actor: actor
+        )
+
+        put_flash(socket, :info, "Invite sent to #{email}")
     end
   end
 end

@@ -37,3 +37,4 @@ npm-debug.log
 
 # Allow having a sample sessionize.json file without accidentally committing it.
 sessionize.json
+.claude

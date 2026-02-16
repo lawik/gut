@@ -19,13 +19,23 @@ defmodule Gut.Accounts do
       define :get_user_by_subject, action: :get_by_subject, args: [:subject]
       define :list_users, action: :read
     end
+
+    resource Gut.Accounts.Invite do
+      define :create_invite, action: :create
+      define :accept_invite, action: :accept
+      define :list_pending_invites_for_email, action: :pending_for_email, args: [:email]
+      define :list_invites_for_resource, action: :for_resource, args: [:resource_type, :resource_id]
+      define :list_invites, action: :read
+      define :destroy_invite, action: :destroy
+    end
   end
 
-  def create_admin_user(email) do
-    create_user(%{email: email, role: :admin}, actor: %{type: :system})
-  end
+  def magic_link_url(email) do
+    strategy = AshAuthentication.Info.strategy!(Gut.Accounts.User, :magic_link)
 
-  def promote_to_admin(user) do
-    update_user(user, %{role: :admin}, actor: %{type: :system})
+    case AshAuthentication.Strategy.MagicLink.request_token_for_identity(strategy, to_string(email)) do
+      {:ok, token} -> {:ok, GutWeb.Endpoint.url() <> "/magic_link/#{token}"}
+      error -> error
+    end
   end
 end

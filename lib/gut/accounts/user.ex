@@ -103,25 +103,8 @@ defmodule Gut.Accounts.User do
       authorize_if always()
     end
 
-    policy action_type(:create) do
-      authorize_if actor_attribute_equals(:type, :system)
-      authorize_if actor_attribute_equals(:role, :admin)
-    end
-
-    policy action_type(:read) do
-      authorize_if actor_attribute_equals(:type, :system)
-      authorize_if actor_attribute_equals(:role, :admin)
-      authorize_if actor_attribute_equals(:role, :user)
-    end
-
-    policy action_type(:update) do
-      authorize_if actor_attribute_equals(:type, :system)
-      authorize_if actor_attribute_equals(:role, :admin)
-    end
-
-    policy action_type(:destroy) do
-      authorize_if actor_attribute_equals(:type, :system)
-      authorize_if actor_attribute_equals(:role, :admin)
+    policy always() do
+      authorize_if actor_present()
     end
   end
 
@@ -134,10 +117,10 @@ defmodule Gut.Accounts.User do
     end
 
     attribute :role, :atom do
-      constraints one_of: [:user, :admin]
+      constraints one_of: [:staff, :speaker, :sponsor]
       allow_nil? false
       public? true
-      default :user
+      default :staff
     end
   end
 
