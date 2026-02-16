@@ -58,6 +58,30 @@ defmodule GutWeb.Layouts do
             <.link navigate={~p"/users"} class="btn btn-ghost">Team</.link>
           </li>
           <li>
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                <.icon name="hero-plus" class="size-5" />
+              </div>
+              <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-48 p-2 shadow">
+                <li>
+                  <.link navigate={~p"/speakers/new"}>
+                    <.icon name="hero-microphone" class="size-4" /> New Speaker
+                  </.link>
+                </li>
+                <li>
+                  <.link navigate={~p"/sponsors/new"}>
+                    <.icon name="hero-currency-dollar" class="size-4" /> New Sponsor
+                  </.link>
+                </li>
+                <li>
+                  <.link navigate={~p"/users/new"}>
+                    <.icon name="hero-user-plus" class="size-4" /> Invite User
+                  </.link>
+                </li>
+              </ul>
+            </div>
+          </li>
+          <li>
             <.theme_toggle />
           </li>
         </ul>

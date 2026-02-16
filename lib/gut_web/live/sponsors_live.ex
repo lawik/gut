@@ -23,17 +23,6 @@ defmodule GutWeb.SponsorsLive do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} page_title="Sponsors">
       <div class="">
-        <div class="sm:flex sm:items-center absolute top-16 right-4">
-          <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <.link
-              patch={~p"/sponsors/new"}
-              class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              Add sponsor
-            </.link>
-          </div>
-        </div>
-
         <div class="">
           <Cinder.Table.table
             id="sponsors-table"
