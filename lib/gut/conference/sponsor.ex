@@ -1,0 +1,98 @@
+defmodule Gut.Conference.Sponsor do
+  use Ash.Resource,
+    otp_app: :gut,
+    domain: Gut.Conference,
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
+
+  postgres do
+    table "sponsors"
+    repo Gut.Repo
+  end
+
+  actions do
+    defaults [:read, :destroy]
+
+    create :create do
+      accept [
+        :name,
+        :outreach,
+        :responded,
+        :interested,
+        :confirmed,
+        :sponsorship_level,
+        :logos_received,
+        :announced
+      ]
+    end
+
+    update :update do
+      accept [
+        :name,
+        :outreach,
+        :responded,
+        :interested,
+        :confirmed,
+        :sponsorship_level,
+        :logos_received,
+        :announced
+      ]
+    end
+  end
+
+  policies do
+    policy always() do
+      authorize_if actor_present()
+    end
+  end
+
+  attributes do
+    uuid_primary_key :id
+
+    attribute :name, :string do
+      allow_nil? false
+      public? true
+    end
+
+    attribute :outreach, :string do
+      public? true
+    end
+
+    attribute :responded, :boolean do
+      default false
+      allow_nil? false
+      public? true
+    end
+
+    attribute :interested, :boolean do
+      default false
+      allow_nil? false
+      public? true
+    end
+
+    attribute :confirmed, :boolean do
+      default false
+      allow_nil? false
+      public? true
+    end
+
+    attribute :sponsorship_level, :string do
+      public? true
+    end
+
+    attribute :logos_received, :boolean do
+      default false
+      allow_nil? false
+      public? true
+    end
+
+    attribute :announced, :boolean do
+      default false
+      allow_nil? false
+      public? true
+    end
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+end

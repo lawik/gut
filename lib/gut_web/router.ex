@@ -42,6 +42,11 @@ defmodule GutWeb.Router do
       live "/speakers/:id", SpeakerDetailLive
       live "/speakers/:id/edit", SpeakerFormLive
 
+      live "/sponsors", SponsorsLive
+      live "/sponsors/new", SponsorFormLive
+      live "/sponsors/:id", SponsorDetailLive
+      live "/sponsors/:id/edit", SponsorFormLive
+
       live "/users", UsersLive
       live "/users/new", UserFormLive
       live "/users/:id", UserFormLive

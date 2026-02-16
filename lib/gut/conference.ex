@@ -13,6 +13,14 @@ defmodule Gut.Conference do
       define :update_speaker, action: :update
       define :destroy_speaker, action: :destroy
     end
+
+    resource Gut.Conference.Sponsor do
+      define :list_sponsors, action: :read
+      define :get_sponsor, action: :read, get_by: [:id]
+      define :create_sponsor, action: :create
+      define :update_sponsor, action: :update
+      define :destroy_sponsor, action: :destroy
+    end
   end
 
   @doc """
