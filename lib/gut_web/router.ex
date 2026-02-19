@@ -62,8 +62,7 @@ defmodule GutWeb.Router do
     sign_out_route AuthController
 
     # Remove these if you'd like to use your own authentication views
-    sign_in_route register_path: "/register",
-                  reset_path: "/reset",
+    sign_in_route reset_path: "/reset",
                   auth_routes_prefix: "/auth",
                   on_mount: [{GutWeb.LiveUserAuth, :live_no_user}],
                   overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]

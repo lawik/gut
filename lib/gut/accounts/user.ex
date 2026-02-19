@@ -24,7 +24,7 @@ defmodule Gut.Accounts.User do
     strategies do
       magic_link do
         identity_field :email
-        registration_enabled? true
+        registration_enabled? false
         require_interaction? true
 
         sender Gut.Accounts.User.Senders.SendMagicLinkEmail
@@ -69,20 +69,16 @@ defmodule Gut.Accounts.User do
       filter expr(email == ^arg(:email))
     end
 
-    create :sign_in_with_magic_link do
-      description "Sign in or register a user with magic link."
+    read :sign_in_with_magic_link do
+      description "Sign in an existing user with magic link."
+      get? true
 
       argument :token, :string do
         description "The token from the magic link that was sent to the user"
         allow_nil? false
       end
 
-      upsert? true
-      upsert_identity :unique_email
-      upsert_fields [:email]
-
-      # Uses the information from the token to create or sign in the user
-      change AshAuthentication.Strategy.MagicLink.SignInChange
+      prepare AshAuthentication.Strategy.MagicLink.SignInPreparation
 
       metadata :token, :string do
         allow_nil? false
