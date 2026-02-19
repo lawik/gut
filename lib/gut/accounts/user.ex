@@ -1,4 +1,20 @@
 defmodule Gut.Accounts.User do
+  @moduledoc """
+  User accounts with role-based access control.
+
+  ## Roles
+
+  - `:staff` — Full access to all resources (speakers, sponsors, users, invites,
+    API keys). This is the admin role for conference organizers.
+  - `:speaker` — Minimal access by default. Explicit grants are added per-resource
+    as needed (e.g. viewing their own speaker profile).
+  - `:sponsor` — Minimal access by default. Explicit grants are added per-resource
+    as needed (e.g. viewing their own sponsor profile).
+
+  Non-staff roles have no implicit permissions. Any access for speakers/sponsors
+  must be explicitly granted via policy rules on the relevant resources.
+  """
+
   use Ash.Resource,
     otp_app: :gut,
     domain: Gut.Accounts,
@@ -110,8 +126,9 @@ defmodule Gut.Accounts.User do
       authorize_if always()
     end
 
+    # Staff have full access. Speaker/sponsor roles get explicit grants as needed.
     policy always() do
-      authorize_if actor_present()
+      authorize_if expr(^actor(:role) == :staff)
     end
   end
 
