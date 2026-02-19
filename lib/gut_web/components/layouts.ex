@@ -62,7 +62,10 @@ defmodule GutWeb.Layouts do
               <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
                 <.icon name="hero-plus" class="size-5" />
               </div>
-              <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-48 p-2 shadow">
+              <ul
+                tabindex="0"
+                class="dropdown-content menu bg-base-100 rounded-box z-10 w-48 p-2 shadow"
+              >
                 <li>
                   <.link navigate={~p"/speakers/new"}>
                     <.icon name="hero-microphone" class="size-4" /> New Speaker

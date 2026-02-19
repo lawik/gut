@@ -1,12 +1,18 @@
 defmodule Gut.Accounts do
-  use Ash.Domain, otp_app: :gut, extensions: [AshAdmin.Domain]
+  use Ash.Domain, otp_app: :gut, extensions: [AshAdmin.Domain, AshAi]
 
   admin do
     show? true
   end
 
+  tools do
+    tool :list_invites, Gut.Accounts.Invite, :read
+    tool :list_invites_for_resource, Gut.Accounts.Invite, :for_resource
+  end
+
   resources do
     resource Gut.Accounts.Token
+    resource Gut.Accounts.ApiKey
 
     resource Gut.Accounts.User do
       define :create_user, action: :create, args: [:email, :role]
@@ -24,7 +30,11 @@ defmodule Gut.Accounts do
       define :create_invite, action: :create
       define :accept_invite, action: :accept
       define :list_pending_invites_for_email, action: :pending_for_email, args: [:email]
-      define :list_invites_for_resource, action: :for_resource, args: [:resource_type, :resource_id]
+
+      define :list_invites_for_resource,
+        action: :for_resource,
+        args: [:resource_type, :resource_id]
+
       define :list_invites, action: :read
       define :destroy_invite, action: :destroy
     end
@@ -33,7 +43,10 @@ defmodule Gut.Accounts do
   def magic_link_url(email) do
     strategy = AshAuthentication.Info.strategy!(Gut.Accounts.User, :magic_link)
 
-    case AshAuthentication.Strategy.MagicLink.request_token_for_identity(strategy, to_string(email)) do
+    case AshAuthentication.Strategy.MagicLink.request_token_for_identity(
+           strategy,
+           to_string(email)
+         ) do
       {:ok, token} -> {:ok, GutWeb.Endpoint.url() <> "/magic_link/#{token}"}
       error -> error
     end

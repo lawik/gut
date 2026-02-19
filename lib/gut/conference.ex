@@ -1,8 +1,21 @@
 defmodule Gut.Conference do
-  use Ash.Domain, otp_app: :gut, extensions: [AshAdmin.Domain]
+  use Ash.Domain, otp_app: :gut, extensions: [AshAdmin.Domain, AshAi]
 
   admin do
     show? true
+  end
+
+  tools do
+    tool :list_speakers, Gut.Conference.Speaker, :read
+    tool :get_speaker, Gut.Conference.Speaker, :read
+    tool :create_speaker, Gut.Conference.Speaker, :create
+    tool :update_speaker, Gut.Conference.Speaker, :update
+    tool :destroy_speaker, Gut.Conference.Speaker, :destroy
+    tool :list_sponsors, Gut.Conference.Sponsor, :read
+    tool :get_sponsor, Gut.Conference.Sponsor, :read
+    tool :create_sponsor, Gut.Conference.Sponsor, :create
+    tool :update_sponsor, Gut.Conference.Sponsor, :update
+    tool :destroy_sponsor, Gut.Conference.Sponsor, :destroy
   end
 
   resources do

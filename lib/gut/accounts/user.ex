@@ -29,6 +29,11 @@ defmodule Gut.Accounts.User do
 
         sender Gut.Accounts.User.Senders.SendMagicLinkEmail
       end
+
+      api_key do
+        api_key_relationship :valid_api_keys
+        api_key_hash_attribute :api_key_hash
+      end
     end
   end
 
@@ -85,6 +90,11 @@ defmodule Gut.Accounts.User do
       end
     end
 
+    read :sign_in_with_api_key do
+      argument :api_key, :string, allow_nil?: false
+      prepare AshAuthentication.Strategy.ApiKey.SignInPreparation
+    end
+
     action :request_magic_link do
       argument :email, :ci_string do
         allow_nil? false
@@ -117,6 +127,12 @@ defmodule Gut.Accounts.User do
       allow_nil? false
       public? true
       default :staff
+    end
+  end
+
+  relationships do
+    has_many :valid_api_keys, Gut.Accounts.ApiKey do
+      filter expr(valid)
     end
   end
 

@@ -68,8 +68,8 @@ defmodule GutWeb.SpeakerDetailLive do
               </div>
             </div>
           </div>
-
-          <!-- Content -->
+          
+    <!-- Content -->
           <div class="px-6 py-8">
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
               <!-- Travel Information -->

@@ -22,6 +22,12 @@ defmodule GutWeb.Router do
     plug :set_actor, :user
   end
 
+  pipeline :mcp do
+    plug AshAuthentication.Strategy.ApiKey.Plug,
+      resource: Gut.Accounts.User,
+      required?: false
+  end
+
   scope "/", GutWeb do
     pipe_through :browser
 
@@ -83,10 +89,27 @@ defmodule GutWeb.Router do
     )
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", GutWeb do
-  #   pipe_through :api
-  # end
+  scope "/mcp" do
+    pipe_through :mcp
+
+    forward "/", AshAi.Mcp.Router,
+      tools: [
+        :list_speakers,
+        :get_speaker,
+        :create_speaker,
+        :update_speaker,
+        :destroy_speaker,
+        :list_sponsors,
+        :get_sponsor,
+        :create_sponsor,
+        :update_sponsor,
+        :destroy_sponsor,
+        :list_invites,
+        :list_invites_for_resource
+      ],
+      protocol_version_statement: "2024-11-05",
+      otp_app: :gut
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:gut, :dev_routes) do

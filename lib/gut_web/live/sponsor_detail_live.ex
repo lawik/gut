@@ -66,14 +66,13 @@ defmodule GutWeb.SponsorDetailLive do
               </div>
             </div>
           </div>
-
-          <!-- Content -->
+          
+    <!-- Content -->
           <div class="px-6 py-8">
             <!-- Pipeline Progress -->
             <div class="mb-8">
               <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                <.icon name="hero-flag" class="h-5 w-5 mr-2 text-indigo-600" />
-                Pipeline Progress
+                <.icon name="hero-flag" class="h-5 w-5 mr-2 text-indigo-600" /> Pipeline Progress
               </h2>
               <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
                 <.pipeline_step label="Responded" value={@sponsor.responded} />
@@ -89,8 +88,7 @@ defmodule GutWeb.SponsorDetailLive do
               <div class="space-y-6">
                 <div>
                   <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <.icon name="hero-megaphone" class="h-5 w-5 mr-2 text-indigo-600" />
-                    Outreach
+                    <.icon name="hero-megaphone" class="h-5 w-5 mr-2 text-indigo-600" /> Outreach
                   </h2>
                   <div class="bg-gray-50 rounded-lg p-4">
                     <%= if @sponsor.outreach do %>
@@ -101,8 +99,8 @@ defmodule GutWeb.SponsorDetailLive do
                   </div>
                 </div>
               </div>
-
-              <!-- Sponsorship Details -->
+              
+    <!-- Sponsorship Details -->
               <div class="space-y-6">
                 <div>
                   <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
@@ -149,8 +147,8 @@ defmodule GutWeb.SponsorDetailLive do
                 </div>
               </div>
             </div>
-
-            <!-- Metadata -->
+            
+    <!-- Metadata -->
             <div class="mt-8 pt-8 border-t border-gray-200">
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>

@@ -1,4 +1,4 @@
-defmodule Gut.Repo.Migrations.MigrateResources1 do
+defmodule Gut.Repo.Migrations.AddApiKeys do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
@@ -11,9 +11,6 @@ defmodule Gut.Repo.Migrations.MigrateResources1 do
     alter table(:users) do
       modify :role, :text, default: "staff"
     end
-
-    execute "UPDATE users SET role = 'staff' WHERE role = 'user'"
-    execute "UPDATE users SET role = 'staff' WHERE role = 'admin'"
 
     alter table(:sponsors) do
       add :user_id,
@@ -40,9 +37,40 @@ defmodule Gut.Repo.Migrations.MigrateResources1 do
         null: false,
         default: fragment("(now() AT TIME ZONE 'utc')")
     end
+
+    create table(:api_keys, primary_key: false) do
+      add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
+      add :api_key_hash, :binary, null: false
+      add :expires_at, :utc_datetime_usec, null: false
+
+      add :inserted_at, :utc_datetime_usec,
+        null: false,
+        default: fragment("(now() AT TIME ZONE 'utc')")
+
+      add :updated_at, :utc_datetime_usec,
+        null: false,
+        default: fragment("(now() AT TIME ZONE 'utc')")
+
+      add :user_id,
+          references(:users,
+            column: :id,
+            name: "api_keys_user_id_fkey",
+            type: :uuid,
+            prefix: "public"
+          ),
+          null: false
+    end
+
+    create unique_index(:api_keys, [:api_key_hash], name: "api_keys_unique_api_key_index")
   end
 
   def down do
+    drop_if_exists unique_index(:api_keys, [:api_key_hash], name: "api_keys_unique_api_key_index")
+
+    drop constraint(:api_keys, "api_keys_user_id_fkey")
+
+    drop table(:api_keys)
+
     drop table(:invites)
 
     drop constraint(:sponsors, "sponsors_user_id_fkey")

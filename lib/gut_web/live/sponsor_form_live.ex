@@ -28,7 +28,11 @@ defmodule GutWeb.SponsorFormLive do
   end
 
   def mount(_params, _session, socket) do
-    form = AshPhoenix.Form.for_create(Gut.Conference.Sponsor, :create, actor: socket.assigns.current_user) |> to_form()
+    form =
+      AshPhoenix.Form.for_create(Gut.Conference.Sponsor, :create,
+        actor: socket.assigns.current_user
+      )
+      |> to_form()
 
     socket =
       socket

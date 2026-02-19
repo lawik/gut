@@ -76,8 +76,7 @@ defmodule GutWeb.UsersLive do
 
         <div class="mt-12">
           <h2 class="text-xl font-semibold text-gray-900 mb-4 px-4 sm:px-6 lg:px-8 flex items-center">
-            <.icon name="hero-envelope" class="h-5 w-5 mr-2 text-indigo-600" />
-            Invites
+            <.icon name="hero-envelope" class="h-5 w-5 mr-2 text-indigo-600" /> Invites
           </h2>
           <Cinder.Table.table
             id="invites-table"
@@ -141,8 +140,13 @@ defmodule GutWeb.UsersLive do
             </:col>
           </Cinder.Table.table>
 
-          <div :if={@shown_link} class="mt-4 mx-4 sm:mx-6 lg:mx-8 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
-            <p class="text-sm font-medium text-indigo-900 mb-2">Magic link (valid for a few minutes):</p>
+          <div
+            :if={@shown_link}
+            class="mt-4 mx-4 sm:mx-6 lg:mx-8 p-4 bg-indigo-50 border border-indigo-200 rounded-lg"
+          >
+            <p class="text-sm font-medium text-indigo-900 mb-2">
+              Magic link (valid for a few minutes):
+            </p>
             <div class="flex items-center gap-2">
               <input
                 type="text"
