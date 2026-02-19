@@ -17,6 +17,7 @@ defmodule Gut.Conference.Sponsor do
     create :create do
       accept [
         :name,
+        :status,
         :outreach,
         :responded,
         :interested,
@@ -31,6 +32,7 @@ defmodule Gut.Conference.Sponsor do
     update :update do
       accept [
         :name,
+        :status,
         :outreach,
         :responded,
         :interested,
@@ -61,6 +63,13 @@ defmodule Gut.Conference.Sponsor do
     uuid_primary_key :id
 
     attribute :name, :string do
+      allow_nil? false
+      public? true
+    end
+
+    attribute :status, :atom do
+      constraints one_of: [:cold, :warm, :ok, :dismissed]
+      default :cold
       allow_nil? false
       public? true
     end

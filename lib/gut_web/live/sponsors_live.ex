@@ -39,6 +39,15 @@ defmodule GutWeb.SponsorsLive do
               <div class="font-medium">{sponsor.name}</div>
             </:col>
 
+            <:col :let={sponsor} field="status" filter sort label="Status">
+              <span class={[
+                "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium",
+                status_badge_class(sponsor.status)
+              ]}>
+                {sponsor.status}
+              </span>
+            </:col>
+
             <:col :let={sponsor} field="outreach" filter label="Outreach">
               <%= if sponsor.outreach do %>
                 <div class="text-sm max-w-xs truncate">{sponsor.outreach}</div>
@@ -105,6 +114,12 @@ defmodule GutWeb.SponsorsLive do
     </Layouts.app>
     """
   end
+
+  defp status_badge_class(:cold), do: "bg-blue-100 text-blue-700"
+  defp status_badge_class(:warm), do: "bg-orange-100 text-orange-700"
+  defp status_badge_class(:ok), do: "bg-green-100 text-green-700"
+  defp status_badge_class(:dismissed), do: "bg-gray-100 text-gray-500"
+  defp status_badge_class(_), do: "bg-gray-100 text-gray-700"
 
   defp checkpoint_badge(assigns) do
     ~H"""
