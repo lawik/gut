@@ -19,6 +19,11 @@ defmodule Gut.Accounts.ApiKey do
 
       change {AshAuthentication.Strategy.ApiKey.GenerateApiKey, prefix: :gut, hash: :api_key_hash}
     end
+
+    read :for_user do
+      argument :user_id, :uuid, allow_nil?: false
+      filter expr(user_id == ^arg(:user_id))
+    end
   end
 
   policies do
@@ -27,7 +32,7 @@ defmodule Gut.Accounts.ApiKey do
     end
 
     policy always() do
-      authorize_if actor_present()
+      authorize_if expr(^actor(:role) == :staff)
     end
   end
 

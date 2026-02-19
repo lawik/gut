@@ -55,7 +55,7 @@ defmodule GutWeb.Router do
 
       live "/users", UsersLive
       live "/users/new", UserFormLive
-      live "/users/:id", UserFormLive
+      live "/users/:id", UserDetailLive
       live "/users/:id/edit", UserFormLive
     end
   end

@@ -12,7 +12,12 @@ defmodule Gut.Accounts do
 
   resources do
     resource Gut.Accounts.Token
-    resource Gut.Accounts.ApiKey
+
+    resource Gut.Accounts.ApiKey do
+      define :create_api_key, action: :create
+      define :destroy_api_key, action: :destroy
+      define :list_api_keys_for_user, action: :for_user, args: [:user_id]
+    end
 
     resource Gut.Accounts.User do
       define :create_user, action: :create, args: [:email, :role]
