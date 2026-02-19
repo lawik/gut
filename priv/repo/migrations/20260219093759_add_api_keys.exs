@@ -8,36 +8,6 @@ defmodule Gut.Repo.Migrations.AddApiKeys do
   use Ecto.Migration
 
   def up do
-    alter table(:users) do
-      modify :role, :text, default: "staff"
-    end
-
-    alter table(:sponsors) do
-      add :user_id,
-          references(:users,
-            column: :id,
-            name: "sponsors_user_id_fkey",
-            type: :uuid,
-            prefix: "public"
-          )
-    end
-
-    create table(:invites, primary_key: false) do
-      add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
-      add :email, :citext, null: false
-      add :resource_type, :text, null: false
-      add :resource_id, :uuid, null: false
-      add :accepted, :boolean, null: false, default: false
-
-      add :inserted_at, :utc_datetime_usec,
-        null: false,
-        default: fragment("(now() AT TIME ZONE 'utc')")
-
-      add :updated_at, :utc_datetime_usec,
-        null: false,
-        default: fragment("(now() AT TIME ZONE 'utc')")
-    end
-
     create table(:api_keys, primary_key: false) do
       add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
       add :api_key_hash, :binary, null: false
@@ -70,17 +40,5 @@ defmodule Gut.Repo.Migrations.AddApiKeys do
     drop constraint(:api_keys, "api_keys_user_id_fkey")
 
     drop table(:api_keys)
-
-    drop table(:invites)
-
-    drop constraint(:sponsors, "sponsors_user_id_fkey")
-
-    alter table(:sponsors) do
-      remove :user_id
-    end
-
-    alter table(:users) do
-      modify :role, :text, default: "user"
-    end
   end
 end
