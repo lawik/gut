@@ -210,8 +210,8 @@ defmodule GutWeb.UsersLive do
   end
 
   def handle_event("delete", %{"id" => id}, socket) do
-    case Gut.Accounts.destroy_user!(id, actor: socket.assigns.current_user) do
-      {:ok, _user} ->
+    case Gut.Accounts.destroy_user(id, actor: socket.assigns.current_user) do
+      :ok ->
         socket =
           socket
           |> put_flash(:info, "User deleted successfully")

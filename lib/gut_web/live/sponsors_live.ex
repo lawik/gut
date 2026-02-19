@@ -141,7 +141,7 @@ defmodule GutWeb.SponsorsLive do
 
   def handle_event("delete", %{"id" => id}, socket) do
     case Gut.Conference.destroy_sponsor(id, actor: socket.assigns.current_user) do
-      {:ok, _sponsor} ->
+      :ok ->
         socket =
           socket
           |> put_flash(:info, "Sponsor deleted successfully")

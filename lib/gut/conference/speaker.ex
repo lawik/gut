@@ -42,6 +42,10 @@ defmodule Gut.Conference.Speaker do
         :sessionize_data,
         :user_id
       ]
+
+      argument :email, :string
+
+      change Gut.Conference.Speaker.Changes.HandleInvite
     end
 
     action :sync_from_sessionize do
@@ -51,6 +55,8 @@ defmodule Gut.Conference.Speaker do
     end
 
     update :update do
+      require_atomic? false
+
       accept [
         :full_name,
         :first_name,
@@ -66,6 +72,10 @@ defmodule Gut.Conference.Speaker do
         :sessionize_data,
         :user_id
       ]
+
+      argument :email, :string
+
+      change Gut.Conference.Speaker.Changes.HandleInvite
     end
   end
 

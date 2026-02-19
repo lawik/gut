@@ -25,6 +25,21 @@ defmodule GutWeb.SpeakersLive do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} page_title="Speakers">
       <div class="">
+        <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+          <button
+            phx-click="sync_sessionize"
+            phx-disable-with="Syncing..."
+            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          >
+            <.icon name="hero-arrow-path" class="h-4 w-4 mr-2" /> Sync from Sessionize
+          </button>
+          <.link
+            navigate={~p"/speakers/new"}
+            class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+          >
+            <.icon name="hero-plus" class="h-4 w-4 mr-2" /> Add Speaker
+          </.link>
+        </div>
         <div class="">
           <Cinder.Table.table
             id="speakers-table"
@@ -132,9 +147,28 @@ defmodule GutWeb.SpeakersLive do
     {:noreply, Cinder.Table.Refresh.refresh_table(socket, "speakers-table")}
   end
 
+  def handle_event("sync_sessionize", _params, socket) do
+    case Gut.Conference.SessionizeSync.sync() do
+      {:ok, %{synced: synced}} ->
+        socket =
+          socket
+          |> put_flash(:info, "Sessionize sync complete: #{synced} speakers synced")
+          |> Cinder.Table.Refresh.refresh_table("speakers-table")
+
+        {:noreply, socket}
+
+      {:error, :not_configured} ->
+        {:noreply, put_flash(socket, :error, "Sessionize URLs not configured")}
+
+      {:error, reason} ->
+        Logger.error("Sessionize sync failed: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Sessionize sync failed")}
+    end
+  end
+
   def handle_event("delete", %{"id" => id}, socket) do
     case Gut.Conference.destroy_speaker(id, actor: socket.assigns.current_user) do
-      {:ok, _speaker} ->
+      :ok ->
         socket =
           socket
           |> put_flash(:info, "Speaker deleted successfully")

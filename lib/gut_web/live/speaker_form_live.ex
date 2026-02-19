@@ -178,11 +178,10 @@ defmodule GutWeb.SpeakerFormLive do
 
   def handle_event("save", %{"form" => params} = all_params, socket) do
     invite_email = Map.get(all_params, "invite_email", "") |> String.trim()
+    params = Map.put(params, "email", invite_email)
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: params) do
-      {:ok, speaker} ->
-        socket = handle_invite_email(socket, speaker, invite_email)
-
+      {:ok, _speaker} ->
         action_text = if socket.assigns.action == :new, do: "created", else: "updated"
 
         socket =
@@ -194,29 +193,6 @@ defmodule GutWeb.SpeakerFormLive do
 
       {:error, form} ->
         {:noreply, assign(socket, :form, form)}
-    end
-  end
-
-  defp handle_invite_email(socket, _speaker, ""), do: socket
-
-  defp handle_invite_email(socket, speaker, email) do
-    actor = socket.assigns.current_user
-
-    case Gut.Accounts.get_user_by_email(email, actor: actor) do
-      {:ok, user} ->
-        Gut.Conference.update_speaker!(speaker, %{user_id: user.id}, actor: actor)
-        Gut.Accounts.update_user!(user, %{role: :speaker}, actor: actor)
-        socket
-
-      {:error, _} ->
-        Gut.Accounts.request_magic_link(email)
-
-        Gut.Accounts.create_invite!(
-          %{email: email, resource_type: :speaker, resource_id: speaker.id},
-          actor: actor
-        )
-
-        put_flash(socket, :info, "Invite sent to #{email}")
     end
   end
 end

@@ -17,6 +17,9 @@ defmodule Gut.Conference.SessionizeSync do
 
   @known_fields ~w(firstName lastName fullName id)
 
+  @doc """
+  Fetches data from the configured Sessionize URLs and syncs speakers.
+  """
   def sync do
     main_url = Application.get_env(:gut, :sessionize_main_url)
     email_url = Application.get_env(:gut, :sessionize_speaker_email_url)
@@ -31,43 +34,80 @@ defmodule Gut.Conference.SessionizeSync do
         {:error, :not_configured}
 
       true ->
-        do_sync(main_url, email_url)
+        with {:ok, main_data} <- fetch_json(main_url),
+             {:ok, email_data} <- fetch_json(email_url) do
+          sync_from_data(main_data, email_data)
+        end
     end
   end
 
-  defp do_sync(main_url, email_url) do
-    with {:ok, main_data} <- fetch_json(main_url),
-         {:ok, email_data} <- fetch_json(email_url) do
-      speakers = extract_speakers(main_data)
-      email_map = build_email_map(email_data)
-      existing = load_existing_speakers()
+  @doc """
+  Syncs speakers from already-fetched Sessionize data.
 
-      results =
-        speakers
-        |> Enum.map(fn speaker_data ->
-          sessionize_id = to_string(Map.get(speaker_data, "id"))
-          email = Map.get(email_map, sessionize_id)
+  `main_data` is the decoded JSON from the main Sessionize endpoint (speaker profiles).
+  `email_data` is the decoded JSON from the email endpoint (list of `%{"id" => ..., "email" => ...}`).
+  """
+  def sync_from_data(main_data, email_data) do
+    speakers = extract_speakers(main_data)
+    email_map = build_email_map(email_data)
+    existing = load_existing_speakers()
 
-          if email do
-            upsert_speaker(speaker_data, email, existing)
-          else
-            Logger.warning("No email found for sessionize speaker #{sessionize_id}, skipping")
-            {:skip, sessionize_id}
-          end
-        end)
-        |> Enum.reject(&match?({:skip, _}, &1))
+    results =
+      speakers
+      |> Enum.map(fn speaker_data ->
+        sessionize_id = to_string(Map.get(speaker_data, "id"))
+        email = Map.get(email_map, sessionize_id)
 
-      {ok, errors} =
-        Enum.split_with(results, fn
-          {:ok, _} -> true
-          _ -> false
-        end)
+        if email do
+          upsert_speaker(speaker_data, email, existing)
+        else
+          Logger.warning("No email found for sessionize speaker #{sessionize_id}, skipping")
+          {:skip, sessionize_id}
+        end
+      end)
+      |> Enum.reject(&match?({:skip, _}, &1))
 
-      Logger.info("Sessionize sync complete: #{length(ok)} synced, #{length(errors)} errors")
+    {ok, errors} =
+      Enum.split_with(results, fn
+        {:ok, _} -> true
+        _ -> false
+      end)
 
-      {:ok, %{synced: length(ok), errors: length(errors)}}
-    end
+    Logger.info("Sessionize sync complete: #{length(ok)} synced, #{length(errors)} errors")
+
+    {:ok, %{synced: length(ok), errors: length(errors)}}
   end
+
+  @doc """
+  Extracts speaker entries from the main Sessionize response.
+  Handles both a bare list and a `%{"speakers" => [...]}` wrapper.
+  """
+  def extract_speakers(data) when is_list(data), do: data
+  def extract_speakers(%{"speakers" => speakers}) when is_list(speakers), do: speakers
+
+  def extract_speakers(data) when is_map(data) do
+    if Map.has_key?(data, "speakers"), do: List.wrap(data["speakers"]), else: []
+  end
+
+  def extract_speakers(_), do: []
+
+  @doc """
+  Builds a map of `%{sessionize_id => email}` from the email endpoint data.
+  """
+  def build_email_map(data) when is_list(data) do
+    Enum.reduce(data, %{}, fn item, acc ->
+      id = to_string(Map.get(item, "id"))
+      email = Map.get(item, "email")
+
+      if id && email do
+        Map.put(acc, id, String.downcase(email))
+      else
+        acc
+      end
+    end)
+  end
+
+  def build_email_map(_), do: %{}
 
   defp fetch_json(url) do
     case Req.get(url) do
@@ -84,53 +124,18 @@ defmodule Gut.Conference.SessionizeSync do
     end
   end
 
-  defp extract_speakers(data) when is_list(data) do
-    data
-  end
-
-  defp extract_speakers(%{"speakers" => speakers}) when is_list(speakers) do
-    speakers
-  end
-
-  defp extract_speakers(data) when is_map(data) do
-    # Try common Sessionize response shapes
-    cond do
-      Map.has_key?(data, "speakers") -> List.wrap(data["speakers"])
-      true -> []
-    end
-  end
-
-  defp extract_speakers(_), do: []
-
-  defp build_email_map(data) when is_list(data) do
-    Enum.reduce(data, %{}, fn item, acc ->
-      id = to_string(Map.get(item, "id"))
-      email = Map.get(item, "email")
-
-      if id && email do
-        Map.put(acc, id, String.downcase(email))
-      else
-        acc
-      end
-    end)
-  end
-
-  defp build_email_map(_), do: %{}
-
   defp load_existing_speakers do
     speakers =
       Gut.Conference.list_speakers!(authorize?: false, load: [:user])
 
-    # Build lookup by email (from user account or from previous sessionize sync)
     Enum.reduce(speakers, %{}, fn speaker, acc ->
       acc =
         if speaker.user do
-          Map.put(acc, String.downcase(speaker.user.email), speaker)
+          Map.put(acc, speaker.user.email |> to_string() |> String.downcase(), speaker)
         else
           acc
         end
 
-      # Also check email stored in sessionize_data from previous syncs
       case get_in(speaker.sessionize_data || %{}, ["email"]) do
         nil -> acc
         email -> Map.put(acc, String.downcase(email), speaker)
@@ -152,7 +157,8 @@ defmodule Gut.Conference.SessionizeSync do
       first_name: first_name,
       last_name: last_name,
       full_name: full_name,
-      sessionize_data: extra_data
+      sessionize_data: extra_data,
+      email: email
     }
 
     case Map.get(existing, String.downcase(email)) do

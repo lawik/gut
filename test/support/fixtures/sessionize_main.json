@@ -1,0 +1,75 @@
+[
+  {
+    "id": "abc-1001",
+    "firstName": "Ada",
+    "lastName": "Lovelace",
+    "fullName": "Ada Lovelace",
+    "bio": "Pioneer of computing, wrote the first algorithm.",
+    "tagLine": "The first programmer",
+    "profilePicture": "https://example.com/photos/ada.jpg",
+    "sessions": [
+      {
+        "id": 5001,
+        "name": "Analytical Engines and Beyond"
+      }
+    ],
+    "links": [
+      {
+        "title": "Website",
+        "url": "https://ada.example.com",
+        "linkType": "Website"
+      }
+    ],
+    "questionAnswers": [
+      {
+        "questionId": 1,
+        "answerValue": "Vegetarian"
+      }
+    ]
+  },
+  {
+    "id": "abc-1002",
+    "firstName": "Grace",
+    "lastName": "Hopper",
+    "fullName": "Grace Hopper",
+    "bio": "Invented the first compiler and popularized machine-independent programming.",
+    "tagLine": "Queen of code",
+    "profilePicture": "https://example.com/photos/grace.jpg",
+    "sessions": [
+      {
+        "id": 5002,
+        "name": "Debugging: From Moths to Modern"
+      }
+    ],
+    "links": [],
+    "questionAnswers": []
+  },
+  {
+    "id": "abc-1003",
+    "firstName": "Alan",
+    "lastName": "Turing",
+    "fullName": "Alan Turing",
+    "bio": "Father of theoretical computer science and artificial intelligence.",
+    "tagLine": "Can machines think?",
+    "profilePicture": "https://example.com/photos/alan.jpg",
+    "sessions": [
+      {
+        "id": 5003,
+        "name": "The Imitation Game"
+      }
+    ],
+    "links": [
+      {
+        "title": "Blog",
+        "url": "https://alan.example.com/blog",
+        "linkType": "Blog"
+      }
+    ],
+    "questionAnswers": [
+      {
+        "questionId": 1,
+        "answerValue": "No preference"
+      }
+    ]
+  }
+]
