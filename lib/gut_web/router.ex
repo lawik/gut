@@ -72,21 +72,21 @@ defmodule GutWeb.Router do
     sign_in_route reset_path: "/reset",
                   auth_routes_prefix: "/auth",
                   on_mount: [{GutWeb.LiveUserAuth, :live_no_user}],
-                  overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+                  overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.DaisyUI]
 
     # Remove this if you do not want to use the reset password feature
     reset_route auth_routes_prefix: "/auth",
-                overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+                overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.DaisyUI]
 
     # Remove this if you do not use the confirmation strategy
     confirm_route Gut.Accounts.User, :confirm_new_user,
       auth_routes_prefix: "/auth",
-      overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+      overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.DaisyUI]
 
     # Remove this if you do not use the magic link strategy.
     magic_sign_in_route(Gut.Accounts.User, :magic_link,
       auth_routes_prefix: "/auth",
-      overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+      overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.DaisyUI]
     )
   end
 
