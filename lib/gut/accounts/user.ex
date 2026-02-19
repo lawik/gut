@@ -7,14 +7,6 @@ defmodule Gut.Accounts.User do
     extensions: [AshAuthentication],
     notifiers: [Ash.Notifier.PubSub]
 
-  pub_sub do
-    module GutWeb.Endpoint
-    prefix "users"
-    publish :create, ["changed"]
-    publish :update, ["changed"]
-    publish :destroy, ["changed"]
-  end
-
   authentication do
     add_ons do
       log_out_everywhere do
@@ -121,6 +113,14 @@ defmodule Gut.Accounts.User do
     policy always() do
       authorize_if actor_present()
     end
+  end
+
+  pub_sub do
+    module GutWeb.Endpoint
+    prefix "users"
+    publish :create, ["changed"]
+    publish :update, ["changed"]
+    publish :destroy, ["changed"]
   end
 
   attributes do

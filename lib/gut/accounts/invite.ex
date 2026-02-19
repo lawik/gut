@@ -6,14 +6,6 @@ defmodule Gut.Accounts.Invite do
     authorizers: [Ash.Policy.Authorizer],
     notifiers: [Ash.Notifier.PubSub]
 
-  pub_sub do
-    module GutWeb.Endpoint
-    prefix "invites"
-    publish :create, ["changed"]
-    publish :accept, ["changed"]
-    publish :destroy, ["changed"]
-  end
-
   postgres do
     table "invites"
     repo Gut.Repo
@@ -53,6 +45,14 @@ defmodule Gut.Accounts.Invite do
     policy always() do
       authorize_if actor_present()
     end
+  end
+
+  pub_sub do
+    module GutWeb.Endpoint
+    prefix "invites"
+    publish :create, ["changed"]
+    publish :accept, ["changed"]
+    publish :destroy, ["changed"]
   end
 
   attributes do

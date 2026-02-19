@@ -6,14 +6,6 @@ defmodule Gut.Conference.Speaker do
     authorizers: [Ash.Policy.Authorizer],
     notifiers: [Ash.Notifier.PubSub]
 
-  pub_sub do
-    module GutWeb.Endpoint
-    prefix "speakers"
-    publish :create, ["changed"]
-    publish :update, ["changed"]
-    publish :destroy, ["changed"]
-  end
-
   postgres do
     table "speakers"
     repo Gut.Repo
@@ -61,6 +53,14 @@ defmodule Gut.Conference.Speaker do
     policy always() do
       authorize_if actor_present()
     end
+  end
+
+  pub_sub do
+    module GutWeb.Endpoint
+    prefix "speakers"
+    publish :create, ["changed"]
+    publish :update, ["changed"]
+    publish :destroy, ["changed"]
   end
 
   attributes do

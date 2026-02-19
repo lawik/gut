@@ -6,14 +6,6 @@ defmodule Gut.Conference.Sponsor do
     authorizers: [Ash.Policy.Authorizer],
     notifiers: [Ash.Notifier.PubSub]
 
-  pub_sub do
-    module GutWeb.Endpoint
-    prefix "sponsors"
-    publish :create, ["changed"]
-    publish :update, ["changed"]
-    publish :destroy, ["changed"]
-  end
-
   postgres do
     table "sponsors"
     repo Gut.Repo
@@ -55,6 +47,14 @@ defmodule Gut.Conference.Sponsor do
     policy always() do
       authorize_if actor_present()
     end
+  end
+
+  pub_sub do
+    module GutWeb.Endpoint
+    prefix "sponsors"
+    publish :create, ["changed"]
+    publish :update, ["changed"]
+    publish :destroy, ["changed"]
   end
 
   attributes do
