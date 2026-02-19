@@ -3,7 +3,16 @@ defmodule Gut.Accounts.Invite do
     otp_app: :gut,
     domain: Gut.Accounts,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    notifiers: [Ash.Notifier.PubSub]
+
+  pub_sub do
+    module GutWeb.Endpoint
+    prefix "invites"
+    publish :create, ["changed"]
+    publish :accept, ["changed"]
+    publish :destroy, ["changed"]
+  end
 
   postgres do
     table "invites"

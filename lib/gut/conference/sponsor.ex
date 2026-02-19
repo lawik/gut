@@ -3,7 +3,16 @@ defmodule Gut.Conference.Sponsor do
     otp_app: :gut,
     domain: Gut.Conference,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    notifiers: [Ash.Notifier.PubSub]
+
+  pub_sub do
+    module GutWeb.Endpoint
+    prefix "sponsors"
+    publish :create, ["changed"]
+    publish :update, ["changed"]
+    publish :destroy, ["changed"]
+  end
 
   postgres do
     table "sponsors"

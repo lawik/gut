@@ -25,6 +25,7 @@ defmodule GutWeb.Router do
   pipeline :mcp do
     plug AshAuthentication.Strategy.ApiKey.Plug,
       resource: Gut.Accounts.User,
+      source: :header_or_query_param,
       required?: false
   end
 

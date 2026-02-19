@@ -4,7 +4,16 @@ defmodule Gut.Accounts.User do
     domain: Gut.Accounts,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshAuthentication]
+    extensions: [AshAuthentication],
+    notifiers: [Ash.Notifier.PubSub]
+
+  pub_sub do
+    module GutWeb.Endpoint
+    prefix "users"
+    publish :create, ["changed"]
+    publish :update, ["changed"]
+    publish :destroy, ["changed"]
+  end
 
   authentication do
     add_ons do

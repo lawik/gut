@@ -7,6 +7,8 @@ defmodule GutWeb.SpeakersLive do
   on_mount {GutWeb.LiveUserAuth, :live_user_required}
 
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Phoenix.PubSub.subscribe(Gut.PubSub, "speakers:changed")
+
     socket =
       socket
       |> assign(:current_scope, nil)
@@ -124,6 +126,10 @@ defmodule GutWeb.SpeakersLive do
       </div>
     </Layouts.app>
     """
+  end
+
+  def handle_info(%{topic: "speakers:changed"}, socket) do
+    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "speakers-table")}
   end
 
   def handle_event("delete", %{"id" => id}, socket) do

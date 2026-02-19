@@ -7,6 +7,8 @@ defmodule GutWeb.SponsorsLive do
   on_mount {GutWeb.LiveUserAuth, :live_user_required}
 
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Phoenix.PubSub.subscribe(Gut.PubSub, "sponsors:changed")
+
     socket =
       socket
       |> assign(:current_scope, nil)
@@ -116,6 +118,10 @@ defmodule GutWeb.SponsorsLive do
       </span>
     <% end %>
     """
+  end
+
+  def handle_info(%{topic: "sponsors:changed"}, socket) do
+    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "sponsors-table")}
   end
 
   def handle_event("delete", %{"id" => id}, socket) do

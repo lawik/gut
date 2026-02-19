@@ -7,6 +7,11 @@ defmodule GutWeb.UsersLive do
   on_mount {GutWeb.LiveUserAuth, :live_user_required}
 
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Gut.PubSub, "users:changed")
+      Phoenix.PubSub.subscribe(Gut.PubSub, "invites:changed")
+    end
+
     socket =
       socket
       |> assign(:current_scope, nil)
@@ -170,6 +175,14 @@ defmodule GutWeb.UsersLive do
   defp invite_type_class(:speaker), do: "bg-purple-100 text-purple-700"
   defp invite_type_class(:sponsor), do: "bg-amber-100 text-amber-700"
   defp invite_type_class(_), do: "bg-gray-100 text-gray-700"
+
+  def handle_info(%{topic: "users:changed"}, socket) do
+    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "users-table")}
+  end
+
+  def handle_info(%{topic: "invites:changed"}, socket) do
+    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "invites-table")}
+  end
 
   def handle_event("get_link", %{"email" => email}, socket) do
     case Gut.Accounts.magic_link_url(email) do
