@@ -21,8 +21,7 @@ defmodule Gut.Accounts.User.Senders.SendMagicLinkEmail do
       end
 
     new()
-    # TODO: Replace with your email
-    |> from({"noreply", "noreply@example.com"})
+    |> from({"Goatmire", Mailer.from_email()})
     |> to(to_string(email))
     |> subject("Your login link")
     |> html_body(body(token: token, email: email))

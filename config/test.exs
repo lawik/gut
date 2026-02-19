@@ -25,7 +25,7 @@ config :gut, GutWeb.Endpoint,
   server: false
 
 # In test we don't send emails
-config :gut, Gut.Mailer, adapter: Swoosh.Adapters.Test
+config :gut, Gut.Mailer, adapter: Swoosh.Adapters.Test, from_email: "noreply@example.com"
 
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
