@@ -72,6 +72,10 @@ if config_env() == :prod do
       System.get_env("TOKEN_SIGNING_SECRET") ||
         raise("Missing environment variable `TOKEN_SIGNING_SECRET`!")
 
+  config :gut,
+    sessionize_main_url: System.get_env("SESSIONIZE_MAIN_URL"),
+    sessionize_speaker_email_url: System.get_env("SESSIONIZE_SPEAKER_EMAIL_URL")
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

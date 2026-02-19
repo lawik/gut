@@ -4,11 +4,23 @@ defmodule Gut.Conference.Speaker do
     domain: Gut.Conference,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    notifiers: [Ash.Notifier.PubSub]
+    notifiers: [Ash.Notifier.PubSub],
+    extensions: [AshOban]
 
   postgres do
     table "speakers"
     repo Gut.Repo
+  end
+
+  oban do
+    domain Gut.Conference
+
+    scheduled_actions do
+      schedule :sync_from_sessionize, "0 * * * *" do
+        queue :default
+        worker_module_name Gut.Workers.SessionizeSync
+      end
+    end
   end
 
   actions do
@@ -27,8 +39,15 @@ defmodule Gut.Conference.Speaker do
         :hotel_stay_end_date,
         :hotel_covered_start_date,
         :hotel_covered_end_date,
+        :sessionize_data,
         :user_id
       ]
+    end
+
+    action :sync_from_sessionize do
+      run fn _input, _context ->
+        Gut.Conference.SessionizeSync.sync()
+      end
     end
 
     update :update do
@@ -44,6 +63,7 @@ defmodule Gut.Conference.Speaker do
         :hotel_stay_end_date,
         :hotel_covered_start_date,
         :hotel_covered_end_date,
+        :sessionize_data,
         :user_id
       ]
     end
@@ -111,6 +131,10 @@ defmodule Gut.Conference.Speaker do
     end
 
     attribute :hotel_covered_end_date, :date do
+      public? true
+    end
+
+    attribute :sessionize_data, :map do
       public? true
     end
 

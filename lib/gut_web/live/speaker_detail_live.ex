@@ -222,6 +222,28 @@ defmodule GutWeb.SpeakerDetailLive do
               </div>
             </div>
             
+    <!-- Sessionize Data -->
+            <%= if @speaker.sessionize_data && @speaker.sessionize_data != %{} do %>
+              <div class="mt-8 pt-8 border-t border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                  <.icon name="hero-cloud-arrow-down" class="h-5 w-5 mr-2 text-indigo-600" />
+                  Sessionize Data
+                </h2>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <%= for {key, value} <- @speaker.sessionize_data do %>
+                      <div>
+                        <dt class="text-sm font-medium text-gray-500">{humanize_key(key)}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                          {format_sessionize_value(value)}
+                        </dd>
+                      </div>
+                    <% end %>
+                  </dl>
+                </div>
+              </div>
+            <% end %>
+            
     <!-- Metadata -->
             <div class="mt-8 pt-8 border-t border-gray-200">
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -247,6 +269,29 @@ defmodule GutWeb.SpeakerDetailLive do
   end
 
   # Helper functions
+
+  defp humanize_key(key) when is_binary(key) do
+    key
+    |> String.replace(~r/([a-z])([A-Z])/, "\\1 \\2")
+    |> String.replace("_", " ")
+    |> String.split(" ")
+    |> Enum.map_join(" ", &String.capitalize/1)
+  end
+
+  defp format_sessionize_value(value) when is_binary(value), do: value
+  defp format_sessionize_value(value) when is_number(value), do: to_string(value)
+  defp format_sessionize_value(value) when is_boolean(value), do: to_string(value)
+  defp format_sessionize_value(nil), do: "-"
+
+  defp format_sessionize_value(value) when is_list(value) do
+    value
+    |> Enum.map_join(", ", &format_sessionize_value/1)
+  end
+
+  defp format_sessionize_value(value) when is_map(value) do
+    Jason.encode!(value, pretty: true)
+  end
+
   defp coverage_complete?(speaker) do
     not is_nil(speaker.hotel_stay_start_date) and not is_nil(speaker.hotel_stay_end_date) and
       not is_nil(speaker.hotel_covered_start_date) and not is_nil(speaker.hotel_covered_end_date) and
