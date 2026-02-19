@@ -36,6 +36,8 @@ defmodule GutWeb.Layouts do
   slot :inner_block, required: true
 
   def app(assigns) do
+    assigns = assign(assigns, :git_sha, git_sha())
+
     ~H"""
     <header class="navbar px-4 sm:px-6 lg:px-8">
       <div class="flex-1">
@@ -44,6 +46,7 @@ defmodule GutWeb.Layouts do
             Gut
           </a>
           <a href="#" class="font-bold">{assigns[:page_title]}</a>
+          <span :if={@git_sha != ""} class="text-xs font-mono text-gray-400">{@git_sha}</span>
         </div>
       </div>
       <div class="flex-none">
@@ -177,5 +180,9 @@ defmodule GutWeb.Layouts do
       </button>
     </div>
     """
+  end
+
+  defp git_sha do
+    System.get_env("GIT_SHA", "")
   end
 end

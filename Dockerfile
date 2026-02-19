@@ -35,6 +35,9 @@ RUN mix local.hex --force \
 # set build ENV
 ENV MIX_ENV="prod"
 
+ARG GIT_SHA=""
+ENV GIT_SHA=${GIT_SHA}
+
 # install mix dependencies
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
@@ -87,6 +90,9 @@ RUN chown nobody /app
 
 # set runner ENV
 ENV MIX_ENV="prod"
+
+ARG GIT_SHA=""
+ENV GIT_SHA=${GIT_SHA}
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/gut ./
