@@ -1,11 +1,6 @@
 defmodule GutWeb.SponsorLiveTest do
   use GutWeb.FeatureCase
 
-  defp create_sponsor(attrs \\ %{}) do
-    defaults = %{name: "Acme Corp"}
-    Gut.Conference.create_sponsor!(Map.merge(defaults, attrs), authorize?: false)
-  end
-
   describe "SponsorsLive (index)" do
     test "renders sponsors page", %{conn: conn} do
       conn
@@ -23,7 +18,7 @@ defmodule GutWeb.SponsorLiveTest do
 
   describe "SponsorDetailLive (show)" do
     test "renders sponsor details", %{conn: conn} do
-      sponsor = create_sponsor(%{sponsorship_level: "Gold"})
+      sponsor = generate(sponsor(sponsorship_level: "Gold"))
 
       conn
       |> visit("/sponsors/#{sponsor.id}")
@@ -34,7 +29,7 @@ defmodule GutWeb.SponsorLiveTest do
     end
 
     test "displays pipeline steps", %{conn: conn} do
-      sponsor = create_sponsor(%{responded: true, interested: true, confirmed: false})
+      sponsor = generate(sponsor(responded: true, interested: true, confirmed: false))
 
       conn
       |> visit("/sponsors/#{sponsor.id}")
@@ -44,7 +39,7 @@ defmodule GutWeb.SponsorLiveTest do
     end
 
     test "shows outreach section", %{conn: conn} do
-      sponsor = create_sponsor(%{outreach: "Contacted via email"})
+      sponsor = generate(sponsor(outreach: "Contacted via email"))
 
       conn
       |> visit("/sponsors/#{sponsor.id}")
@@ -53,7 +48,7 @@ defmodule GutWeb.SponsorLiveTest do
     end
 
     test "navigates to edit form", %{conn: conn} do
-      sponsor = create_sponsor()
+      sponsor = generate(sponsor())
 
       conn
       |> visit("/sponsors/#{sponsor.id}/edit")
@@ -81,7 +76,7 @@ defmodule GutWeb.SponsorLiveTest do
 
   describe "SponsorFormLive (edit)" do
     test "renders the edit form with existing data", %{conn: conn} do
-      sponsor = create_sponsor()
+      sponsor = generate(sponsor())
 
       conn
       |> visit("/sponsors/#{sponsor.id}/edit")
@@ -89,7 +84,7 @@ defmodule GutWeb.SponsorLiveTest do
     end
 
     test "updates a sponsor", %{conn: conn} do
-      sponsor = create_sponsor()
+      sponsor = generate(sponsor())
 
       conn
       |> visit("/sponsors/#{sponsor.id}/edit")

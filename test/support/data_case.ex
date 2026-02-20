@@ -24,6 +24,7 @@ defmodule Gut.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Gut.DataCase
+      import Gut.Generators
     end
   end
 

@@ -12,13 +12,14 @@ defmodule GutWeb.FeatureCase do
 
       import PhoenixTest
       import GutWeb.FeatureCase
+      import Gut.Generators
     end
   end
 
   setup tags do
     Gut.DataCase.setup_sandbox(tags)
 
-    user = Gut.Accounts.create_user!("staff@test.com", :staff, authorize?: false)
+    user = Gut.Generators.generate(Gut.Generators.user(email: "staff@test.com", role: :staff))
     conn = Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{})
     conn = log_in_user(conn, user)
 
@@ -44,7 +45,7 @@ defmodule GutWeb.FeatureCase do
   Builds a conn logged in as a user with the given role.
   """
   def log_in_as(role) do
-    user = Gut.Accounts.create_user!("#{role}@test.com", role, authorize?: false)
+    user = Gut.Generators.generate(Gut.Generators.user(email: "#{role}@test.com", role: role))
     conn = Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{})
     log_in_user(conn, user)
   end

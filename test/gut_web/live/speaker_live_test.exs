@@ -1,11 +1,6 @@
 defmodule GutWeb.SpeakerLiveTest do
   use GutWeb.FeatureCase
 
-  defp create_speaker(attrs \\ %{}) do
-    defaults = %{first_name: "Ada", last_name: "Lovelace", full_name: "Ada Lovelace"}
-    Gut.Conference.create_speaker!(Map.merge(defaults, attrs), authorize?: false)
-  end
-
   describe "SpeakersLive (index)" do
     test "renders speakers page", %{conn: conn} do
       conn
@@ -31,7 +26,7 @@ defmodule GutWeb.SpeakerLiveTest do
 
   describe "SpeakerDetailLive (show)" do
     test "renders speaker details", %{conn: conn} do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       conn
       |> visit("/speakers/#{speaker.id}")
@@ -42,10 +37,12 @@ defmodule GutWeb.SpeakerLiveTest do
 
     test "shows travel information when set", %{conn: conn} do
       speaker =
-        create_speaker(%{
-          arrival_date: ~D[2026-06-15],
-          leaving_date: ~D[2026-06-18]
-        })
+        generate(
+          speaker(
+            arrival_date: ~D[2026-06-15],
+            leaving_date: ~D[2026-06-18]
+          )
+        )
 
       conn
       |> visit("/speakers/#{speaker.id}")
@@ -58,12 +55,14 @@ defmodule GutWeb.SpeakerLiveTest do
 
     test "shows hotel information when set", %{conn: conn} do
       speaker =
-        create_speaker(%{
-          hotel_stay_start_date: ~D[2026-06-14],
-          hotel_stay_end_date: ~D[2026-06-18],
-          hotel_covered_start_date: ~D[2026-06-14],
-          hotel_covered_end_date: ~D[2026-06-18]
-        })
+        generate(
+          speaker(
+            hotel_stay_start_date: ~D[2026-06-14],
+            hotel_stay_end_date: ~D[2026-06-18],
+            hotel_covered_start_date: ~D[2026-06-14],
+            hotel_covered_end_date: ~D[2026-06-18]
+          )
+        )
 
       conn
       |> visit("/speakers/#{speaker.id}")
@@ -72,7 +71,7 @@ defmodule GutWeb.SpeakerLiveTest do
     end
 
     test "navigates to edit form", %{conn: conn} do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       conn
       |> visit("/speakers/#{speaker.id}/edit")
@@ -103,7 +102,7 @@ defmodule GutWeb.SpeakerLiveTest do
 
   describe "SpeakerFormLive (edit)" do
     test "renders the edit form with existing data", %{conn: conn} do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       conn
       |> visit("/speakers/#{speaker.id}/edit")
@@ -111,7 +110,7 @@ defmodule GutWeb.SpeakerLiveTest do
     end
 
     test "updates a speaker", %{conn: conn} do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       conn
       |> visit("/speakers/#{speaker.id}/edit")

@@ -1,13 +1,6 @@
 defmodule GutWeb.RoleLandingTest do
   use GutWeb.FeatureCase
 
-  defp create_speaker_for_user(user) do
-    Gut.Conference.create_speaker!(
-      %{first_name: "Ada", last_name: "Lovelace", full_name: "Ada Lovelace", user_id: user.id},
-      authorize?: false
-    )
-  end
-
   describe "staff landing" do
     test "staff user landing on / redirects to speakers list", %{conn: conn} do
       conn
@@ -32,8 +25,8 @@ defmodule GutWeb.RoleLandingTest do
     end
 
     test "speaker sees travel form with fields" do
-      user = Gut.Accounts.create_user!("speaker-form@test.com", :speaker, authorize?: false)
-      _speaker = create_speaker_for_user(user)
+      user = generate(user(email: "speaker-form@test.com", role: :speaker))
+      _speaker = generate(speaker(user_id: user.id))
       conn = log_in_user(Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{}), user)
 
       conn
@@ -55,8 +48,8 @@ defmodule GutWeb.RoleLandingTest do
     end
 
     test "speaker can submit travel details" do
-      user = Gut.Accounts.create_user!("speaker-save@test.com", :speaker, authorize?: false)
-      _speaker = create_speaker_for_user(user)
+      user = generate(user(email: "speaker-save@test.com", role: :speaker))
+      _speaker = generate(speaker(user_id: user.id))
       conn = log_in_user(Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{}), user)
 
       conn

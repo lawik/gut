@@ -40,7 +40,7 @@ defmodule GutWeb.UserLiveTest do
     end
 
     test "does not show API keys for non-staff users", %{conn: conn} do
-      speaker_user = Gut.Accounts.create_user!("speaker@test.com", :speaker, authorize?: false)
+      speaker_user = generate(user(email: "speaker@test.com", role: :speaker))
 
       conn
       |> visit("/users/#{speaker_user.id}")
@@ -75,7 +75,7 @@ defmodule GutWeb.UserLiveTest do
     end
 
     test "updates a user role", %{conn: conn} do
-      other_user = Gut.Accounts.create_user!("other@test.com", :staff, authorize?: false)
+      other_user = generate(user(email: "other@test.com", role: :staff))
 
       conn
       |> visit("/users/#{other_user.id}/edit")

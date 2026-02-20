@@ -3,15 +3,12 @@ defmodule Gut.AuthorizationTest do
 
   describe "speaker-role user is denied staff actions" do
     setup do
-      user = Gut.Accounts.create_user!("speaker@test.com", :speaker, authorize?: false)
+      user = generate(user(email: "speaker@test.com", role: :speaker))
       %{actor: user}
     end
 
     test "cannot see speakers", %{actor: actor} do
-      Gut.Conference.create_speaker!(
-        %{full_name: "Test", first_name: "T", last_name: "T"},
-        authorize?: false
-      )
+      generate(speaker())
 
       assert {:ok, []} = Gut.Conference.list_speakers(actor: actor)
     end
@@ -25,22 +22,14 @@ defmodule Gut.AuthorizationTest do
     end
 
     test "cannot update speaker", %{actor: actor} do
-      speaker =
-        Gut.Conference.create_speaker!(
-          %{full_name: "Test", first_name: "T", last_name: "T"},
-          authorize?: false
-        )
+      speaker = generate(speaker())
 
       assert {:error, %Ash.Error.Forbidden{}} =
                Gut.Conference.update_speaker(speaker, %{full_name: "Changed"}, actor: actor)
     end
 
     test "cannot destroy speaker", %{actor: actor} do
-      speaker =
-        Gut.Conference.create_speaker!(
-          %{full_name: "Test", first_name: "T", last_name: "T"},
-          authorize?: false
-        )
+      speaker = generate(speaker())
 
       assert {:error, %Ash.Error.Forbidden{}} =
                Gut.Conference.destroy_speaker(speaker, actor: actor)
@@ -52,7 +41,7 @@ defmodule Gut.AuthorizationTest do
     end
 
     test "cannot see sponsors", %{actor: actor} do
-      Gut.Conference.create_sponsor!(%{name: "Test Corp"}, authorize?: false)
+      generate(sponsor())
 
       assert {:ok, []} = Gut.Conference.list_sponsors(actor: actor)
     end
@@ -67,10 +56,7 @@ defmodule Gut.AuthorizationTest do
     end
 
     test "cannot see invites", %{actor: actor} do
-      Gut.Accounts.create_invite!(
-        %{email: "x@test.com", resource_type: :speaker, resource_id: Ash.UUID.generate()},
-        authorize?: false
-      )
+      generate(invite(email: "x@test.com"))
 
       assert {:ok, []} = Gut.Accounts.list_invites(actor: actor)
     end
@@ -78,15 +64,12 @@ defmodule Gut.AuthorizationTest do
 
   describe "sponsor-role user is denied staff actions" do
     setup do
-      user = Gut.Accounts.create_user!("sponsor@test.com", :sponsor, authorize?: false)
+      user = generate(user(email: "sponsor@test.com", role: :sponsor))
       %{actor: user}
     end
 
     test "cannot see speakers", %{actor: actor} do
-      Gut.Conference.create_speaker!(
-        %{full_name: "Test", first_name: "T", last_name: "T"},
-        authorize?: false
-      )
+      generate(speaker())
 
       assert {:ok, []} = Gut.Conference.list_speakers(actor: actor)
     end
@@ -105,7 +88,7 @@ defmodule Gut.AuthorizationTest do
     end
 
     test "cannot see sponsors", %{actor: actor} do
-      Gut.Conference.create_sponsor!(%{name: "Test Corp"}, authorize?: false)
+      generate(sponsor())
 
       assert {:ok, []} = Gut.Conference.list_sponsors(actor: actor)
     end
@@ -120,10 +103,7 @@ defmodule Gut.AuthorizationTest do
     end
 
     test "cannot see invites", %{actor: actor} do
-      Gut.Accounts.create_invite!(
-        %{email: "x@test.com", resource_type: :speaker, resource_id: Ash.UUID.generate()},
-        authorize?: false
-      )
+      generate(invite(email: "x@test.com"))
 
       assert {:ok, []} = Gut.Accounts.list_invites(actor: actor)
     end
@@ -131,15 +111,12 @@ defmodule Gut.AuthorizationTest do
 
   describe "staff-role user is allowed" do
     setup do
-      user = Gut.Accounts.create_user!("staff@test.com", :staff, authorize?: false)
+      user = generate(user(email: "staff@test.com", role: :staff))
       %{actor: user}
     end
 
     test "can list speakers", %{actor: actor} do
-      Gut.Conference.create_speaker!(
-        %{full_name: "Test", first_name: "T", last_name: "T"},
-        authorize?: false
-      )
+      generate(speaker())
 
       assert {:ok, [_]} = Gut.Conference.list_speakers(actor: actor)
     end
@@ -153,7 +130,7 @@ defmodule Gut.AuthorizationTest do
     end
 
     test "can list sponsors", %{actor: actor} do
-      Gut.Conference.create_sponsor!(%{name: "Test Corp"}, authorize?: false)
+      generate(sponsor())
 
       assert {:ok, [_]} = Gut.Conference.list_sponsors(actor: actor)
     end
@@ -167,10 +144,7 @@ defmodule Gut.AuthorizationTest do
     end
 
     test "can list invites", %{actor: actor} do
-      Gut.Accounts.create_invite!(
-        %{email: "x@test.com", resource_type: :speaker, resource_id: Ash.UUID.generate()},
-        authorize?: false
-      )
+      generate(invite(email: "x@test.com"))
 
       assert {:ok, [_]} = Gut.Accounts.list_invites(actor: actor)
     end

@@ -2,29 +2,19 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
   use Gut.DataCase
   use Oban.Testing, repo: Gut.Repo
 
-  defp create_speaker(attrs \\ %{}) do
-    defaults = %{first_name: "Ada", last_name: "Lovelace", full_name: "Ada Lovelace"}
-
-    Gut.Conference.create_speaker!(Map.merge(defaults, attrs), authorize?: false)
-  end
-
-  defp create_sponsor(attrs \\ %{}) do
-    defaults = %{name: "Acme Corp"}
-
-    Gut.Conference.create_sponsor!(Map.merge(defaults, attrs), authorize?: false)
-  end
+  @actor Gut.system_actor("test")
 
   defp update_speaker(speaker, attrs) do
-    Gut.Conference.update_speaker!(speaker, attrs, authorize?: false)
+    Gut.Conference.update_speaker!(speaker, attrs, actor: @actor)
   end
 
   defp update_sponsor(sponsor, attrs) do
-    Gut.Conference.update_sponsor!(sponsor, attrs, authorize?: false)
+    Gut.Conference.update_sponsor!(sponsor, attrs, actor: @actor)
   end
 
   describe "speaker updates" do
     test "enqueues notification when values change" do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       update_speaker(speaker, %{full_name: "Ada Byron"})
 
@@ -39,7 +29,7 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
     end
 
     test "does not enqueue notification when no values change" do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       update_speaker(speaker, %{full_name: "Ada Lovelace"})
 
@@ -47,7 +37,7 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
     end
 
     test "includes only changed fields in notification" do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       update_speaker(speaker, %{
         full_name: "Ada Lovelace",
@@ -66,7 +56,7 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
     end
 
     test "formats date values as strings" do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       update_speaker(speaker, %{arrival_date: ~D[2026-06-15]})
 
@@ -82,7 +72,7 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
     end
 
     test "formats time values as strings" do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       update_speaker(speaker, %{arrival_time: ~T[14:30:00]})
 
@@ -97,7 +87,7 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
     end
 
     test "formats map values as complex data" do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       update_speaker(speaker, %{sessionize_data: %{"bio" => "Hello"}})
 
@@ -116,7 +106,7 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
     end
 
     test "tracks multiple changes in one update" do
-      speaker = create_speaker()
+      speaker = generate(speaker())
 
       update_speaker(speaker, %{
         first_name: "Grace",
@@ -140,7 +130,7 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
 
   describe "sponsor updates" do
     test "enqueues notification when values change" do
-      sponsor = create_sponsor()
+      sponsor = generate(sponsor())
 
       update_sponsor(sponsor, %{status: :warm})
 
@@ -155,7 +145,7 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
     end
 
     test "does not enqueue notification when no values change" do
-      sponsor = create_sponsor()
+      sponsor = generate(sponsor())
 
       update_sponsor(sponsor, %{name: "Acme Corp"})
 
@@ -163,7 +153,7 @@ defmodule Gut.Conference.Changes.NotifyDiscordTest do
     end
 
     test "formats boolean changes" do
-      sponsor = create_sponsor()
+      sponsor = generate(sponsor())
 
       update_sponsor(sponsor, %{confirmed: true})
 
