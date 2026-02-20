@@ -98,7 +98,9 @@ defmodule GutWeb.UserDetailLive do
               <table :if={@api_keys != []} class="min-w-full divide-y divide-base-300">
                 <thead>
                   <tr>
-                    <th class="py-3 text-left text-xs font-medium text-base-content/50 uppercase">ID</th>
+                    <th class="py-3 text-left text-xs font-medium text-base-content/50 uppercase">
+                      ID
+                    </th>
                     <th class="py-3 text-left text-xs font-medium text-base-content/50 uppercase">
                       Created
                     </th>

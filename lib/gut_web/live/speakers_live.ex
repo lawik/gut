@@ -92,7 +92,9 @@ defmodule GutWeb.SpeakersLive do
               <%= if not is_nil(speaker.hotel_stay_start_date) and not is_nil(speaker.hotel_stay_end_date) do %>
                 <div class="text-sm">
                   <div>{Date.to_string(speaker.hotel_stay_start_date)}</div>
-                  <div class="text-base-content/50">to {Date.to_string(speaker.hotel_stay_end_date)}</div>
+                  <div class="text-base-content/50">
+                    to {Date.to_string(speaker.hotel_stay_end_date)}
+                  </div>
                 </div>
               <% else %>
                 <span class="text-base-content/40">Not set</span>
