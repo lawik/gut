@@ -32,7 +32,8 @@ defmodule Gut.Accounts.ApiKey do
     end
 
     policy always() do
-      authorize_if expr(^actor(:role) == :staff)
+      authorize_if Gut.Checks.SystemActor
+      authorize_if Gut.Checks.StaffActor
     end
   end
 

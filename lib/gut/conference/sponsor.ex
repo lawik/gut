@@ -47,8 +47,8 @@ defmodule Gut.Conference.Sponsor do
 
   policies do
     policy always() do
-      # Staff have full access. Speaker/sponsor roles get explicit grants as needed.
-      authorize_if expr(^actor(:role) == :staff)
+      authorize_if Gut.Checks.SystemActor
+      authorize_if Gut.Checks.StaffActor
     end
   end
 

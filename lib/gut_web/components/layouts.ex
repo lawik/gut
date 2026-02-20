@@ -31,12 +31,16 @@ defmodule GutWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :current_user, :map, default: nil, doc: "the current user"
   attr :page_title, :string, default: ""
 
   slot :inner_block, required: true
 
   def app(assigns) do
-    assigns = assign(assigns, :git_sha, git_sha())
+    assigns =
+      assigns
+      |> assign(:git_sha, git_sha())
+      |> assign(:staff?, assigns[:current_user] && assigns[:current_user].role == :staff)
 
     ~H"""
     <header class="navbar px-4 sm:px-6 lg:px-8">
@@ -51,16 +55,16 @@ defmodule GutWeb.Layouts do
       </div>
       <div class="flex-none">
         <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
+          <li :if={@staff?}>
             <.link navigate={~p"/speakers"} class="btn btn-ghost">Speakers</.link>
           </li>
-          <li>
+          <li :if={@staff?}>
             <.link navigate={~p"/sponsors"} class="btn btn-ghost">Sponsors</.link>
           </li>
-          <li>
+          <li :if={@staff?}>
             <.link navigate={~p"/users"} class="btn btn-ghost">Users</.link>
           </li>
-          <li>
+          <li :if={@staff?}>
             <div class="dropdown dropdown-end">
               <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
                 <.icon name="hero-plus" class="size-5" />

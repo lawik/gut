@@ -20,7 +20,7 @@ defmodule Gut.Conference.SessionizeSync do
   @doc """
   Fetches data from the configured Sessionize URLs and syncs speakers.
   """
-  def sync do
+  def sync(actor) do
     main_url = Application.get_env(:gut, :sessionize_main_url)
     email_url = Application.get_env(:gut, :sessionize_speaker_email_url)
 
@@ -36,7 +36,7 @@ defmodule Gut.Conference.SessionizeSync do
       true ->
         with {:ok, main_data} <- fetch_json(main_url),
              {:ok, email_data} <- fetch_json(email_url) do
-          sync_from_data(main_data, email_data)
+          sync_from_data(main_data, email_data, actor)
         end
     end
   end
@@ -47,10 +47,10 @@ defmodule Gut.Conference.SessionizeSync do
   `main_data` is the decoded JSON from the main Sessionize endpoint (speaker profiles).
   `email_data` is the decoded JSON from the email endpoint (list of `%{"id" => ..., "email" => ...}`).
   """
-  def sync_from_data(main_data, email_data) do
+  def sync_from_data(main_data, email_data, actor) do
     speakers = extract_speakers(main_data)
     email_map = build_email_map(email_data)
-    existing = load_existing_speakers()
+    existing = load_existing_speakers(actor)
 
     results =
       speakers
@@ -59,7 +59,7 @@ defmodule Gut.Conference.SessionizeSync do
         email = Map.get(email_map, sessionize_id)
 
         if email do
-          upsert_speaker(speaker_data, email, existing)
+          upsert_speaker(speaker_data, email, existing, actor)
         else
           Logger.warning("No email found for sessionize speaker #{sessionize_id}, skipping")
           {:skip, sessionize_id}
@@ -124,9 +124,9 @@ defmodule Gut.Conference.SessionizeSync do
     end
   end
 
-  defp load_existing_speakers do
+  defp load_existing_speakers(actor) do
     speakers =
-      Gut.Conference.list_speakers!(authorize?: false, load: [:user])
+      Gut.Conference.list_speakers!(actor: actor, load: [:user])
 
     Enum.reduce(speakers, %{}, fn speaker, acc ->
       acc =
@@ -143,7 +143,7 @@ defmodule Gut.Conference.SessionizeSync do
     end)
   end
 
-  defp upsert_speaker(speaker_data, email, existing) do
+  defp upsert_speaker(speaker_data, email, existing, actor) do
     first_name = Map.get(speaker_data, "firstName", "")
     last_name = Map.get(speaker_data, "lastName", "")
     full_name = Map.get(speaker_data, "fullName", "#{first_name} #{last_name}")
@@ -163,10 +163,10 @@ defmodule Gut.Conference.SessionizeSync do
 
     case Map.get(existing, String.downcase(email)) do
       nil ->
-        Gut.Conference.create_speaker(attrs, authorize?: false)
+        Gut.Conference.create_speaker(attrs, actor: actor)
 
       speaker ->
-        Gut.Conference.update_speaker(speaker, attrs, authorize?: false)
+        Gut.Conference.update_speaker(speaker, attrs, actor: actor)
     end
   end
 end

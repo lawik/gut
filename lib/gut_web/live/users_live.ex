@@ -27,7 +27,12 @@ defmodule GutWeb.UsersLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} page_title="Users">
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      current_user={@current_user}
+      page_title="Users"
+    >
       <div class="">
         <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
           <div></div>

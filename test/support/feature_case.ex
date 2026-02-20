@@ -39,4 +39,13 @@ defmodule GutWeb.FeatureCase do
         raise "Failed to generate token for test user"
     end
   end
+
+  @doc """
+  Builds a conn logged in as a user with the given role.
+  """
+  def log_in_as(role) do
+    user = Gut.Accounts.create_user!("#{role}@test.com", role, authorize?: false)
+    conn = Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{})
+    log_in_user(conn, user)
+  end
 end

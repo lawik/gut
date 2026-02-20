@@ -126,9 +126,9 @@ defmodule Gut.Accounts.User do
       authorize_if always()
     end
 
-    # Staff have full access. Speaker/sponsor roles get explicit grants as needed.
     policy always() do
-      authorize_if expr(^actor(:role) == :staff)
+      authorize_if Gut.Checks.SystemActor
+      authorize_if Gut.Checks.StaffActor
     end
   end
 

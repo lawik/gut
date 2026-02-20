@@ -17,6 +17,7 @@ defmodule Gut.Conference.Speaker do
 
     scheduled_actions do
       schedule :sync_from_sessionize, "0 * * * *" do
+        action :sync_from_sessionize
         queue :default
         worker_module_name Gut.Workers.SessionizeSync
       end
@@ -49,8 +50,9 @@ defmodule Gut.Conference.Speaker do
     end
 
     action :sync_from_sessionize do
-      run fn _input, _context ->
-        Gut.Conference.SessionizeSync.sync()
+      run fn _input, context ->
+        actor = context.actor || Gut.system_actor("sessionize_sync")
+        Gut.Conference.SessionizeSync.sync(actor)
       end
     end
 
@@ -80,9 +82,13 @@ defmodule Gut.Conference.Speaker do
   end
 
   policies do
+    policy action(:sync_from_sessionize) do
+      authorize_if AshOban.Checks.AshObanInteraction
+    end
+
     policy always() do
-      # Staff have full access. Speaker/sponsor roles get explicit grants as needed.
-      authorize_if expr(^actor(:role) == :staff)
+      authorize_if Gut.Checks.SystemActor
+      authorize_if Gut.Checks.StaffActor
     end
   end
 

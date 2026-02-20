@@ -64,12 +64,13 @@ defmodule Gut.Conference.SessionizeSyncTest do
     end
   end
 
-  describe "sync_from_data/2" do
+  describe "sync_from_data/3" do
     test "creates new speakers from sessionize data", %{
       main_data: main_data,
       email_data: email_data
     } do
-      assert {:ok, %{synced: 3, errors: 0}} = SessionizeSync.sync_from_data(main_data, email_data)
+      assert {:ok, %{synced: 3, errors: 0}} =
+               SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       speakers = Gut.Conference.list_speakers!(authorize?: false)
       assert length(speakers) == 3
@@ -80,7 +81,7 @@ defmodule Gut.Conference.SessionizeSyncTest do
     end
 
     test "stores extra fields in sessionize_data", %{main_data: main_data, email_data: email_data} do
-      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data)
+      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       speakers = Gut.Conference.list_speakers!(authorize?: false)
       ada = Enum.find(speakers, &(&1.first_name == "Ada"))
@@ -95,7 +96,7 @@ defmodule Gut.Conference.SessionizeSyncTest do
       main_data: main_data,
       email_data: email_data
     } do
-      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data)
+      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       speakers = Gut.Conference.list_speakers!(authorize?: false)
       ada = Enum.find(speakers, &(&1.first_name == "Ada"))
@@ -121,7 +122,8 @@ defmodule Gut.Conference.SessionizeSyncTest do
         authorize?: false
       )
 
-      assert {:ok, %{synced: 3, errors: 0}} = SessionizeSync.sync_from_data(main_data, email_data)
+      assert {:ok, %{synced: 3, errors: 0}} =
+               SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       speakers = Gut.Conference.list_speakers!(authorize?: false)
       adas = Enum.filter(speakers, &(&1.first_name == "Ada"))
@@ -144,7 +146,8 @@ defmodule Gut.Conference.SessionizeSyncTest do
         authorize?: false
       )
 
-      assert {:ok, %{synced: 3, errors: 0}} = SessionizeSync.sync_from_data(main_data, email_data)
+      assert {:ok, %{synced: 3, errors: 0}} =
+               SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       speakers = Gut.Conference.list_speakers!(authorize?: false)
       adas = Enum.filter(speakers, &(&1.first_name == "Ada"))
@@ -167,7 +170,7 @@ defmodule Gut.Conference.SessionizeSyncTest do
         authorize?: false
       )
 
-      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data)
+      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       speakers = Gut.Conference.list_speakers!(authorize?: false)
       ada = Enum.find(speakers, &(&1.first_name == "Ada"))
@@ -182,7 +185,7 @@ defmodule Gut.Conference.SessionizeSyncTest do
       ]
 
       assert {:ok, %{synced: 2, errors: 0}} =
-               SessionizeSync.sync_from_data(main_data, partial_emails)
+               SessionizeSync.sync_from_data(main_data, partial_emails, Gut.system_actor("test"))
 
       speakers = Gut.Conference.list_speakers!(authorize?: false)
       assert length(speakers) == 2
@@ -193,8 +196,11 @@ defmodule Gut.Conference.SessionizeSyncTest do
       main_data: main_data,
       email_data: email_data
     } do
-      {:ok, %{synced: 3}} = SessionizeSync.sync_from_data(main_data, email_data)
-      {:ok, %{synced: 3}} = SessionizeSync.sync_from_data(main_data, email_data)
+      {:ok, %{synced: 3}} =
+        SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
+
+      {:ok, %{synced: 3}} =
+        SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       speakers = Gut.Conference.list_speakers!(authorize?: false)
       assert length(speakers) == 3
@@ -203,7 +209,7 @@ defmodule Gut.Conference.SessionizeSyncTest do
 
   describe "sync_from_data/2 invite handling" do
     test "creates invite for new email", %{main_data: main_data, email_data: email_data} do
-      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data)
+      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       invites = Gut.Accounts.list_invites!(authorize?: false)
       ada_invites = Enum.filter(invites, &(to_string(&1.email) == "ada@example.com"))
@@ -217,7 +223,7 @@ defmodule Gut.Conference.SessionizeSyncTest do
     } do
       user = Gut.Accounts.create_user!("grace@example.com", :staff, authorize?: false)
 
-      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data)
+      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       speakers = Gut.Conference.list_speakers!(authorize?: false, load: [:user])
       grace = Enum.find(speakers, &(&1.first_name == "Grace"))
@@ -234,8 +240,8 @@ defmodule Gut.Conference.SessionizeSyncTest do
     } do
       user = Gut.Accounts.create_user!("ada@example.com", :staff, authorize?: false)
 
-      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data)
-      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data)
+      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
+      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data, Gut.system_actor("test"))
 
       # Ada was linked to user on first sync, second sync should find her by user email
       speakers = Gut.Conference.list_speakers!(authorize?: false)
@@ -251,7 +257,7 @@ defmodule Gut.Conference.SessionizeSyncTest do
       Application.put_env(:gut, :sessionize_main_url, nil)
       Application.put_env(:gut, :sessionize_speaker_email_url, nil)
 
-      assert {:error, :not_configured} = SessionizeSync.sync()
+      assert {:error, :not_configured} = SessionizeSync.sync(Gut.system_actor("test"))
     end
   end
 end

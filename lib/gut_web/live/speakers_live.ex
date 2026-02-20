@@ -23,7 +23,12 @@ defmodule GutWeb.SpeakersLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} page_title="Speakers">
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      current_user={@current_user}
+      page_title="Speakers"
+    >
       <div class="">
         <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
           <button
@@ -150,7 +155,7 @@ defmodule GutWeb.SpeakersLive do
   end
 
   def handle_event("sync_sessionize", _params, socket) do
-    case Gut.Conference.SessionizeSync.sync() do
+    case Gut.Conference.SessionizeSync.sync(socket.assigns.current_user) do
       {:ok, %{synced: synced}} ->
         socket =
           socket
