@@ -13,7 +13,7 @@ config :ash_oban, pro?: false
 config :gut, Oban,
   engine: Oban.Engines.Basic,
   notifier: Oban.Notifiers.Postgres,
-  queues: [default: 10],
+  queues: [default: 10, discord: 5],
   repo: Gut.Repo,
   plugins: [{Oban.Plugins.Cron, []}]
 

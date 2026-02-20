@@ -69,7 +69,8 @@ config :gut,
   dev_routes: true,
   token_signing_secret: "dZOFJWGdgXEvo/9zKze4fFsm5JbQU6Kt",
   sessionize_main_url: System.get_env("SESSIONIZE_MAIN_URL"),
-  sessionize_speaker_email_url: System.get_env("SESSIONIZE_SPEAKER_EMAIL_URL")
+  sessionize_speaker_email_url: System.get_env("SESSIONIZE_SPEAKER_EMAIL_URL"),
+  discord_channel_id: System.get_env("DISCORD_CHANNEL_ID")
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
@@ -93,3 +94,7 @@ config :phoenix_live_view,
 config :swoosh, :api_client, false
 
 config :gut, Gut.Mailer, from_email: "noreply@example.com"
+
+config :nostrum,
+  token: System.get_env("DISCORD_BOT_TOKEN"),
+  gateway_intents: [:guilds]

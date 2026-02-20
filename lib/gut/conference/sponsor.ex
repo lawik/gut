@@ -30,6 +30,8 @@ defmodule Gut.Conference.Sponsor do
     end
 
     update :update do
+      require_atomic? false
+
       accept [
         :name,
         :status,
@@ -42,6 +44,8 @@ defmodule Gut.Conference.Sponsor do
         :announced,
         :user_id
       ]
+
+      change Gut.Conference.Changes.NotifyDiscord
     end
   end
 

@@ -7,22 +7,20 @@ defmodule Gut.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      GutWeb.Telemetry,
-      Gut.Repo,
-      {DNSCluster, query: Application.get_env(:gut, :dns_cluster_query) || :ignore},
-      {Oban,
-       AshOban.config(
-         Application.fetch_env!(:gut, :ash_domains),
-         Application.fetch_env!(:gut, Oban)
-       )},
-      {Phoenix.PubSub, name: Gut.PubSub},
-      # Start a worker by calling: Gut.Worker.start_link(arg)
-      # {Gut.Worker, arg},
-      # Start to serve requests, typically the last entry
-      GutWeb.Endpoint,
-      {AshAuthentication.Supervisor, [otp_app: :gut]}
-    ]
+    children =
+      [
+        GutWeb.Telemetry,
+        Gut.Repo,
+        {DNSCluster, query: Application.get_env(:gut, :dns_cluster_query) || :ignore},
+        {Oban,
+         AshOban.config(
+           Application.fetch_env!(:gut, :ash_domains),
+           Application.fetch_env!(:gut, Oban)
+         )},
+        {Phoenix.PubSub, name: Gut.PubSub},
+        GutWeb.Endpoint,
+        {AshAuthentication.Supervisor, [otp_app: :gut]}
+      ] ++ discord_children()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -32,6 +30,14 @@ defmodule Gut.Application do
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
+  defp discord_children do
+    case Application.get_env(:nostrum, :token) do
+      nil -> []
+      "" -> []
+      _token -> [Gut.Discord.Consumer]
+    end
+  end
+
   @impl true
   def config_change(changed, _new, removed) do
     GutWeb.Endpoint.config_change(changed, removed)

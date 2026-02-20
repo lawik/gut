@@ -78,6 +78,7 @@ defmodule Gut.Conference.Speaker do
       argument :email, :string
 
       change Gut.Conference.Speaker.Changes.HandleInvite
+      change Gut.Conference.Changes.NotifyDiscord
     end
 
     read :read_own do
