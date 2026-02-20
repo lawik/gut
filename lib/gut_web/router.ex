@@ -112,6 +112,12 @@ defmodule GutWeb.Router do
       otp_app: :gut
   end
 
+  scope "/" do
+    pipe_through :browser
+
+    oban_dashboard("/oban", resolver: GutWeb.ObanResolver)
+  end
+
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:gut, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
@@ -126,12 +132,6 @@ defmodule GutWeb.Router do
 
       live_dashboard "/dashboard", metrics: GutWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
-
-    scope "/" do
-      pipe_through :browser
-
-      oban_dashboard("/oban")
     end
   end
 
