@@ -3,12 +3,15 @@ defmodule Gut.Conference.Changes.NotifyDiscord do
 
   def change(changeset, _opts, _context) do
     Ash.Changeset.after_action(changeset, fn changeset, record ->
-      {type, name} = resource_info(record)
       changes = build_changes(changeset)
 
-      %{"resource_type" => type, "name" => name, "changes" => changes}
-      |> Gut.Workers.DiscordNotification.new()
-      |> Oban.insert()
+      if changes != [] do
+        {type, name} = resource_info(record)
+
+        %{"resource_type" => type, "name" => name, "changes" => changes}
+        |> Gut.Workers.DiscordNotification.new()
+        |> Oban.insert()
+      end
 
       {:ok, record}
     end)
