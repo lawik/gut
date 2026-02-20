@@ -94,7 +94,3 @@ config :phoenix_live_view,
 config :swoosh, :api_client, false
 
 config :gut, Gut.Mailer, from_email: "noreply@example.com"
-
-config :nostrum,
-  token: System.get_env("DISCORD_BOT_TOKEN"),
-  gateway_intents: [:guilds]
