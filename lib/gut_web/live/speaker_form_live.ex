@@ -1,7 +1,7 @@
 defmodule GutWeb.SpeakerFormLive do
   use GutWeb, :live_view
 
-  on_mount {GutWeb.LiveUserAuth, :live_user_required}
+  on_mount {GutWeb.LiveUserAuth, :live_staff_required}
 
   def mount(%{"id" => id}, _session, socket) do
     speaker =

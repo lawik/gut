@@ -33,6 +33,16 @@ defmodule GutWeb.LiveUserAuth do
     end
   end
 
+  def on_mount(:live_staff_required, _params, session, socket) do
+    socket = AshAuthentication.Phoenix.LiveSession.assign_new_resources(socket, session)
+
+    case socket.assigns[:current_user] do
+      %{role: :staff} -> {:cont, socket}
+      %{role: _} -> {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/")}
+      nil -> {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
+    end
+  end
+
   def on_mount(:live_no_user, _params, _session, socket) do
     if socket.assigns[:current_user] do
       {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/")}

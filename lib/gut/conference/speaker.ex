@@ -79,6 +79,15 @@ defmodule Gut.Conference.Speaker do
 
       change Gut.Conference.Speaker.Changes.HandleInvite
     end
+
+    read :read_own do
+      get? true
+      filter expr(user_id == ^actor(:id))
+    end
+
+    update :update_travel do
+      accept [:arrival_date, :arrival_time, :leaving_date, :leaving_time]
+    end
   end
 
   policies do
@@ -86,7 +95,15 @@ defmodule Gut.Conference.Speaker do
       authorize_if AshOban.Checks.AshObanInteraction
     end
 
-    policy always() do
+    policy action(:read_own) do
+      authorize_if actor_attribute_equals(:role, :speaker)
+    end
+
+    policy action(:update_travel) do
+      authorize_if relates_to_actor_via(:user)
+    end
+
+    policy action([:read, :create, :update, :destroy]) do
       authorize_if Gut.Checks.SystemActor
       authorize_if Gut.Checks.StaffActor
     end

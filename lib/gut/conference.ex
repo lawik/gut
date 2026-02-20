@@ -26,6 +26,8 @@ defmodule Gut.Conference do
       define :update_speaker, action: :update
       define :destroy_speaker, action: :destroy
       define :sync_from_sessionize, action: :sync_from_sessionize
+      define :get_own_speaker, action: :read_own
+      define :update_speaker_travel, action: :update_travel
     end
 
     resource Gut.Conference.Sponsor do

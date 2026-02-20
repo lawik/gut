@@ -44,6 +44,9 @@ defmodule GutWeb.Router do
       # If an authenticated user must *not* be present:
       # on_mount {GutWeb.LiveUserAuth, :live_no_user}
 
+      live "/my-travel", MyTravelLive
+      live "/my-sponsor", MySponsorLive
+
       live "/speakers", SpeakersLive
       live "/speakers/new", SpeakerFormLive
       live "/speakers/:id", SpeakerDetailLive

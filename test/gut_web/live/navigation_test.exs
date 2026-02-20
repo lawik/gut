@@ -12,26 +12,42 @@ defmodule GutWeb.NavigationTest do
   end
 
   describe "speaker-role user navigation" do
-    test "does not see nav links" do
+    test "does not see nav links on their landing page" do
       conn = log_in_as(:speaker)
 
       conn
-      |> visit("/speakers")
+      |> visit("/my-travel")
       |> refute_has("a.btn-ghost", text: "Speakers")
       |> refute_has("a.btn-ghost", text: "Sponsors")
       |> refute_has("a.btn-ghost", text: "Users")
     end
+
+    test "is redirected away from staff pages" do
+      conn = log_in_as(:speaker)
+
+      conn
+      |> visit("/speakers")
+      |> assert_has("h1", text: "My Travel Details")
+    end
   end
 
   describe "sponsor-role user navigation" do
-    test "does not see nav links" do
+    test "does not see nav links on their landing page" do
+      conn = log_in_as(:sponsor)
+
+      conn
+      |> visit("/my-sponsor")
+      |> refute_has("a.btn-ghost", text: "Speakers")
+      |> refute_has("a.btn-ghost", text: "Sponsors")
+      |> refute_has("a.btn-ghost", text: "Users")
+    end
+
+    test "is redirected away from staff pages" do
       conn = log_in_as(:sponsor)
 
       conn
       |> visit("/speakers")
-      |> refute_has("a.btn-ghost", text: "Speakers")
-      |> refute_has("a.btn-ghost", text: "Sponsors")
-      |> refute_has("a.btn-ghost", text: "Users")
+      |> assert_has("h1", text: "Sponsor Portal")
     end
   end
 end

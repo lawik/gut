@@ -4,7 +4,7 @@ defmodule GutWeb.SpeakersLive do
 
   require Logger
 
-  on_mount {GutWeb.LiveUserAuth, :live_user_required}
+  on_mount {GutWeb.LiveUserAuth, :live_staff_required}
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Phoenix.PubSub.subscribe(Gut.PubSub, "speakers:changed")
