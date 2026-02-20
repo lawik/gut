@@ -28,30 +28,30 @@ defmodule GutWeb.SponsorDetailLive do
         <div class="mb-8">
           <.link
             navigate={~p"/sponsors"}
-            class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
+            class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80"
           >
             <.icon name="hero-arrow-left" class="h-4 w-4 mr-2" /> Back to Sponsors
           </.link>
         </div>
 
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
+        <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl overflow-hidden">
           <!-- Header -->
-          <div class="px-6 py-8 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200">
+          <div class="px-6 py-8 bg-base-200 border-b border-base-300">
             <div class="flex items-center justify-between">
               <div>
-                <h1 class="text-3xl font-bold text-gray-900">{@sponsor.name}</h1>
+                <h1 class="text-3xl font-bold text-base-content">{@sponsor.name}</h1>
                 <%= if @sponsor.sponsorship_level do %>
-                  <p class="mt-2 text-lg text-gray-600">
+                  <p class="mt-2 text-lg text-base-content/60">
                     {@sponsor.sponsorship_level} Sponsor
                   </p>
                 <% end %>
                 <%= if @sponsor.user do %>
-                  <p class="mt-1 text-sm text-gray-500">
+                  <p class="mt-1 text-sm text-base-content/50">
                     Associated with user account ({@sponsor.user.email})
                   </p>
                 <% end %>
                 <%= for invite <- @invites, not invite.accepted do %>
-                  <p class="mt-1 text-sm text-gray-500">
+                  <p class="mt-1 text-sm text-base-content/50">
                     Pending invite sent to {invite.email}
                   </p>
                 <% end %>
@@ -59,7 +59,7 @@ defmodule GutWeb.SponsorDetailLive do
               <div class="flex space-x-3">
                 <.link
                   patch={~p"/sponsors/#{@sponsor.id}/edit"}
-                  class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                  class="btn btn-primary"
                 >
                   Edit Sponsor
                 </.link>
@@ -71,8 +71,8 @@ defmodule GutWeb.SponsorDetailLive do
           <div class="px-6 py-8">
             <!-- Pipeline Progress -->
             <div class="mb-8">
-              <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                <.icon name="hero-flag" class="h-5 w-5 mr-2 text-indigo-600" /> Pipeline Progress
+              <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
+                <.icon name="hero-flag" class="h-5 w-5 mr-2 text-primary" /> Pipeline Progress
               </h2>
               <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
                 <.pipeline_step label="Responded" value={@sponsor.responded} />
@@ -87,14 +87,14 @@ defmodule GutWeb.SponsorDetailLive do
               <!-- Outreach Information -->
               <div class="space-y-6">
                 <div>
-                  <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <.icon name="hero-megaphone" class="h-5 w-5 mr-2 text-indigo-600" /> Outreach
+                  <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
+                    <.icon name="hero-megaphone" class="h-5 w-5 mr-2 text-primary" /> Outreach
                   </h2>
-                  <div class="bg-gray-50 rounded-lg p-4">
+                  <div class="bg-base-200 rounded-lg p-4">
                     <%= if @sponsor.outreach do %>
-                      <p class="text-sm text-gray-900 whitespace-pre-wrap">{@sponsor.outreach}</p>
+                      <p class="text-sm text-base-content whitespace-pre-wrap">{@sponsor.outreach}</p>
                     <% else %>
-                      <p class="text-sm text-gray-400">No outreach information recorded</p>
+                      <p class="text-sm text-base-content/40">No outreach information recorded</p>
                     <% end %>
                   </div>
                 </div>
@@ -103,41 +103,41 @@ defmodule GutWeb.SponsorDetailLive do
     <!-- Sponsorship Details -->
               <div class="space-y-6">
                 <div>
-                  <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <.icon name="hero-currency-dollar" class="h-5 w-5 mr-2 text-indigo-600" />
+                  <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
+                    <.icon name="hero-currency-dollar" class="h-5 w-5 mr-2 text-primary" />
                     Sponsorship Details
                   </h2>
-                  <div class="bg-gray-50 rounded-lg p-4 space-y-4">
+                  <div class="bg-base-200 rounded-lg p-4 space-y-4">
                     <div>
-                      <dt class="text-sm font-medium text-gray-500">Sponsorship Level</dt>
+                      <dt class="text-sm font-medium text-base-content/50">Sponsorship Level</dt>
                       <dd class="mt-1">
                         <%= if @sponsor.sponsorship_level do %>
-                          <span class="text-sm font-medium text-gray-900">
+                          <span class="text-sm font-medium text-base-content">
                             {@sponsor.sponsorship_level}
                           </span>
                         <% else %>
-                          <span class="text-sm text-gray-400">Not set</span>
+                          <span class="text-sm text-base-content/40">Not set</span>
                         <% end %>
                       </dd>
                     </div>
                     <div>
-                      <dt class="text-sm font-medium text-gray-500">Status</dt>
+                      <dt class="text-sm font-medium text-base-content/50">Status</dt>
                       <dd class="mt-1">
                         <%= cond do %>
                           <% @sponsor.confirmed -> %>
-                            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                            <span class="inline-flex items-center rounded-full bg-success/10 px-2.5 py-0.5 text-xs font-medium text-success">
                               Confirmed
                             </span>
                           <% @sponsor.interested -> %>
-                            <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                            <span class="inline-flex items-center rounded-full bg-info/10 px-2.5 py-0.5 text-xs font-medium text-info">
                               Interested
                             </span>
                           <% @sponsor.responded -> %>
-                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+                            <span class="inline-flex items-center rounded-full bg-warning/10 px-2.5 py-0.5 text-xs font-medium text-warning">
                               In Contact
                             </span>
                           <% true -> %>
-                            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                            <span class="inline-flex items-center rounded-full bg-base-200 px-2.5 py-0.5 text-xs font-medium text-base-content/70">
                               Outreach Pending
                             </span>
                         <% end %>
@@ -149,17 +149,17 @@ defmodule GutWeb.SponsorDetailLive do
             </div>
             
     <!-- Metadata -->
-            <div class="mt-8 pt-8 border-t border-gray-200">
+            <div class="mt-8 pt-8 border-t border-base-300">
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Added to system</dt>
-                  <dd class="mt-1 text-sm text-gray-900">
+                  <dt class="text-sm font-medium text-base-content/50">Added to system</dt>
+                  <dd class="mt-1 text-sm text-base-content">
                     {Calendar.strftime(@sponsor.inserted_at, "%B %d, %Y at %I:%M %p")}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Last updated</dt>
-                  <dd class="mt-1 text-sm text-gray-900">
+                  <dt class="text-sm font-medium text-base-content/50">Last updated</dt>
+                  <dd class="mt-1 text-sm text-base-content">
                     {Calendar.strftime(@sponsor.updated_at, "%B %d, %Y at %I:%M %p")}
                   </dd>
                 </div>
@@ -176,16 +176,16 @@ defmodule GutWeb.SponsorDetailLive do
     ~H"""
     <div class={[
       "rounded-lg p-3 text-center border",
-      if(@value, do: "bg-green-50 border-green-200", else: "bg-gray-50 border-gray-200")
+      if(@value, do: "bg-success/10 border-success/30", else: "bg-base-200 border-base-300")
     ]}>
       <%= if @value do %>
-        <.icon name="hero-check-circle" class="h-6 w-6 text-green-600 mx-auto" />
+        <.icon name="hero-check-circle" class="h-6 w-6 text-success mx-auto" />
       <% else %>
-        <.icon name="hero-x-circle" class="h-6 w-6 text-gray-300 mx-auto" />
+        <.icon name="hero-x-circle" class="h-6 w-6 text-base-content/30 mx-auto" />
       <% end %>
       <p class={[
         "text-xs font-medium mt-1",
-        if(@value, do: "text-green-700", else: "text-gray-500")
+        if(@value, do: "text-success", else: "text-base-content/50")
       ]}>
         {@label}
       </p>

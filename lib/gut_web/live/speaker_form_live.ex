@@ -58,7 +58,7 @@ defmodule GutWeb.SpeakerFormLive do
         <div class="mb-8">
           <.link
             navigate={~p"/speakers"}
-            class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
+            class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80"
           >
             <.icon name="hero-arrow-left" class="h-4 w-4 mr-2" /> Back to Speakers
           </.link>
@@ -66,8 +66,8 @@ defmodule GutWeb.SpeakerFormLive do
 
         <div class="sm:flex sm:items-center mb-8">
           <div class="sm:flex-auto">
-            <h1 class="text-2xl font-semibold leading-6 text-gray-900">{@page_title}</h1>
-            <p class="mt-2 text-sm text-gray-700">
+            <h1 class="text-2xl font-semibold leading-6 text-base-content">{@page_title}</h1>
+            <p class="mt-2 text-sm text-base-content/70">
               <%= if @action == :new do %>
                 Add a new speaker with their travel and hotel information.
               <% else %>
@@ -77,11 +77,11 @@ defmodule GutWeb.SpeakerFormLive do
           </div>
         </div>
 
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl p-6">
+        <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl p-6">
           <.form for={@form} id="speaker-form" phx-change="validate" phx-submit="save">
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div class="sm:col-span-2">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+                <h3 class="text-lg font-medium text-base-content mb-4">Basic Information</h3>
               </div>
 
               <.input field={@form[:full_name]} type="text" label="Full Name" required />
@@ -90,16 +90,16 @@ defmodule GutWeb.SpeakerFormLive do
               <.input field={@form[:last_name]} type="text" label="Last Name" required />
 
               <div class="sm:col-span-2 mt-8">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">User Account</h3>
+                <h3 class="text-lg font-medium text-base-content mb-4">User Account</h3>
               </div>
 
               <div class="sm:col-span-2">
                 <%= if @connected_user do %>
-                  <div class="flex items-center gap-3 mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <.icon name="hero-check-circle" class="h-5 w-5 text-green-600" />
+                  <div class="flex items-center gap-3 mb-4 p-3 bg-success/10 border border-success/30 rounded-lg">
+                    <.icon name="hero-check-circle" class="h-5 w-5 text-success" />
                     <div>
-                      <p class="text-sm font-medium text-green-900">Connected to user account</p>
-                      <p class="text-sm text-green-700">{@connected_user.email}</p>
+                      <p class="text-sm font-medium text-success">Connected to user account</p>
+                      <p class="text-sm text-success/70">{@connected_user.email}</p>
                     </div>
                   </div>
                 <% end %>
@@ -110,13 +110,13 @@ defmodule GutWeb.SpeakerFormLive do
                   value={@invite_email}
                   placeholder="Enter email to connect or invite a user"
                 />
-                <p class="mt-1 text-xs text-gray-500">
+                <p class="mt-1 text-xs text-base-content/50">
                   If the user exists, they will be linked directly. Otherwise, a magic link invite will be sent.
                 </p>
               </div>
 
               <div class="sm:col-span-2 mt-8">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Travel Information</h3>
+                <h3 class="text-lg font-medium text-base-content mb-4">Travel Information</h3>
               </div>
 
               <.input field={@form[:arrival_date]} type="date" label="Arrival Date" />
@@ -125,7 +125,7 @@ defmodule GutWeb.SpeakerFormLive do
               <.input field={@form[:leaving_time]} type="time" label="Departure Time" />
 
               <div class="sm:col-span-2 mt-8">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Hotel Information</h3>
+                <h3 class="text-lg font-medium text-base-content mb-4">Hotel Information</h3>
               </div>
 
               <.input field={@form[:hotel_stay_start_date]} type="date" label="Hotel Stay Start" />
@@ -143,7 +143,7 @@ defmodule GutWeb.SpeakerFormLive do
             </div>
 
             <div :if={@form.errors != []} class="mt-8 flex space-x-3">
-              <p :for={{_key, {error, _}} <- @form.errors} class="text-red-500">
+              <p :for={{_key, {error, _}} <- @form.errors} class="text-error">
                 {error}
               </p>
             </div>
@@ -151,14 +151,14 @@ defmodule GutWeb.SpeakerFormLive do
             <div class="mt-8 flex justify-end space-x-3">
               <.link
                 navigate={~p"/speakers"}
-                class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                class="btn btn-ghost"
               >
                 Cancel
               </.link>
               <.button
                 type="submit"
                 phx-disable-with="Saving..."
-                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                class="btn btn-primary"
               >
                 {if @action == :new, do: "Create Speaker", else: "Update Speaker"}
               </.button>

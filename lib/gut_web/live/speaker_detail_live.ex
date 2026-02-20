@@ -32,28 +32,28 @@ defmodule GutWeb.SpeakerDetailLive do
         <div class="mb-8">
           <.link
             navigate={~p"/speakers"}
-            class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
+            class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80"
           >
             <.icon name="hero-arrow-left" class="h-4 w-4 mr-2" /> Back to Speakers
           </.link>
         </div>
 
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
+        <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl overflow-hidden">
           <!-- Header -->
-          <div class="px-6 py-8 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200">
+          <div class="px-6 py-8 bg-base-200 border-b border-base-300">
             <div class="flex items-center justify-between">
               <div>
-                <h1 class="text-3xl font-bold text-gray-900">{@speaker.full_name}</h1>
-                <p class="mt-2 text-lg text-gray-600">
+                <h1 class="text-3xl font-bold text-base-content">{@speaker.full_name}</h1>
+                <p class="mt-2 text-lg text-base-content/60">
                   {@speaker.first_name} {@speaker.last_name}
                 </p>
                 <%= if @speaker.user do %>
-                  <p class="mt-1 text-sm text-gray-500">
+                  <p class="mt-1 text-sm text-base-content/50">
                     Associated with user account ({@speaker.user.email})
                   </p>
                 <% end %>
                 <%= for invite <- @invites, not invite.accepted do %>
-                  <p class="mt-1 text-sm text-gray-500">
+                  <p class="mt-1 text-sm text-base-content/50">
                     Pending invite sent to {invite.email}
                   </p>
                 <% end %>
@@ -61,7 +61,7 @@ defmodule GutWeb.SpeakerDetailLive do
               <div class="flex space-x-3">
                 <.link
                   patch={~p"/speakers/#{@speaker.id}/edit"}
-                  class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                  class="btn btn-primary"
                 >
                   Edit Speaker
                 </.link>
@@ -75,43 +75,43 @@ defmodule GutWeb.SpeakerDetailLive do
               <!-- Travel Information -->
               <div class="space-y-6">
                 <div>
-                  <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <.icon name="hero-airplane-departure" class="h-5 w-5 mr-2 text-indigo-600" />
+                  <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
+                    <.icon name="hero-airplane-departure" class="h-5 w-5 mr-2 text-primary" />
                     Travel Information
                   </h2>
-                  <div class="bg-gray-50 rounded-lg p-4 space-y-4">
+                  <div class="bg-base-200 rounded-lg p-4 space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <dt class="text-sm font-medium text-gray-500">Arrival</dt>
+                        <dt class="text-sm font-medium text-base-content/50">Arrival</dt>
                         <dd class="mt-1">
                           <%= if @speaker.arrival_date do %>
-                            <div class="text-sm font-medium text-gray-900">
+                            <div class="text-sm font-medium text-base-content">
                               {Date.to_string(@speaker.arrival_date)}
                             </div>
                             <%= if @speaker.arrival_time do %>
-                              <div class="text-sm text-gray-600">
+                              <div class="text-sm text-base-content/60">
                                 {Time.to_string(@speaker.arrival_time)}
                               </div>
                             <% end %>
                           <% else %>
-                            <span class="text-sm text-gray-400">Not scheduled</span>
+                            <span class="text-sm text-base-content/40">Not scheduled</span>
                           <% end %>
                         </dd>
                       </div>
                       <div>
-                        <dt class="text-sm font-medium text-gray-500">Departure</dt>
+                        <dt class="text-sm font-medium text-base-content/50">Departure</dt>
                         <dd class="mt-1">
                           <%= if @speaker.leaving_date do %>
-                            <div class="text-sm font-medium text-gray-900">
+                            <div class="text-sm font-medium text-base-content">
                               {Date.to_string(@speaker.leaving_date)}
                             </div>
                             <%= if @speaker.leaving_time do %>
-                              <div class="text-sm text-gray-600">
+                              <div class="text-sm text-base-content/60">
                                 {Time.to_string(@speaker.leaving_time)}
                               </div>
                             <% end %>
                           <% else %>
-                            <span class="text-sm text-gray-400">Not scheduled</span>
+                            <span class="text-sm text-base-content/40">Not scheduled</span>
                           <% end %>
                         </dd>
                       </div>
@@ -121,12 +121,12 @@ defmodule GutWeb.SpeakerDetailLive do
                 
     <!-- Travel Duration -->
                 <%= if @speaker.arrival_date && @speaker.leaving_date do %>
-                  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div class="bg-info/10 border border-info/30 rounded-lg p-4">
                     <div class="flex items-center">
-                      <.icon name="hero-clock" class="h-5 w-5 text-blue-600 mr-2" />
+                      <.icon name="hero-clock" class="h-5 w-5 text-info mr-2" />
                       <div>
-                        <p class="text-sm font-medium text-blue-900">Total Stay Duration</p>
-                        <p class="text-sm text-blue-700">
+                        <p class="text-sm font-medium text-info">Total Stay Duration</p>
+                        <p class="text-sm text-info/70">
                           {Date.diff(@speaker.leaving_date, @speaker.arrival_date)} days
                         </p>
                       </div>
@@ -138,42 +138,42 @@ defmodule GutWeb.SpeakerDetailLive do
     <!-- Hotel Information -->
               <div class="space-y-6">
                 <div>
-                  <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <.icon name="hero-building-office-2" class="h-5 w-5 mr-2 text-indigo-600" />
+                  <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
+                    <.icon name="hero-building-office-2" class="h-5 w-5 mr-2 text-primary" />
                     Hotel Information
                   </h2>
-                  <div class="bg-gray-50 rounded-lg p-4 space-y-4">
+                  <div class="bg-base-200 rounded-lg p-4 space-y-4">
                     <div>
-                      <dt class="text-sm font-medium text-gray-500">Hotel Stay Period</dt>
+                      <dt class="text-sm font-medium text-base-content/50">Hotel Stay Period</dt>
                       <dd class="mt-1">
                         <%= if not is_nil(@speaker.hotel_stay_start_date) and not is_nil(@speaker.hotel_stay_end_date) do %>
                           <div class="text-sm">
-                            <div class="font-medium text-gray-900">
+                            <div class="font-medium text-base-content">
                               {Date.to_string(@speaker.hotel_stay_start_date)} to {Date.to_string(
                                 @speaker.hotel_stay_end_date
                               )}
                             </div>
-                            <div class="text-gray-600 mt-1">
+                            <div class="text-base-content/60 mt-1">
                               {Date.diff(@speaker.hotel_stay_end_date, @speaker.hotel_stay_start_date)} nights
                             </div>
                           </div>
                         <% else %>
-                          <span class="text-sm text-gray-400">Not set</span>
+                          <span class="text-sm text-base-content/40">Not set</span>
                         <% end %>
                       </dd>
                     </div>
 
                     <div>
-                      <dt class="text-sm font-medium text-gray-500">Conference Coverage</dt>
+                      <dt class="text-sm font-medium text-base-content/50">Conference Coverage</dt>
                       <dd class="mt-1">
                         <%= if not is_nil(@speaker.hotel_covered_start_date) and not is_nil(@speaker.hotel_covered_end_date) do %>
                           <div class="text-sm">
-                            <div class="font-medium text-green-700">
+                            <div class="font-medium text-success">
                               {Date.to_string(@speaker.hotel_covered_start_date)} to {Date.to_string(
                                 @speaker.hotel_covered_end_date
                               )}
                             </div>
-                            <div class="text-green-600 mt-1">
+                            <div class="text-success mt-1">
                               {Date.diff(
                                 @speaker.hotel_covered_end_date,
                                 @speaker.hotel_covered_start_date
@@ -181,7 +181,7 @@ defmodule GutWeb.SpeakerDetailLive do
                             </div>
                           </div>
                         <% else %>
-                          <span class="text-sm text-gray-400">Not covered</span>
+                          <span class="text-sm text-base-content/40">Not covered</span>
                         <% end %>
                       </dd>
                     </div>
@@ -194,24 +194,24 @@ defmodule GutWeb.SpeakerDetailLive do
                   <div class={[
                     "border rounded-lg p-4",
                     if(coverage_complete?(@speaker),
-                      do: "bg-green-50 border-green-200",
-                      else: "bg-yellow-50 border-yellow-200"
+                      do: "bg-success/10 border-success/30",
+                      else: "bg-warning/10 border-warning/30"
                     )
                   ]}>
                     <div class="flex items-center">
                       <%= if coverage_complete?(@speaker) do %>
-                        <.icon name="hero-check-circle" class="h-5 w-5 text-green-600 mr-2" />
+                        <.icon name="hero-check-circle" class="h-5 w-5 text-success mr-2" />
                         <div>
-                          <p class="text-sm font-medium text-green-900">Full Coverage</p>
-                          <p class="text-sm text-green-700">
+                          <p class="text-sm font-medium text-success">Full Coverage</p>
+                          <p class="text-sm text-success/70">
                             All hotel nights are covered by the conference
                           </p>
                         </div>
                       <% else %>
-                        <.icon name="hero-exclamation-triangle" class="h-5 w-5 text-yellow-600 mr-2" />
+                        <.icon name="hero-exclamation-triangle" class="h-5 w-5 text-warning mr-2" />
                         <div>
-                          <p class="text-sm font-medium text-yellow-900">Partial Coverage</p>
-                          <p class="text-sm text-yellow-700">
+                          <p class="text-sm font-medium text-warning">Partial Coverage</p>
+                          <p class="text-sm text-warning/70">
                             {uncovered_nights(@speaker)} nights not covered by the conference
                           </p>
                         </div>
@@ -224,17 +224,17 @@ defmodule GutWeb.SpeakerDetailLive do
             
     <!-- Sessionize Data -->
             <%= if @speaker.sessionize_data && @speaker.sessionize_data != %{} do %>
-              <div class="mt-8 pt-8 border-t border-gray-200">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                  <.icon name="hero-cloud-arrow-down" class="h-5 w-5 mr-2 text-indigo-600" />
+              <div class="mt-8 pt-8 border-t border-base-300">
+                <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
+                  <.icon name="hero-cloud-arrow-down" class="h-5 w-5 mr-2 text-primary" />
                   Sessionize Data
                 </h2>
-                <div class="bg-gray-50 rounded-lg p-4">
+                <div class="bg-base-200 rounded-lg p-4">
                   <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <%= for {key, value} <- @speaker.sessionize_data do %>
                       <div>
-                        <dt class="text-sm font-medium text-gray-500">{humanize_key(key)}</dt>
-                        <dd class="mt-1 text-sm text-gray-900">
+                        <dt class="text-sm font-medium text-base-content/50">{humanize_key(key)}</dt>
+                        <dd class="mt-1 text-sm text-base-content">
                           {format_sessionize_value(value)}
                         </dd>
                       </div>
@@ -245,17 +245,17 @@ defmodule GutWeb.SpeakerDetailLive do
             <% end %>
             
     <!-- Metadata -->
-            <div class="mt-8 pt-8 border-t border-gray-200">
+            <div class="mt-8 pt-8 border-t border-base-300">
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Added to system</dt>
-                  <dd class="mt-1 text-sm text-gray-900">
+                  <dt class="text-sm font-medium text-base-content/50">Added to system</dt>
+                  <dd class="mt-1 text-sm text-base-content">
                     {Calendar.strftime(@speaker.inserted_at, "%B %d, %Y at %I:%M %p")}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Last updated</dt>
-                  <dd class="mt-1 text-sm text-gray-900">
+                  <dt class="text-sm font-medium text-base-content/50">Last updated</dt>
+                  <dd class="mt-1 text-sm text-base-content">
                     {Calendar.strftime(@speaker.updated_at, "%B %d, %Y at %I:%M %p")}
                   </dd>
                 </div>

@@ -25,6 +25,15 @@ defmodule GutWeb.SponsorsLive do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} page_title="Sponsors">
       <div class="">
+        <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+          <div></div>
+          <.link
+            navigate={~p"/sponsors/new"}
+            class="btn btn-primary"
+          >
+            <.icon name="hero-plus" class="h-4 w-4 mr-2" /> Add Sponsor
+          </.link>
+        </div>
         <div class="">
           <Cinder.Table.table
             id="sponsors-table"
@@ -52,7 +61,7 @@ defmodule GutWeb.SponsorsLive do
               <%= if sponsor.outreach do %>
                 <div class="text-sm max-w-xs truncate">{sponsor.outreach}</div>
               <% else %>
-                <span class="text-gray-400">-</span>
+                <span class="text-base-content/40">-</span>
               <% end %>
             </:col>
 
@@ -72,7 +81,7 @@ defmodule GutWeb.SponsorsLive do
               <%= if sponsor.sponsorship_level do %>
                 <span class="text-sm font-medium">{sponsor.sponsorship_level}</span>
               <% else %>
-                <span class="text-gray-400">-</span>
+                <span class="text-base-content/40">-</span>
               <% end %>
             </:col>
 
@@ -85,7 +94,7 @@ defmodule GutWeb.SponsorsLive do
             </:col>
 
             <:col :let={sponsor} field="inserted_at" sort label="Added">
-              <div class="text-sm text-gray-500">
+              <div class="text-sm text-base-content/50">
                 {Calendar.strftime(sponsor.inserted_at, "%b %d, %Y")}
               </div>
             </:col>
@@ -102,7 +111,7 @@ defmodule GutWeb.SponsorsLive do
                   phx-click="delete"
                   phx-value-id={sponsor.id}
                   data-confirm="Are you sure you want to delete this sponsor?"
-                  class="text-red-600 hover:text-red-900 text-sm font-medium"
+                  class="text-error hover:text-error/80 text-sm font-medium"
                 >
                   Delete
                 </button>
@@ -115,20 +124,20 @@ defmodule GutWeb.SponsorsLive do
     """
   end
 
-  defp status_badge_class(:cold), do: "bg-blue-100 text-blue-700"
-  defp status_badge_class(:warm), do: "bg-orange-100 text-orange-700"
-  defp status_badge_class(:ok), do: "bg-green-100 text-green-700"
-  defp status_badge_class(:dismissed), do: "bg-gray-100 text-gray-500"
-  defp status_badge_class(_), do: "bg-gray-100 text-gray-700"
+  defp status_badge_class(:cold), do: "bg-info/10 text-info"
+  defp status_badge_class(:warm), do: "bg-warning/10 text-warning"
+  defp status_badge_class(:ok), do: "bg-success/10 text-success"
+  defp status_badge_class(:dismissed), do: "bg-base-200 text-base-content/50"
+  defp status_badge_class(_), do: "bg-base-200 text-base-content/70"
 
   defp checkpoint_badge(assigns) do
     ~H"""
     <%= if @value do %>
-      <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+      <span class="inline-flex items-center rounded-full bg-success/10 px-2 py-1 text-xs font-medium text-success">
         <.icon name="hero-check-mini" class="h-3 w-3 mr-0.5" /> Yes
       </span>
     <% else %>
-      <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-500">
+      <span class="inline-flex items-center rounded-full bg-base-200 px-2 py-1 text-xs font-medium text-base-content/50">
         No
       </span>
     <% end %>

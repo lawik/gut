@@ -29,13 +29,13 @@ defmodule GutWeb.SpeakersLive do
           <button
             phx-click="sync_sessionize"
             phx-disable-with="Syncing..."
-            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            class="btn btn-ghost"
           >
             <.icon name="hero-arrow-path" class="h-4 w-4 mr-2" /> Sync from Sessionize
           </button>
           <.link
             navigate={~p"/speakers/new"}
-            class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+            class="btn btn-primary"
           >
             <.icon name="hero-plus" class="h-4 w-4 mr-2" /> Add Speaker
           </.link>
@@ -67,11 +67,11 @@ defmodule GutWeb.SpeakersLive do
                 <div class="text-sm">
                   <div class="font-medium">{Date.to_string(speaker.arrival_date)}</div>
                   <%= if speaker.arrival_time do %>
-                    <div class="text-gray-500">{Time.to_string(speaker.arrival_time)}</div>
+                    <div class="text-base-content/50">{Time.to_string(speaker.arrival_time)}</div>
                   <% end %>
                 </div>
               <% else %>
-                <span class="text-gray-400">Not set</span>
+                <span class="text-base-content/40">Not set</span>
               <% end %>
             </:col>
 
@@ -80,11 +80,11 @@ defmodule GutWeb.SpeakersLive do
                 <div class="text-sm">
                   <div class="font-medium">{Date.to_string(speaker.leaving_date)}</div>
                   <%= if speaker.leaving_time do %>
-                    <div class="text-gray-500">{Time.to_string(speaker.leaving_time)}</div>
+                    <div class="text-base-content/50">{Time.to_string(speaker.leaving_time)}</div>
                   <% end %>
                 </div>
               <% else %>
-                <span class="text-gray-400">Not set</span>
+                <span class="text-base-content/40">Not set</span>
               <% end %>
             </:col>
 
@@ -92,28 +92,28 @@ defmodule GutWeb.SpeakersLive do
               <%= if not is_nil(speaker.hotel_stay_start_date) and not is_nil(speaker.hotel_stay_end_date) do %>
                 <div class="text-sm">
                   <div>{Date.to_string(speaker.hotel_stay_start_date)}</div>
-                  <div class="text-gray-500">to {Date.to_string(speaker.hotel_stay_end_date)}</div>
+                  <div class="text-base-content/50">to {Date.to_string(speaker.hotel_stay_end_date)}</div>
                 </div>
               <% else %>
-                <span class="text-gray-400">Not set</span>
+                <span class="text-base-content/40">Not set</span>
               <% end %>
             </:col>
 
             <:col :let={speaker} field="hotel_covered_start_date" filter label="Hotel Coverage">
               <%= if not is_nil(speaker.hotel_covered_start_date) and not is_nil(speaker.hotel_covered_end_date) do %>
                 <div class="text-sm">
-                  <div class="text-green-600">{Date.to_string(speaker.hotel_covered_start_date)}</div>
-                  <div class="text-green-500">
+                  <div class="text-success">{Date.to_string(speaker.hotel_covered_start_date)}</div>
+                  <div class="text-success/70">
                     to {Date.to_string(speaker.hotel_covered_end_date)}
                   </div>
                 </div>
               <% else %>
-                <span class="text-gray-400">Not covered</span>
+                <span class="text-base-content/40">Not covered</span>
               <% end %>
             </:col>
 
             <:col :let={speaker} field="inserted_at" sort label="Added">
-              <div class="text-sm text-gray-500">
+              <div class="text-sm text-base-content/50">
                 {Calendar.strftime(speaker.inserted_at, "%b %d, %Y")}
               </div>
             </:col>
@@ -130,7 +130,7 @@ defmodule GutWeb.SpeakersLive do
                   phx-click="delete"
                   phx-value-id={speaker.id}
                   data-confirm="Are you sure you want to delete this speaker?"
-                  class="text-red-600 hover:text-red-900 text-sm font-medium"
+                  class="text-error hover:text-error/80 text-sm font-medium"
                 >
                   Delete
                 </button>

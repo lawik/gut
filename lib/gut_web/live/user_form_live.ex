@@ -48,7 +48,7 @@ defmodule GutWeb.UserFormLive do
         <div class="mb-8">
           <.link
             navigate={~p"/users"}
-            class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
+            class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80"
           >
             <.icon name="hero-arrow-left" class="h-4 w-4 mr-2" /> Back to Users
           </.link>
@@ -56,8 +56,8 @@ defmodule GutWeb.UserFormLive do
 
         <div class="sm:flex sm:items-center mb-8">
           <div class="sm:flex-auto">
-            <h1 class="text-2xl font-semibold leading-6 text-gray-900">{@page_title}</h1>
-            <p class="mt-2 text-sm text-gray-700">
+            <h1 class="text-2xl font-semibold leading-6 text-base-content">{@page_title}</h1>
+            <p class="mt-2 text-sm text-base-content/70">
               <%= if @action == :new do %>
                 Add a new user to the system.
               <% else %>
@@ -67,11 +67,11 @@ defmodule GutWeb.UserFormLive do
           </div>
         </div>
 
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl p-6">
+        <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl p-6">
           <.form for={@form} id="user-form" phx-change="validate" phx-submit="save">
             <div class="grid grid-cols-1 gap-6">
               <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-4">User Information</h3>
+                <h3 class="text-lg font-medium text-base-content mb-4">User Information</h3>
               </div>
 
               <.input field={@form[:email]} type="email" label="Email Address" required />
@@ -84,7 +84,7 @@ defmodule GutWeb.UserFormLive do
             </div>
 
             <div :if={@form.errors != []} class="mt-8 flex space-x-3">
-              <p :for={{_key, {error, _}} <- @form.errors} class="text-red-500">
+              <p :for={{_key, {error, _}} <- @form.errors} class="text-error">
                 {error}
               </p>
             </div>
@@ -92,14 +92,14 @@ defmodule GutWeb.UserFormLive do
             <div class="mt-8 flex justify-end space-x-3">
               <.link
                 navigate={~p"/users"}
-                class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                class="btn btn-ghost"
               >
                 Cancel
               </.link>
               <.button
                 type="submit"
                 phx-disable-with="Saving..."
-                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                class="btn btn-primary"
               >
                 {if @action == :new, do: "Create User", else: "Update User"}
               </.button>

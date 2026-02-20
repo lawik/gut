@@ -28,7 +28,16 @@ defmodule GutWeb.UsersLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} page_title="Users">
-      <div class="py-8">
+      <div class="">
+        <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+          <div></div>
+          <.link
+            navigate={~p"/users/new"}
+            class="btn btn-primary"
+          >
+            <.icon name="hero-plus" class="h-4 w-4 mr-2" /> Add User
+          </.link>
+        </div>
         <div class="">
           <Cinder.Table.table
             id="users-table"
@@ -53,7 +62,7 @@ defmodule GutWeb.UsersLive do
             </:col>
 
             <:col :let={user} field="id" sort label="ID">
-              <div class="text-sm text-gray-500 font-mono">
+              <div class="text-sm text-base-content/50 font-mono">
                 {String.slice(user.id, 0, 8)}...
               </div>
             </:col>
@@ -70,7 +79,7 @@ defmodule GutWeb.UsersLive do
                   phx-click="delete"
                   phx-value-id={user.id}
                   data-confirm="Are you sure you want to delete this user?"
-                  class="text-red-600 hover:text-red-900 text-sm font-medium"
+                  class="text-error hover:text-error/80 text-sm font-medium"
                 >
                   Delete
                 </button>
@@ -80,8 +89,8 @@ defmodule GutWeb.UsersLive do
         </div>
 
         <div class="mt-12">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4 px-4 sm:px-6 lg:px-8 flex items-center">
-            <.icon name="hero-envelope" class="h-5 w-5 mr-2 text-indigo-600" /> Invites
+          <h2 class="text-xl font-semibold text-base-content mb-4 px-4 sm:px-6 lg:px-8 flex items-center">
+            <.icon name="hero-envelope" class="h-5 w-5 mr-2 text-primary" /> Invites
           </h2>
           <Cinder.Table.table
             id="invites-table"
@@ -106,18 +115,18 @@ defmodule GutWeb.UsersLive do
 
             <:col :let={invite} field="accepted" filter sort label="Status">
               <%= if invite.accepted do %>
-                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-100 text-green-700">
+                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-success/10 text-success">
                   Accepted
                 </span>
               <% else %>
-                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700">
+                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-warning/10 text-warning">
                   Pending
                 </span>
               <% end %>
             </:col>
 
             <:col :let={invite} field="inserted_at" sort label="Sent">
-              <span class="text-sm text-gray-500">
+              <span class="text-sm text-base-content/50">
                 {Calendar.strftime(invite.inserted_at, "%b %d, %Y")}
               </span>
             </:col>
@@ -129,7 +138,7 @@ defmodule GutWeb.UsersLive do
                   phx-click="get_link"
                   phx-value-id={invite.id}
                   phx-value-email={invite.email}
-                  class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                  class="text-primary hover:text-primary/80 text-sm font-medium"
                 >
                   Get link
                 </button>
@@ -137,7 +146,7 @@ defmodule GutWeb.UsersLive do
                   phx-click="delete_invite"
                   phx-value-id={invite.id}
                   data-confirm="Delete this invite?"
-                  class="text-red-600 hover:text-red-900 text-sm font-medium"
+                  class="text-error hover:text-error/80 text-sm font-medium"
                 >
                   Delete
                 </button>
@@ -147,9 +156,9 @@ defmodule GutWeb.UsersLive do
 
           <div
             :if={@shown_link}
-            class="mt-4 mx-4 sm:mx-6 lg:mx-8 p-4 bg-indigo-50 border border-indigo-200 rounded-lg"
+            class="mt-4 mx-4 sm:mx-6 lg:mx-8 p-4 bg-primary/10 border border-primary/30 rounded-lg"
           >
-            <p class="text-sm font-medium text-indigo-900 mb-2">
+            <p class="text-sm font-medium text-primary mb-2">
               Magic link (valid for a few minutes):
             </p>
             <div class="flex items-center gap-2">
@@ -157,7 +166,7 @@ defmodule GutWeb.UsersLive do
                 type="text"
                 readonly
                 value={@shown_link}
-                class="flex-1 text-xs font-mono bg-white border border-indigo-300 rounded px-3 py-2 text-gray-700"
+                class="flex-1 text-xs font-mono bg-base-100 border border-primary/30 rounded px-3 py-2 text-base-content"
               />
             </div>
           </div>
@@ -167,14 +176,14 @@ defmodule GutWeb.UsersLive do
     """
   end
 
-  defp role_badge_class(:staff), do: "bg-blue-100 text-blue-700"
-  defp role_badge_class(:speaker), do: "bg-purple-100 text-purple-700"
-  defp role_badge_class(:sponsor), do: "bg-amber-100 text-amber-700"
-  defp role_badge_class(_), do: "bg-gray-100 text-gray-700"
+  defp role_badge_class(:staff), do: "bg-info/10 text-info"
+  defp role_badge_class(:speaker), do: "bg-secondary/10 text-secondary"
+  defp role_badge_class(:sponsor), do: "bg-warning/10 text-warning"
+  defp role_badge_class(_), do: "bg-base-200 text-base-content/70"
 
-  defp invite_type_class(:speaker), do: "bg-purple-100 text-purple-700"
-  defp invite_type_class(:sponsor), do: "bg-amber-100 text-amber-700"
-  defp invite_type_class(_), do: "bg-gray-100 text-gray-700"
+  defp invite_type_class(:speaker), do: "bg-secondary/10 text-secondary"
+  defp invite_type_class(:sponsor), do: "bg-warning/10 text-warning"
+  defp invite_type_class(_), do: "bg-base-200 text-base-content/70"
 
   def handle_info(%{topic: "users:changed"}, socket) do
     {:noreply, Cinder.Table.Refresh.refresh_table(socket, "users-table")}

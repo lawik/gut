@@ -34,25 +34,25 @@ defmodule GutWeb.UserDetailLive do
         <div class="mb-8">
           <.link
             navigate={~p"/users"}
-            class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
+            class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80"
           >
             <.icon name="hero-arrow-left" class="h-4 w-4 mr-2" /> Back to Users
           </.link>
         </div>
 
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
-          <div class="px-6 py-8 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200">
+        <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl overflow-hidden">
+          <div class="px-6 py-8 bg-base-200 border-b border-base-300">
             <div class="flex items-center justify-between">
               <div>
-                <h1 class="text-3xl font-bold text-gray-900">{@user.email}</h1>
-                <p class="mt-2 text-sm text-gray-600">
+                <h1 class="text-3xl font-bold text-base-content">{@user.email}</h1>
+                <p class="mt-2 text-sm text-base-content/60">
                   Role: <span class="font-medium">{@user.role}</span>
                 </p>
               </div>
               <div class="flex space-x-3">
                 <.link
                   navigate={~p"/users/#{@user.id}/edit"}
-                  class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                  class="btn btn-primary"
                 >
                   Edit User
                 </.link>
@@ -64,21 +64,21 @@ defmodule GutWeb.UserDetailLive do
         </div>
 
         <div :if={@is_staff and @user.role == :staff} class="mt-8">
-          <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h2 class="text-xl font-semibold text-gray-900 flex items-center">
-                <.icon name="hero-key" class="h-5 w-5 mr-2 text-indigo-600" /> API Keys
+          <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-base-300 flex items-center justify-between">
+              <h2 class="text-xl font-semibold text-base-content flex items-center">
+                <.icon name="hero-key" class="h-5 w-5 mr-2 text-primary" /> API Keys
               </h2>
               <button
                 phx-click="create_api_key"
-                class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                class="btn btn-primary btn-sm"
               >
                 Generate Key
               </button>
             </div>
 
-            <div :if={@new_api_key} class="px-6 py-4 bg-green-50 border-b border-green-200">
-              <p class="text-sm font-medium text-green-800 mb-2">
+            <div :if={@new_api_key} class="px-6 py-4 bg-success/10 border-b border-success/30">
+              <p class="text-sm font-medium text-success mb-2">
                 New API key created. Copy it now — it won't be shown again.
               </p>
               <input
@@ -86,39 +86,39 @@ defmodule GutWeb.UserDetailLive do
                 readonly
                 value={@new_api_key}
                 onclick="this.select()"
-                class="block w-full p-3 bg-white rounded border border-green-300 text-sm font-mono"
+                class="block w-full p-3 bg-base-100 rounded border border-success/30 text-sm font-mono"
               />
             </div>
 
             <div class="px-6 py-4">
-              <div :if={@api_keys == []} class="text-sm text-gray-500 py-4 text-center">
+              <div :if={@api_keys == []} class="text-sm text-base-content/50 py-4 text-center">
                 No API keys yet.
               </div>
 
-              <table :if={@api_keys != []} class="min-w-full divide-y divide-gray-200">
+              <table :if={@api_keys != []} class="min-w-full divide-y divide-base-300">
                 <thead>
                   <tr>
-                    <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                    <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th class="py-3 text-left text-xs font-medium text-base-content/50 uppercase">ID</th>
+                    <th class="py-3 text-left text-xs font-medium text-base-content/50 uppercase">
                       Created
                     </th>
-                    <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th class="py-3 text-left text-xs font-medium text-base-content/50 uppercase">
                       Expires
                     </th>
-                    <th class="py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                    <th class="py-3 text-right text-xs font-medium text-base-content/50 uppercase">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-base-300">
                   <tr :for={key <- @api_keys}>
-                    <td class="py-3 text-sm text-gray-500 font-mono">
+                    <td class="py-3 text-sm text-base-content/50 font-mono">
                       {String.slice(key.id, 0..7)}...
                     </td>
-                    <td class="py-3 text-sm text-gray-900">
+                    <td class="py-3 text-sm text-base-content">
                       {Calendar.strftime(key.inserted_at, "%B %d, %Y")}
                     </td>
-                    <td class="py-3 text-sm text-gray-900">
+                    <td class="py-3 text-sm text-base-content">
                       {Calendar.strftime(key.expires_at, "%B %d, %Y")}
                     </td>
                     <td class="py-3 text-right">
@@ -126,7 +126,7 @@ defmodule GutWeb.UserDetailLive do
                         phx-click="revoke_api_key"
                         phx-value-id={key.id}
                         data-confirm="Are you sure you want to revoke this API key?"
-                        class="text-sm text-red-600 hover:text-red-800 font-medium"
+                        class="text-sm text-error hover:text-error/80 font-medium"
                       >
                         Revoke
                       </button>
