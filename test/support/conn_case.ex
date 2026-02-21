@@ -32,7 +32,16 @@ defmodule GutWeb.ConnCase do
   end
 
   setup tags do
-    Gut.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    pid = Gut.DataCase.setup_sandbox(tags)
+    metadata = Phoenix.Ecto.SQL.Sandbox.metadata_for(Gut.Repo, pid)
+
+    conn =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Conn.put_req_header(
+        "user-agent",
+        Phoenix.Ecto.SQL.Sandbox.encode_metadata(metadata)
+      )
+
+    {:ok, conn: conn}
   end
 end

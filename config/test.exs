@@ -1,4 +1,5 @@
 import Config
+config :gut, :sql_sandbox, true
 config :gut, Oban, testing: :manual
 config :gut, token_signing_secret: "L4RqKk67T+NAFtcnFQ0dVAQ1EvH8GaYq"
 config :bcrypt_elixir, log_rounds: 1

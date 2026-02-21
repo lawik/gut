@@ -17,11 +17,20 @@ defmodule GutWeb.FeatureCase do
   end
 
   setup tags do
-    Gut.DataCase.setup_sandbox(tags)
+    pid = Gut.DataCase.setup_sandbox(tags)
 
     user = Gut.Generators.generate(Gut.Generators.user(email: "staff@test.com", role: :staff))
     conn = Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{})
     conn = log_in_user(conn, user)
+
+    metadata = Phoenix.Ecto.SQL.Sandbox.metadata_for(Gut.Repo, pid)
+
+    conn =
+      Plug.Conn.put_req_header(
+        conn,
+        "user-agent",
+        Phoenix.Ecto.SQL.Sandbox.encode_metadata(metadata)
+      )
 
     {:ok, conn: conn, user: user}
   end
