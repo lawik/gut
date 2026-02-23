@@ -26,18 +26,18 @@
     },
     {
       "allow_nil?": false,
-      "default": "nil",
+      "default": "\"staff\"",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "resource_type",
+      "source": "role",
       "type": "text"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -45,43 +45,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "resource_id",
-      "type": "uuid"
-    },
-    {
-      "allow_nil?": false,
-      "default": "false",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "accepted",
-      "type": "boolean"
-    },
-    {
-      "allow_nil?": false,
-      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "inserted_at",
-      "type": "utc_datetime_usec"
-    },
-    {
-      "allow_nil?": false,
-      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "updated_at",
+      "source": "activated_at",
       "type": "utc_datetime_usec"
     }
   ],
@@ -90,8 +54,23 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "1431F6233C41A1964D2310153F6A50F41D17C69CEF040DDE03CE2AE5122F4054",
-  "identities": [],
+  "hash": "B0440104E96471FFD094B9347CEBFEF83EBB6593853C3CCDA374FF3CF2123C92",
+  "identities": [
+    {
+      "all_tenants?": false,
+      "base_filter": null,
+      "index_name": "users_unique_email_index",
+      "keys": [
+        {
+          "type": "atom",
+          "value": "email"
+        }
+      ],
+      "name": "unique_email",
+      "nils_distinct?": true,
+      "where": null
+    }
+  ],
   "multitenancy": {
     "attribute": null,
     "global": null,
@@ -99,5 +78,5 @@
   },
   "repo": "Elixir.Gut.Repo",
   "schema": null,
-  "table": "invites"
+  "table": "users"
 }

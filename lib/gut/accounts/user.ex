@@ -4,7 +4,7 @@ defmodule Gut.Accounts.User do
 
   ## Roles
 
-  - `:staff` — Full access to all resources (speakers, sponsors, users, invites,
+  - `:staff` — Full access to all resources (speakers, sponsors, users,
     API keys). This is the admin role for conference organizers.
   - `:speaker` — Minimal access by default. Explicit grants are added per-resource
     as needed (e.g. viewing their own speaker profile).
@@ -68,7 +68,7 @@ defmodule Gut.Accounts.User do
     end
 
     update :update do
-      accept [:email, :role]
+      accept [:email, :role, :activated_at]
     end
 
     destroy :destroy
@@ -153,6 +153,10 @@ defmodule Gut.Accounts.User do
       allow_nil? false
       public? true
       default :staff
+    end
+
+    attribute :activated_at, :utc_datetime_usec do
+      public? true
     end
   end
 

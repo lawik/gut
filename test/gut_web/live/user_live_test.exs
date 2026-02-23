@@ -6,13 +6,6 @@ defmodule GutWeb.UserLiveTest do
       conn
       |> visit("/users")
       |> assert_has("a", text: "Users")
-      |> assert_has("h2", text: "Invites")
-    end
-
-    test "displays invites section", %{conn: conn} do
-      conn
-      |> visit("/users")
-      |> assert_has("h2", text: "Invites")
     end
   end
 
@@ -63,7 +56,7 @@ defmodule GutWeb.UserLiveTest do
       |> fill_in("Email Address", with: "new@test.com")
       |> select("Role", option: "Speaker")
       |> click_button("Create User")
-      |> assert_has("h2", text: "Invites")
+      |> assert_has("a", text: "Users")
     end
   end
 
@@ -81,7 +74,7 @@ defmodule GutWeb.UserLiveTest do
       |> visit("/users/#{other_user.id}/edit")
       |> select("Role", option: "Speaker")
       |> click_button("Update User")
-      |> assert_has("h2", text: "Invites")
+      |> assert_has("a", text: "Users")
     end
   end
 end

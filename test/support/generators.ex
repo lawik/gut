@@ -59,17 +59,4 @@ defmodule Gut.Generators do
     )
   end
 
-  def invite(opts \\ []) do
-    changeset_generator(
-      Gut.Accounts.Invite,
-      :create,
-      actor: Gut.system_actor("test"),
-      defaults: [
-        email: sequence(:invite_email, &"invite#{&1}@test.com"),
-        resource_type: :speaker,
-        resource_id: StreamData.repeatedly(fn -> Ash.UUID.generate() end)
-      ],
-      overrides: opts
-    )
-  end
 end

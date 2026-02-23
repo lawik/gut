@@ -202,17 +202,18 @@ defmodule Gut.Conference.SessionizeSyncTest do
     end
   end
 
-  describe "sync_from_data/2 invite handling" do
-    test "creates invite for new email", %{main_data: main_data, email_data: email_data} do
+  describe "sync_from_data/2 user handling" do
+    test "creates user for new email", %{main_data: main_data, email_data: email_data} do
       {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data, @actor)
 
-      invites = Gut.Accounts.list_invites!(actor: @actor)
-      ada_invites = Enum.filter(invites, &(to_string(&1.email) == "ada@example.com"))
-      assert length(ada_invites) == 1
-      assert hd(ada_invites).resource_type == :speaker
+      speakers = Gut.Conference.list_speakers!(actor: @actor, load: [:user])
+      ada = Enum.find(speakers, &(&1.first_name == "Ada"))
+      assert ada.user_id
+      assert ada.user.role == :speaker
+      assert to_string(ada.user.email) == "ada@example.com"
     end
 
-    test "links existing user instead of creating invite", %{
+    test "links existing user instead of creating new one", %{
       main_data: main_data,
       email_data: email_data
     } do
@@ -228,7 +229,7 @@ defmodule Gut.Conference.SessionizeSyncTest do
       assert updated_user.role == :speaker
     end
 
-    test "does not duplicate invites on re-sync when user was already linked", %{
+    test "does not duplicate users on re-sync when user was already linked", %{
       main_data: main_data,
       email_data: email_data
     } do

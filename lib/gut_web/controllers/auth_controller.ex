@@ -12,7 +12,11 @@ defmodule GutWeb.AuthController do
         _ -> "You are now signed in"
       end
 
-    process_pending_invites(user)
+    if is_nil(user.activated_at) do
+      Gut.Accounts.update_user!(user, %{activated_at: DateTime.utc_now()},
+        authorize?: false
+      )
+    end
 
     conn
     |> delete_session(:return_to)
@@ -54,31 +58,4 @@ defmodule GutWeb.AuthController do
     |> redirect(to: return_to)
   end
 
-  defp process_pending_invites(user) do
-    case Gut.Accounts.list_pending_invites_for_email(user.email, actor: user) do
-      {:ok, invites} ->
-        Enum.each(invites, fn invite ->
-          case invite.resource_type do
-            :speaker ->
-              with {:ok, speaker} <-
-                     Gut.Conference.get_speaker(invite.resource_id, actor: user) do
-                Gut.Conference.update_speaker!(speaker, %{user_id: user.id}, actor: user)
-                Gut.Accounts.update_user!(user, %{role: :speaker}, actor: user)
-              end
-
-            :sponsor ->
-              with {:ok, sponsor} <-
-                     Gut.Conference.get_sponsor(invite.resource_id, actor: user) do
-                Gut.Conference.update_sponsor!(sponsor, %{user_id: user.id}, actor: user)
-                Gut.Accounts.update_user!(user, %{role: :sponsor}, actor: user)
-              end
-          end
-
-          Gut.Accounts.accept_invite!(invite, actor: user)
-        end)
-
-      _ ->
-        :ok
-    end
-  end
 end

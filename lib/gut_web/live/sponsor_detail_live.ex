@@ -6,16 +6,10 @@ defmodule GutWeb.SponsorDetailLive do
   def mount(%{"id" => id}, _session, socket) do
     sponsor = Gut.Conference.get_sponsor!(id, actor: socket.assigns.current_user, load: [:user])
 
-    invites =
-      Gut.Accounts.list_invites_for_resource!(:sponsor, sponsor.id,
-        actor: socket.assigns.current_user
-      )
-
     socket =
       socket
       |> assign(:page_title, "Sponsor Details")
       |> assign(:sponsor, sponsor)
-      |> assign(:invites, invites)
       |> assign(:current_scope, nil)
 
     {:ok, socket}
@@ -48,11 +42,6 @@ defmodule GutWeb.SponsorDetailLive do
                 <%= if @sponsor.user do %>
                   <p class="mt-1 text-sm text-base-content/50">
                     Associated with user account ({@sponsor.user.email})
-                  </p>
-                <% end %>
-                <%= for invite <- @invites, not invite.accepted do %>
-                  <p class="mt-1 text-sm text-base-content/50">
-                    Pending invite sent to {invite.email}
                   </p>
                 <% end %>
               </div>

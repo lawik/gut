@@ -1,7 +1,7 @@
-defmodule Gut.Conference.Speaker.Changes.HandleInvite do
+defmodule Gut.Conference.Speaker.Changes.HandleUser do
   @moduledoc """
   After a speaker is created or updated, if an `email` argument is provided,
-  links an existing user or creates an invite with a magic link.
+  links an existing user or creates a new one with the `:speaker` role.
   """
   use Ash.Resource.Change
 
@@ -23,13 +23,8 @@ defmodule Gut.Conference.Speaker.Changes.HandleInvite do
         {:ok, speaker}
 
       {:error, _} ->
-        Gut.Accounts.request_magic_link(email)
-
-        Gut.Accounts.create_invite!(
-          %{email: email, resource_type: :speaker, resource_id: speaker.id},
-          authorize?: false
-        )
-
+        user = Gut.Accounts.create_user!(email, :speaker, authorize?: false)
+        speaker = Gut.Conference.update_speaker!(speaker, %{user_id: user.id}, authorize?: false)
         {:ok, speaker}
     end
   end

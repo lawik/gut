@@ -55,11 +55,6 @@ defmodule Gut.AuthorizationTest do
       assert {:ok, []} = Gut.Accounts.list_users(actor: actor)
     end
 
-    test "cannot see invites", %{actor: actor} do
-      generate(invite(email: "x@test.com"))
-
-      assert {:ok, []} = Gut.Accounts.list_invites(actor: actor)
-    end
   end
 
   describe "sponsor-role user is denied staff actions" do
@@ -102,11 +97,6 @@ defmodule Gut.AuthorizationTest do
       assert {:ok, []} = Gut.Accounts.list_users(actor: actor)
     end
 
-    test "cannot see invites", %{actor: actor} do
-      generate(invite(email: "x@test.com"))
-
-      assert {:ok, []} = Gut.Accounts.list_invites(actor: actor)
-    end
   end
 
   describe "staff-role user is allowed" do
@@ -143,10 +133,5 @@ defmodule Gut.AuthorizationTest do
       assert {:ok, [_]} = Gut.Accounts.list_users(actor: actor)
     end
 
-    test "can list invites", %{actor: actor} do
-      generate(invite(email: "x@test.com"))
-
-      assert {:ok, [_]} = Gut.Accounts.list_invites(actor: actor)
-    end
   end
 end

@@ -109,12 +109,12 @@ defmodule GutWeb.SponsorFormLive do
                 <.input
                   name="invite_email"
                   type="email"
-                  label={if @connected_user, do: "Change user (email)", else: "Invite user (email)"}
+                  label={if @connected_user, do: "Change user (email)", else: "Connect user (email)"}
                   value={@invite_email}
-                  placeholder="Enter email to connect or invite a user"
+                  placeholder="Enter email to connect a user"
                 />
                 <p class="mt-1 text-xs text-base-content/50">
-                  If the user exists, they will be linked directly. Otherwise, a magic link invite will be sent.
+                  If the user exists, they will be linked directly. Otherwise, a new account will be created.
                 </p>
               </div>
 
@@ -202,21 +202,14 @@ defmodule GutWeb.SponsorFormLive do
   defp handle_invite_email(socket, sponsor, email) do
     actor = socket.assigns.current_user
 
-    case Gut.Accounts.get_user_by_email(email, actor: actor) do
-      {:ok, user} ->
-        Gut.Conference.update_sponsor!(sponsor, %{user_id: user.id}, actor: actor)
-        Gut.Accounts.update_user!(user, %{role: :sponsor}, actor: actor)
-        socket
+    user =
+      case Gut.Accounts.get_user_by_email(email, actor: actor) do
+        {:ok, user} -> user
+        {:error, _} -> Gut.Accounts.create_user!(email, :sponsor, authorize?: false)
+      end
 
-      {:error, _} ->
-        Gut.Accounts.request_magic_link(email)
-
-        Gut.Accounts.create_invite!(
-          %{email: email, resource_type: :sponsor, resource_id: sponsor.id},
-          actor: actor
-        )
-
-        put_flash(socket, :info, "Invite sent to #{email}")
-    end
+    Gut.Conference.update_sponsor!(sponsor, %{user_id: user.id}, actor: actor)
+    Gut.Accounts.update_user!(user, %{role: :sponsor}, authorize?: false)
+    socket
   end
 end

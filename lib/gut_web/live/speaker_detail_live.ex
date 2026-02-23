@@ -10,16 +10,10 @@ defmodule GutWeb.SpeakerDetailLive do
         load: [:user]
       )
 
-    invites =
-      Gut.Accounts.list_invites_for_resource!(:speaker, speaker.id,
-        actor: socket.assigns.current_user
-      )
-
     socket =
       socket
       |> assign(:page_title, "Speaker Details")
       |> assign(:speaker, speaker)
-      |> assign(:invites, invites)
       |> assign(:current_scope, nil)
 
     {:ok, socket}
@@ -50,11 +44,6 @@ defmodule GutWeb.SpeakerDetailLive do
                 <%= if @speaker.user do %>
                   <p class="mt-1 text-sm text-base-content/50">
                     Associated with user account ({@speaker.user.email})
-                  </p>
-                <% end %>
-                <%= for invite <- @invites, not invite.accepted do %>
-                  <p class="mt-1 text-sm text-base-content/50">
-                    Pending invite sent to {invite.email}
                   </p>
                 <% end %>
               </div>

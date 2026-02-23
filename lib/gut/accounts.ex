@@ -5,11 +5,6 @@ defmodule Gut.Accounts do
     show? true
   end
 
-  tools do
-    tool :list_invites, Gut.Accounts.Invite, :read
-    tool :list_invites_for_resource, Gut.Accounts.Invite, :for_resource
-  end
-
   resources do
     resource Gut.Accounts.Token
 
@@ -31,18 +26,6 @@ defmodule Gut.Accounts do
       define :list_users, action: :read
     end
 
-    resource Gut.Accounts.Invite do
-      define :create_invite, action: :create
-      define :accept_invite, action: :accept
-      define :list_pending_invites_for_email, action: :pending_for_email, args: [:email]
-
-      define :list_invites_for_resource,
-        action: :for_resource,
-        args: [:resource_type, :resource_id]
-
-      define :list_invites, action: :read
-      define :destroy_invite, action: :destroy
-    end
   end
 
   def magic_link_url(email) do
