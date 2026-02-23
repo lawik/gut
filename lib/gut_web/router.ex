@@ -107,7 +107,7 @@ defmodule GutWeb.Router do
         :get_sponsor,
         :create_sponsor,
         :update_sponsor,
-        :destroy_sponsor,
+        :destroy_sponsor
       ],
       protocol_version_statement: "2024-11-05",
       otp_app: :gut

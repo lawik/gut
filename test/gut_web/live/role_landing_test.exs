@@ -24,10 +24,10 @@ defmodule GutWeb.RoleLandingTest do
       |> assert_has("h1", text: "My Travel Details")
     end
 
-    test "speaker sees travel form with fields" do
+    test "speaker sees travel form with fields", %{conn: conn} do
       user = generate(user(email: "speaker-form@test.com", role: :speaker))
       _speaker = generate(speaker(user_id: user.id))
-      conn = log_in_user(Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{}), user)
+      conn = log_in_user(conn, user)
 
       conn
       |> visit("/my-travel")
@@ -47,10 +47,10 @@ defmodule GutWeb.RoleLandingTest do
       |> assert_has("p", text: "No speaker profile is associated with your account")
     end
 
-    test "speaker can submit travel details" do
+    test "speaker can submit travel details", %{conn: conn} do
       user = generate(user(email: "speaker-save@test.com", role: :speaker))
       _speaker = generate(speaker(user_id: user.id))
-      conn = log_in_user(Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{}), user)
+      conn = log_in_user(conn, user)
 
       conn
       |> visit("/my-travel")

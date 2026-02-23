@@ -25,7 +25,6 @@ defmodule Gut.Accounts do
       define :get_user_by_subject, action: :get_by_subject, args: [:subject]
       define :list_users, action: :read
     end
-
   end
 
   def magic_link_url(email) do

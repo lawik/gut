@@ -13,9 +13,7 @@ defmodule GutWeb.AuthController do
       end
 
     if is_nil(user.activated_at) do
-      Gut.Accounts.update_user!(user, %{activated_at: DateTime.utc_now()},
-        authorize?: false
-      )
+      Gut.Accounts.update_user!(user, %{activated_at: DateTime.utc_now()}, authorize?: false)
     end
 
     conn
@@ -57,5 +55,4 @@ defmodule GutWeb.AuthController do
     |> put_flash(:info, "You are now signed out")
     |> redirect(to: return_to)
   end
-
 end

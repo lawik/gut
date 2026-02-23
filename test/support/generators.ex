@@ -58,5 +58,4 @@ defmodule Gut.Generators do
       overrides: opts
     )
   end
-
 end
