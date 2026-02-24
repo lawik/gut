@@ -247,8 +247,16 @@ defmodule Gut.Conference.SessionizeSyncTest do
 
   describe "sync/0 without config" do
     test "returns error when URLs not configured" do
+      prev_main = Application.get_env(:gut, :sessionize_main_url)
+      prev_email = Application.get_env(:gut, :sessionize_speaker_email_url)
+
       Application.put_env(:gut, :sessionize_main_url, nil)
       Application.put_env(:gut, :sessionize_speaker_email_url, nil)
+
+      on_exit(fn ->
+        Application.put_env(:gut, :sessionize_main_url, prev_main)
+        Application.put_env(:gut, :sessionize_speaker_email_url, prev_email)
+      end)
 
       assert {:error, :not_configured} = SessionizeSync.sync(@actor)
     end

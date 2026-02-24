@@ -16,8 +16,8 @@ defmodule GutWeb.RoleLandingTest do
   end
 
   describe "speaker landing" do
-    test "speaker landing on / redirects to travel form" do
-      conn = log_in_as(:speaker)
+    test "speaker landing on / redirects to travel form", %{conn: conn} do
+      conn = log_in_as(conn, :speaker)
 
       conn
       |> visit("/")
@@ -39,8 +39,8 @@ defmodule GutWeb.RoleLandingTest do
       |> assert_has("button", text: "Save Travel Details")
     end
 
-    test "speaker without profile sees friendly message" do
-      conn = log_in_as(:speaker)
+    test "speaker without profile sees friendly message", %{conn: conn} do
+      conn = log_in_as(conn, :speaker)
 
       conn
       |> visit("/my-travel")
@@ -60,24 +60,24 @@ defmodule GutWeb.RoleLandingTest do
       |> assert_has("p", text: "Travel details saved successfully")
     end
 
-    test "speaker navigating to /speakers is redirected to travel form" do
-      conn = log_in_as(:speaker)
+    test "speaker navigating to /speakers is redirected to travel form", %{conn: conn} do
+      conn = log_in_as(conn, :speaker)
 
       conn
       |> visit("/speakers")
       |> assert_has("h1", text: "My Travel Details")
     end
 
-    test "speaker navigating to /sponsors is redirected to travel form" do
-      conn = log_in_as(:speaker)
+    test "speaker navigating to /sponsors is redirected to travel form", %{conn: conn} do
+      conn = log_in_as(conn, :speaker)
 
       conn
       |> visit("/sponsors")
       |> assert_has("h1", text: "My Travel Details")
     end
 
-    test "speaker navigating to /users is redirected to travel form" do
-      conn = log_in_as(:speaker)
+    test "speaker navigating to /users is redirected to travel form", %{conn: conn} do
+      conn = log_in_as(conn, :speaker)
 
       conn
       |> visit("/users")
@@ -86,16 +86,16 @@ defmodule GutWeb.RoleLandingTest do
   end
 
   describe "sponsor landing" do
-    test "sponsor landing on / redirects to sponsor portal" do
-      conn = log_in_as(:sponsor)
+    test "sponsor landing on / redirects to sponsor portal", %{conn: conn} do
+      conn = log_in_as(conn, :sponsor)
 
       conn
       |> visit("/")
       |> assert_has("h1", text: "Sponsor Portal")
     end
 
-    test "sponsor sees placeholder page" do
-      conn = log_in_as(:sponsor)
+    test "sponsor sees placeholder page", %{conn: conn} do
+      conn = log_in_as(conn, :sponsor)
 
       conn
       |> visit("/my-sponsor")
@@ -103,24 +103,24 @@ defmodule GutWeb.RoleLandingTest do
       |> assert_has("p", text: "More information coming soon")
     end
 
-    test "sponsor navigating to /speakers is redirected to sponsor portal" do
-      conn = log_in_as(:sponsor)
+    test "sponsor navigating to /speakers is redirected to sponsor portal", %{conn: conn} do
+      conn = log_in_as(conn, :sponsor)
 
       conn
       |> visit("/speakers")
       |> assert_has("h1", text: "Sponsor Portal")
     end
 
-    test "sponsor navigating to /sponsors is redirected to sponsor portal" do
-      conn = log_in_as(:sponsor)
+    test "sponsor navigating to /sponsors is redirected to sponsor portal", %{conn: conn} do
+      conn = log_in_as(conn, :sponsor)
 
       conn
       |> visit("/sponsors")
       |> assert_has("h1", text: "Sponsor Portal")
     end
 
-    test "sponsor navigating to /users is redirected to sponsor portal" do
-      conn = log_in_as(:sponsor)
+    test "sponsor navigating to /users is redirected to sponsor portal", %{conn: conn} do
+      conn = log_in_as(conn, :sponsor)
 
       conn
       |> visit("/users")

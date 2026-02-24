@@ -12,8 +12,8 @@ defmodule GutWeb.NavigationTest do
   end
 
   describe "speaker-role user navigation" do
-    test "does not see nav links on their landing page" do
-      conn = log_in_as(:speaker)
+    test "does not see nav links on their landing page", %{conn: conn} do
+      conn = log_in_as(conn, :speaker)
 
       conn
       |> visit("/my-travel")
@@ -22,8 +22,8 @@ defmodule GutWeb.NavigationTest do
       |> refute_has("a.btn-ghost", text: "Users")
     end
 
-    test "is redirected away from staff pages" do
-      conn = log_in_as(:speaker)
+    test "is redirected away from staff pages", %{conn: conn} do
+      conn = log_in_as(conn, :speaker)
 
       conn
       |> visit("/speakers")
@@ -32,8 +32,8 @@ defmodule GutWeb.NavigationTest do
   end
 
   describe "sponsor-role user navigation" do
-    test "does not see nav links on their landing page" do
-      conn = log_in_as(:sponsor)
+    test "does not see nav links on their landing page", %{conn: conn} do
+      conn = log_in_as(conn, :sponsor)
 
       conn
       |> visit("/my-sponsor")
@@ -42,8 +42,8 @@ defmodule GutWeb.NavigationTest do
       |> refute_has("a.btn-ghost", text: "Users")
     end
 
-    test "is redirected away from staff pages" do
-      conn = log_in_as(:sponsor)
+    test "is redirected away from staff pages", %{conn: conn} do
+      conn = log_in_as(conn, :sponsor)
 
       conn
       |> visit("/speakers")

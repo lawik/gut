@@ -125,13 +125,21 @@ defmodule Gut.Conference.SessionizeSync do
   end
 
   defp load_existing_speakers(actor) do
-    speakers =
-      Gut.Conference.list_speakers!(actor: actor, load: [:user])
+    speakers = Gut.Conference.list_speakers!(actor: actor, load: [:user])
 
     Enum.reduce(speakers, %{}, fn speaker, acc ->
       acc =
         if speaker.user do
-          Map.put(acc, speaker.user.email |> to_string() |> String.downcase(), speaker)
+          # Force a binary copy of the email to avoid stale sub-binary references
+          # from Postgrex response buffers (observed as flaky CiString corruption
+          # in the Ecto SQL Sandbox).
+          email =
+            speaker.user.email
+            |> to_string()
+            |> String.downcase()
+            |> :binary.copy()
+
+          Map.put(acc, email, speaker)
         else
           acc
         end

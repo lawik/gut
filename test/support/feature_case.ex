@@ -51,11 +51,12 @@ defmodule GutWeb.FeatureCase do
   end
 
   @doc """
-  Builds a conn logged in as a user with the given role.
+  Re-authenticates an existing conn as a user with the given role.
+
+  The conn must already have sandbox metadata (from the setup block).
   """
-  def log_in_as(role) do
+  def log_in_as(conn, role) do
     user = Gut.Generators.generate(Gut.Generators.user(email: "#{role}@test.com", role: role))
-    conn = Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{})
     log_in_user(conn, user)
   end
 end
