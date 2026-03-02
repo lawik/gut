@@ -40,6 +40,13 @@ defmodule Gut.Conference.Speaker do
         :hotel_stay_end_date,
         :hotel_covered_start_date,
         :hotel_covered_end_date,
+        :room_number,
+        :confirmed_with_hotel,
+        :sharing_with,
+        :wants_early_checkin,
+        :double_bed,
+        :special_requests,
+        :notes,
         :sessionize_data,
         :user_id
       ]
@@ -71,6 +78,13 @@ defmodule Gut.Conference.Speaker do
         :hotel_stay_end_date,
         :hotel_covered_start_date,
         :hotel_covered_end_date,
+        :room_number,
+        :confirmed_with_hotel,
+        :sharing_with,
+        :wants_early_checkin,
+        :double_bed,
+        :special_requests,
+        :notes,
         :sessionize_data,
         :user_id
       ]
@@ -78,6 +92,7 @@ defmodule Gut.Conference.Speaker do
       argument :email, :string
 
       change Gut.Conference.Speaker.Changes.HandleUser
+      change Gut.Conference.Speaker.Changes.FlipHotelConfirmation
       change Gut.Conference.Changes.NotifyDiscord
     end
 
@@ -165,6 +180,38 @@ defmodule Gut.Conference.Speaker do
     end
 
     attribute :hotel_covered_end_date, :date do
+      public? true
+    end
+
+    attribute :room_number, :string do
+      public? true
+    end
+
+    attribute :confirmed_with_hotel, :atom do
+      public? true
+      default :unconfirmed
+      constraints one_of: [:unconfirmed, :confirmed, :changed]
+    end
+
+    attribute :sharing_with, :string do
+      public? true
+    end
+
+    attribute :wants_early_checkin, :boolean do
+      public? true
+      default false
+    end
+
+    attribute :double_bed, :boolean do
+      public? true
+      default false
+    end
+
+    attribute :special_requests, :string do
+      public? true
+    end
+
+    attribute :notes, :string do
       public? true
     end
 
