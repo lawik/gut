@@ -31,6 +31,13 @@ defmodule Gut.Generators do
         hotel_stay_end_date: nil,
         hotel_covered_start_date: nil,
         hotel_covered_end_date: nil,
+        room_number: nil,
+        confirmed_with_hotel: :unconfirmed,
+        sharing_with: nil,
+        wants_early_checkin: false,
+        double_bed: false,
+        special_requests: nil,
+        notes: nil,
         sessionize_data: nil,
         user_id: nil
       ],
