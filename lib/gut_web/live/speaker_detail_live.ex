@@ -183,7 +183,8 @@ defmodule GutWeb.SpeakerDetailLive do
                         <dt class="text-sm font-medium text-base-content/50">Preferences</dt>
                         <dd class="mt-1 text-sm text-base-content space-y-1">
                           <div :if={@speaker.wants_early_checkin} class="flex items-center">
-                            <.icon name="hero-check" class="h-4 w-4 text-success mr-1" /> Early check-in
+                            <.icon name="hero-check" class="h-4 w-4 text-success mr-1" />
+                            Early check-in
                           </div>
                           <div :if={@speaker.double_bed} class="flex items-center">
                             <.icon name="hero-check" class="h-4 w-4 text-success mr-1" /> Double bed
@@ -201,7 +202,9 @@ defmodule GutWeb.SpeakerDetailLive do
                     <%= if @speaker.special_requests do %>
                       <div>
                         <dt class="text-sm font-medium text-base-content/50">Special Requests</dt>
-                        <dd class="mt-1 text-sm text-base-content whitespace-pre-wrap">{@speaker.special_requests}</dd>
+                        <dd class="mt-1 text-sm text-base-content whitespace-pre-wrap">
+                          {@speaker.special_requests}
+                        </dd>
                       </div>
                     <% end %>
 
@@ -275,7 +278,7 @@ defmodule GutWeb.SpeakerDetailLive do
                 </div>
               </div>
             <% end %>
-
+            
     <!-- Sessionize Data -->
             <%= if @speaker.sessionize_data && @speaker.sessionize_data != %{} do %>
               <div class="mt-8 pt-8 border-t border-base-300">
