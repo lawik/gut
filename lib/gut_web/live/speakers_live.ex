@@ -119,6 +119,15 @@ defmodule GutWeb.SpeakersLive do
               <% end %>
             </:col>
 
+            <:col :let={speaker} field="confirmed_with_hotel" filter sort label="Hotel Status">
+              <span class={[
+                "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium",
+                hotel_status_class(speaker.confirmed_with_hotel)
+              ]}>
+                {hotel_status_label(speaker.confirmed_with_hotel)}
+              </span>
+            </:col>
+
             <:col :let={speaker} field="inserted_at" sort label="Added">
               <div class="text-sm text-base-content/50">
                 {Calendar.strftime(speaker.inserted_at, "%b %d, %Y")}
@@ -188,4 +197,12 @@ defmodule GutWeb.SpeakersLive do
         {:noreply, put_flash(socket, :error, "Failed to delete speaker")}
     end
   end
+
+  defp hotel_status_class(:confirmed), do: "bg-success/20 text-success"
+  defp hotel_status_class(:changed), do: "bg-warning/20 text-warning"
+  defp hotel_status_class(_), do: "bg-base-300 text-base-content/60"
+
+  defp hotel_status_label(:confirmed), do: "Confirmed"
+  defp hotel_status_label(:changed), do: "Changed"
+  defp hotel_status_label(_), do: "Unconfirmed"
 end

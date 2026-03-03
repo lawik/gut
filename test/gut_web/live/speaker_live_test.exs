@@ -70,6 +70,60 @@ defmodule GutWeb.SpeakerLiveTest do
       |> assert_has("p", text: "Full Coverage")
     end
 
+    test "shows hotel detail fields", %{conn: conn} do
+      speaker =
+        generate(
+          speaker(
+            room_number: "204",
+            sharing_with: "Jane Doe",
+            wants_early_checkin: true,
+            double_bed: true,
+            special_requests: "Vegetarian, no nuts"
+          )
+        )
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("dd", text: "204")
+      |> assert_has("dd", text: "Jane Doe")
+      |> assert_has("div", text: "Early check-in")
+      |> assert_has("div", text: "Double bed")
+      |> assert_has("dd", text: "Vegetarian, no nuts")
+    end
+
+    test "shows hotel status badge", %{conn: conn} do
+      speaker = generate(speaker(confirmed_with_hotel: :confirmed))
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("span", text: "Confirmed")
+    end
+
+    test "shows unconfirmed status by default", %{conn: conn} do
+      speaker = generate(speaker())
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("span", text: "Unconfirmed")
+    end
+
+    test "shows notes when present", %{conn: conn} do
+      speaker = generate(speaker(notes: "Arrives a day early for dinner"))
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("h2", text: "Notes")
+      |> assert_has("p", text: "Arrives a day early for dinner")
+    end
+
+    test "hides notes section when empty", %{conn: conn} do
+      speaker = generate(speaker())
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> refute_has("h2", text: "Notes")
+    end
+
     test "navigates to edit form", %{conn: conn} do
       speaker = generate(speaker())
 
@@ -89,12 +143,41 @@ defmodule GutWeb.SpeakerLiveTest do
       |> assert_has("label", text: "Last Name")
     end
 
+    test "renders hotel fields in the form", %{conn: conn} do
+      conn
+      |> visit("/speakers/new")
+      |> assert_has("label", text: "Room Number")
+      |> assert_has("label", text: "Sharing With")
+      |> assert_has("label", text: "Wants Early Check-in")
+      |> assert_has("label", text: "Double Bed")
+      |> assert_has("label", text: "Special Requests")
+      |> assert_has("label", text: "Hotel Confirmation Status")
+      |> assert_has("label", text: "Notes")
+    end
+
     test "creates a speaker with valid data", %{conn: conn} do
       conn
       |> visit("/speakers/new")
       |> fill_in("Full Name", with: "Grace Hopper")
       |> fill_in("First Name", with: "Grace")
       |> fill_in("Last Name", with: "Hopper")
+      |> click_button("Create Speaker")
+      |> assert_has("button", text: "Sync from Sessionize")
+    end
+
+    test "creates a speaker with hotel fields", %{conn: conn} do
+      conn
+      |> visit("/speakers/new")
+      |> fill_in("Full Name", with: "Grace Hopper")
+      |> fill_in("First Name", with: "Grace")
+      |> fill_in("Last Name", with: "Hopper")
+      |> fill_in("Room Number", with: "305")
+      |> fill_in("Sharing With", with: "Partner Name")
+      |> check("Wants Early Check-in")
+      |> check("Double Bed")
+      |> fill_in("Special Requests", with: "Vegetarian")
+      |> fill_in("Notes", with: "VIP speaker")
+      |> select("Hotel Confirmation Status", option: "Confirmed")
       |> click_button("Create Speaker")
       |> assert_has("button", text: "Sync from Sessionize")
     end
@@ -117,6 +200,41 @@ defmodule GutWeb.SpeakerLiveTest do
       |> fill_in("Full Name", with: "Ada Updated")
       |> click_button("Update Speaker")
       |> assert_has("button", text: "Sync from Sessionize")
+    end
+
+    test "updates hotel fields on a speaker", %{conn: conn} do
+      speaker = generate(speaker())
+
+      conn
+      |> visit("/speakers/#{speaker.id}/edit")
+      |> fill_in("Room Number", with: "101")
+      |> fill_in("Sharing With", with: "Someone Else")
+      |> check("Wants Early Check-in")
+      |> check("Double Bed")
+      |> fill_in("Special Requests", with: "No seafood")
+      |> fill_in("Notes", with: "Updated notes")
+      |> click_button("Update Speaker")
+      |> assert_has("button", text: "Sync from Sessionize")
+    end
+
+    test "updates hotel fields and verifies on detail page", %{conn: conn} do
+      speaker = generate(speaker())
+
+      conn
+      |> visit("/speakers/#{speaker.id}/edit")
+      |> fill_in("Room Number", with: "202")
+      |> fill_in("Special Requests", with: "Lactose intolerant")
+      |> fill_in("Notes", with: "Needs ground floor")
+      |> click_button("Update Speaker")
+      |> assert_has("button", text: "Sync from Sessionize")
+
+      # Verify the data persisted by visiting the detail page
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("dd", text: "202")
+      |> assert_has("dd", text: "Lactose intolerant")
+      |> assert_has("p", text: "Needs ground floor")
+      |> assert_has("span", text: "Changed")
     end
   end
 end

@@ -145,6 +145,44 @@ defmodule GutWeb.SpeakerFormLive do
                 type="date"
                 label="Hotel Coverage End"
               />
+
+              <.input field={@form[:room_number]} type="text" label="Room Number" />
+              <.input field={@form[:sharing_with]} type="text" label="Sharing With" />
+              <.input
+                field={@form[:wants_early_checkin]}
+                type="checkbox"
+                label="Wants Early Check-in"
+              />
+              <.input field={@form[:double_bed]} type="checkbox" label="Double Bed" />
+              <.input
+                field={@form[:special_requests]}
+                type="textarea"
+                label="Special Requests"
+                placeholder="Dietary restrictions, accessibility needs, etc."
+              />
+              <.input
+                field={@form[:confirmed_with_hotel]}
+                type="select"
+                label="Hotel Confirmation Status"
+                options={[
+                  {"Unconfirmed", "unconfirmed"},
+                  {"Confirmed", "confirmed"},
+                  {"Changed", "changed"}
+                ]}
+              />
+
+              <div class="sm:col-span-2 mt-8">
+                <h3 class="text-lg font-medium text-base-content mb-4">Notes</h3>
+              </div>
+
+              <div class="sm:col-span-2">
+                <.input
+                  field={@form[:notes]}
+                  type="textarea"
+                  label="Notes"
+                  placeholder="General notes about this speaker"
+                />
+              </div>
             </div>
 
             <div :if={@form.errors != []} class="mt-8 flex space-x-3">

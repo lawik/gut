@@ -152,6 +152,59 @@ defmodule GutWeb.SpeakerDetailLive do
                       </dd>
                     </div>
 
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <dt class="text-sm font-medium text-base-content/50">Room Number</dt>
+                        <dd class="mt-1 text-sm text-base-content">
+                          {if @speaker.room_number, do: @speaker.room_number, else: "Not assigned"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt class="text-sm font-medium text-base-content/50">Hotel Status</dt>
+                        <dd class="mt-1">
+                          <span class={[
+                            "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium",
+                            hotel_status_class(@speaker.confirmed_with_hotel)
+                          ]}>
+                            {hotel_status_label(@speaker.confirmed_with_hotel)}
+                          </span>
+                        </dd>
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <dt class="text-sm font-medium text-base-content/50">Sharing With</dt>
+                        <dd class="mt-1 text-sm text-base-content">
+                          {if @speaker.sharing_with, do: @speaker.sharing_with, else: "No one"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt class="text-sm font-medium text-base-content/50">Preferences</dt>
+                        <dd class="mt-1 text-sm text-base-content space-y-1">
+                          <div :if={@speaker.wants_early_checkin} class="flex items-center">
+                            <.icon name="hero-check" class="h-4 w-4 text-success mr-1" /> Early check-in
+                          </div>
+                          <div :if={@speaker.double_bed} class="flex items-center">
+                            <.icon name="hero-check" class="h-4 w-4 text-success mr-1" /> Double bed
+                          </div>
+                          <div
+                            :if={not @speaker.wants_early_checkin and not @speaker.double_bed}
+                            class="text-base-content/40"
+                          >
+                            None
+                          </div>
+                        </dd>
+                      </div>
+                    </div>
+
+                    <%= if @speaker.special_requests do %>
+                      <div>
+                        <dt class="text-sm font-medium text-base-content/50">Special Requests</dt>
+                        <dd class="mt-1 text-sm text-base-content whitespace-pre-wrap">{@speaker.special_requests}</dd>
+                      </div>
+                    <% end %>
+
                     <div>
                       <dt class="text-sm font-medium text-base-content/50">Conference Coverage</dt>
                       <dd class="mt-1">
@@ -211,6 +264,18 @@ defmodule GutWeb.SpeakerDetailLive do
               </div>
             </div>
             
+    <!-- Notes -->
+            <%= if @speaker.notes do %>
+              <div class="mt-8 pt-8 border-t border-base-300">
+                <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
+                  <.icon name="hero-document-text" class="h-5 w-5 mr-2 text-primary" /> Notes
+                </h2>
+                <div class="bg-base-200 rounded-lg p-4">
+                  <p class="text-sm text-base-content whitespace-pre-wrap">{@speaker.notes}</p>
+                </div>
+              </div>
+            <% end %>
+
     <!-- Sessionize Data -->
             <%= if @speaker.sessionize_data && @speaker.sessionize_data != %{} do %>
               <div class="mt-8 pt-8 border-t border-base-300">
@@ -280,6 +345,14 @@ defmodule GutWeb.SpeakerDetailLive do
   defp format_sessionize_value(value) when is_map(value) do
     Jason.encode!(value, pretty: true)
   end
+
+  defp hotel_status_class(:confirmed), do: "bg-success/20 text-success"
+  defp hotel_status_class(:changed), do: "bg-warning/20 text-warning"
+  defp hotel_status_class(_), do: "bg-base-300 text-base-content/60"
+
+  defp hotel_status_label(:confirmed), do: "Confirmed"
+  defp hotel_status_label(:changed), do: "Changed"
+  defp hotel_status_label(_), do: "Unconfirmed"
 
   defp coverage_complete?(speaker) do
     not is_nil(speaker.hotel_stay_start_date) and not is_nil(speaker.hotel_stay_end_date) and
