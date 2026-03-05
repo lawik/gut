@@ -46,9 +46,7 @@ defmodule Gut.Conference.Speaker.HotelFieldsTest do
       speaker = generate(speaker())
 
       {:ok, confirmed} =
-        Gut.Conference.update_speaker(speaker, %{confirmed_with_hotel: :confirmed},
-          actor: @actor
-        )
+        Gut.Conference.update_speaker(speaker, %{confirmed_with_hotel: :confirmed}, actor: @actor)
 
       %{speaker: speaker, confirmed_speaker: confirmed}
     end
