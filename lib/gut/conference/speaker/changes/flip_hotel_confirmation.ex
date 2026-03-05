@@ -20,6 +20,9 @@ defmodule Gut.Conference.Speaker.Changes.FlipHotelConfirmation do
   ]
 
   def change(changeset, _opts, _context) do
+    currently_confirmed? =
+      Ash.Changeset.get_data(changeset, :confirmed_with_hotel) == :confirmed
+
     hotel_field_changing? =
       Enum.any?(@hotel_fields, fn field ->
         Ash.Changeset.changing_attribute?(changeset, field)
@@ -28,7 +31,7 @@ defmodule Gut.Conference.Speaker.Changes.FlipHotelConfirmation do
     explicitly_setting_confirmation? =
       Ash.Changeset.changing_attribute?(changeset, :confirmed_with_hotel)
 
-    if hotel_field_changing? and not explicitly_setting_confirmation? do
+    if currently_confirmed? and hotel_field_changing? and not explicitly_setting_confirmation? do
       Ash.Changeset.force_change_attribute(changeset, :confirmed_with_hotel, :changed)
     else
       changeset

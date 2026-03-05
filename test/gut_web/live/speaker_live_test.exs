@@ -218,7 +218,7 @@ defmodule GutWeb.SpeakerLiveTest do
     end
 
     test "updates hotel fields and verifies on detail page", %{conn: conn} do
-      speaker = generate(speaker())
+      speaker = generate(speaker(confirmed_with_hotel: :confirmed))
 
       conn
       |> visit("/speakers/#{speaker.id}/edit")

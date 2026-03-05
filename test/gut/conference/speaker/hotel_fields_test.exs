@@ -44,10 +44,18 @@ defmodule Gut.Conference.Speaker.HotelFieldsTest do
   describe "confirmed_with_hotel flip on update" do
     setup do
       speaker = generate(speaker())
-      %{speaker: speaker}
+
+      {:ok, confirmed} =
+        Gut.Conference.update_speaker(speaker, %{confirmed_with_hotel: :confirmed},
+          actor: @actor
+        )
+
+      %{speaker: speaker, confirmed_speaker: confirmed}
     end
 
-    test "flips to :changed when hotel_stay_start_date changes", %{speaker: speaker} do
+    test "flips to :changed when hotel_stay_start_date changes", %{
+      confirmed_speaker: speaker
+    } do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{hotel_stay_start_date: ~D[2026-09-10]},
           actor: @actor
@@ -56,7 +64,7 @@ defmodule Gut.Conference.Speaker.HotelFieldsTest do
       assert updated.confirmed_with_hotel == :changed
     end
 
-    test "flips to :changed when hotel_stay_end_date changes", %{speaker: speaker} do
+    test "flips to :changed when hotel_stay_end_date changes", %{confirmed_speaker: speaker} do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{hotel_stay_end_date: ~D[2026-09-13]},
           actor: @actor
@@ -65,7 +73,9 @@ defmodule Gut.Conference.Speaker.HotelFieldsTest do
       assert updated.confirmed_with_hotel == :changed
     end
 
-    test "flips to :changed when hotel_covered_start_date changes", %{speaker: speaker} do
+    test "flips to :changed when hotel_covered_start_date changes", %{
+      confirmed_speaker: speaker
+    } do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{hotel_covered_start_date: ~D[2026-09-10]},
           actor: @actor
@@ -74,7 +84,9 @@ defmodule Gut.Conference.Speaker.HotelFieldsTest do
       assert updated.confirmed_with_hotel == :changed
     end
 
-    test "flips to :changed when hotel_covered_end_date changes", %{speaker: speaker} do
+    test "flips to :changed when hotel_covered_end_date changes", %{
+      confirmed_speaker: speaker
+    } do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{hotel_covered_end_date: ~D[2026-09-13]},
           actor: @actor
@@ -83,42 +95,42 @@ defmodule Gut.Conference.Speaker.HotelFieldsTest do
       assert updated.confirmed_with_hotel == :changed
     end
 
-    test "flips to :changed when room_number changes", %{speaker: speaker} do
+    test "flips to :changed when room_number changes", %{confirmed_speaker: speaker} do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{room_number: "101"}, actor: @actor)
 
       assert updated.confirmed_with_hotel == :changed
     end
 
-    test "flips to :changed when sharing_with changes", %{speaker: speaker} do
+    test "flips to :changed when sharing_with changes", %{confirmed_speaker: speaker} do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{sharing_with: "Someone"}, actor: @actor)
 
       assert updated.confirmed_with_hotel == :changed
     end
 
-    test "flips to :changed when wants_early_checkin changes", %{speaker: speaker} do
+    test "flips to :changed when wants_early_checkin changes", %{confirmed_speaker: speaker} do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{wants_early_checkin: true}, actor: @actor)
 
       assert updated.confirmed_with_hotel == :changed
     end
 
-    test "flips to :changed when double_bed changes", %{speaker: speaker} do
+    test "flips to :changed when double_bed changes", %{confirmed_speaker: speaker} do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{double_bed: true}, actor: @actor)
 
       assert updated.confirmed_with_hotel == :changed
     end
 
-    test "flips to :changed when special_requests changes", %{speaker: speaker} do
+    test "flips to :changed when special_requests changes", %{confirmed_speaker: speaker} do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{special_requests: "No nuts"}, actor: @actor)
 
       assert updated.confirmed_with_hotel == :changed
     end
 
-    test "flips to :changed when notes changes", %{speaker: speaker} do
+    test "flips to :changed when notes changes", %{confirmed_speaker: speaker} do
       {:ok, updated} =
         Gut.Conference.update_speaker(speaker, %{notes: "Updated info"}, actor: @actor)
 
@@ -132,16 +144,15 @@ defmodule Gut.Conference.Speaker.HotelFieldsTest do
       assert updated.confirmed_with_hotel == :unconfirmed
     end
 
-    test "flips from :confirmed to :changed on hotel field update", %{speaker: speaker} do
-      {:ok, confirmed} =
-        Gut.Conference.update_speaker(speaker, %{confirmed_with_hotel: :confirmed}, actor: @actor)
-
-      assert confirmed.confirmed_with_hotel == :confirmed
+    test "stays :unconfirmed when hotel fields change on unconfirmed speaker", %{
+      speaker: speaker
+    } do
+      assert speaker.confirmed_with_hotel == :unconfirmed
 
       {:ok, updated} =
-        Gut.Conference.update_speaker(confirmed, %{room_number: "305"}, actor: @actor)
+        Gut.Conference.update_speaker(speaker, %{room_number: "101"}, actor: @actor)
 
-      assert updated.confirmed_with_hotel == :changed
+      assert updated.confirmed_with_hotel == :unconfirmed
     end
 
     test "allows explicit confirmed_with_hotel override alongside hotel field changes", %{
