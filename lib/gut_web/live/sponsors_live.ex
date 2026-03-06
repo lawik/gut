@@ -17,7 +17,11 @@ defmodule GutWeb.SponsorsLive do
   end
 
   def handle_params(params, uri, socket) do
-    params = Map.put_new(params, "sort", "-updated_at")
+    params =
+      params
+      |> Map.put_new("sort", "-updated_at")
+      |> Map.put_new("not_happening", "false")
+
     socket = Cinder.Table.UrlSync.handle_params(params, uri, socket)
     {:noreply, socket}
   end
@@ -97,6 +101,10 @@ defmodule GutWeb.SponsorsLive do
 
             <:col :let={sponsor} field="announced" filter sort label="Announced">
               <.checkpoint_badge value={sponsor.announced} />
+            </:col>
+
+            <:col :let={sponsor} field="not_happening" filter sort label="Not Happening">
+              <.checkpoint_badge value={sponsor.not_happening} />
             </:col>
 
             <:col :let={sponsor} field="inserted_at" sort label="Added">

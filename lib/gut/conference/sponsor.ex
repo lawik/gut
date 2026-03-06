@@ -25,6 +25,7 @@ defmodule Gut.Conference.Sponsor do
         :sponsorship_level,
         :logos_received,
         :announced,
+        :not_happening,
         :user_id
       ]
     end
@@ -42,6 +43,7 @@ defmodule Gut.Conference.Sponsor do
         :sponsorship_level,
         :logos_received,
         :announced,
+        :not_happening,
         :user_id
       ]
 
@@ -112,6 +114,12 @@ defmodule Gut.Conference.Sponsor do
     end
 
     attribute :announced, :boolean do
+      default false
+      allow_nil? false
+      public? true
+    end
+
+    attribute :not_happening, :boolean do
       default false
       allow_nil? false
       public? true

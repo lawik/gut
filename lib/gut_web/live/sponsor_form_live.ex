@@ -140,6 +140,7 @@ defmodule GutWeb.SponsorFormLive do
               <.input field={@form[:confirmed]} type="checkbox" label="Confirmed (said yes)" />
               <.input field={@form[:logos_received]} type="checkbox" label="Logos received" />
               <.input field={@form[:announced]} type="checkbox" label="Announced" />
+              <.input field={@form[:not_happening]} type="checkbox" label="Not happening" />
             </div>
 
             <div :if={@form.errors != []} class="mt-8 flex space-x-3">
