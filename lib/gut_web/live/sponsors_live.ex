@@ -17,6 +17,7 @@ defmodule GutWeb.SponsorsLive do
   end
 
   def handle_params(params, uri, socket) do
+    params = Map.put_new(params, "sort", "-updated_at")
     socket = Cinder.Table.UrlSync.handle_params(params, uri, socket)
     {:noreply, socket}
   end
@@ -101,6 +102,12 @@ defmodule GutWeb.SponsorsLive do
             <:col :let={sponsor} field="inserted_at" sort label="Added">
               <div class="text-sm text-base-content/50">
                 {Calendar.strftime(sponsor.inserted_at, "%b %d, %Y")}
+              </div>
+            </:col>
+
+            <:col :let={sponsor} field="updated_at" sort label="Updated">
+              <div class="text-sm text-base-content/50">
+                {Calendar.strftime(sponsor.updated_at, "%b %d, %Y")}
               </div>
             </:col>
 
