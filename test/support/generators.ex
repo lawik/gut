@@ -60,6 +60,9 @@ defmodule Gut.Generators do
         sponsorship_level: nil,
         logos_received: false,
         announced: false,
+        not_happening: false,
+        amount_eur: nil,
+        likelihood: nil,
         user_id: nil
       ],
       overrides: opts

@@ -3,6 +3,7 @@ defmodule GutWeb.SponsorsLive do
   use Cinder.Table.UrlSync
 
   require Ash.Query
+  require Ash.Expr
   require Logger
 
   on_mount {GutWeb.LiveUserAuth, :live_staff_required}
@@ -220,38 +221,42 @@ defmodule GutWeb.SponsorsLive do
 
   @boolean_filters ~w(responded interested confirmed logos_received announced not_happening)
   @status_values ~w(cold warm ok dismissed)
+  @text_filters ~w(name outreach sponsorship_level)
 
   defp compute_pipeline_value(params, actor) do
-    query =
-      Enum.reduce(params, Ash.Query.for_read(Gut.Conference.Sponsor, :read), fn
-        {key, "true"}, query when key in @boolean_filters ->
-          Ash.Query.filter(query, ^ref(key) == true)
+    query = build_filter_query(params)
 
-        {key, "false"}, query when key in @boolean_filters ->
-          Ash.Query.filter(query, ^ref(key) == false)
-
-        {"status", value}, query when value in @status_values ->
-          Ash.Query.filter(query, status == ^String.to_existing_atom(value))
-
-        _, query ->
-          query
-      end)
-
-    case Ash.read(query, actor: actor) do
-      {:ok, sponsors} ->
-        Enum.reduce(sponsors, 0, fn sponsor, acc ->
-          amount = sponsor.amount_eur || 0
-          likelihood = sponsor.likelihood || 0
-          acc + div(amount * likelihood, 100)
-        end)
-
-      _ ->
-        0
+    case Ash.aggregate(
+           query,
+           {:pipeline_value, :sum,
+            expr: Ash.Expr.expr(amount_eur * likelihood / 100), expr_type: :integer, default: 0},
+           actor: actor
+         ) do
+      {:ok, %{pipeline_value: value}} -> value || 0
+      _ -> 0
     end
   end
 
-  defp ref(field_name) do
-    Ash.Expr.ref(String.to_existing_atom(field_name))
+  defp build_filter_query(params) do
+    Enum.reduce(params, Ash.Query.for_read(Gut.Conference.Sponsor, :read), fn
+      {key, "true"}, query when key in @boolean_filters ->
+        Ash.Query.filter(query, ^Ash.Expr.ref(String.to_existing_atom(key)) == true)
+
+      {key, "false"}, query when key in @boolean_filters ->
+        Ash.Query.filter(query, ^Ash.Expr.ref(String.to_existing_atom(key)) == false)
+
+      {"status", value}, query when value in @status_values ->
+        Ash.Query.filter(query, status == ^String.to_existing_atom(value))
+
+      {key, value}, query when key in @text_filters and is_binary(value) and value != "" ->
+        Ash.Query.filter(
+          query,
+          contains(type(^Ash.Expr.ref(String.to_existing_atom(key)), :string), ^value)
+        )
+
+      _, query ->
+        query
+    end)
   end
 
   defp format_number(n) when is_integer(n) do
