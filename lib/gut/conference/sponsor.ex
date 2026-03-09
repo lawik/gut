@@ -26,6 +26,8 @@ defmodule Gut.Conference.Sponsor do
         :logos_received,
         :announced,
         :not_happening,
+        :amount_eur,
+        :likelihood,
         :user_id
       ]
     end
@@ -44,6 +46,8 @@ defmodule Gut.Conference.Sponsor do
         :logos_received,
         :announced,
         :not_happening,
+        :amount_eur,
+        :likelihood,
         :user_id
       ]
 
@@ -122,6 +126,15 @@ defmodule Gut.Conference.Sponsor do
     attribute :not_happening, :boolean do
       default false
       allow_nil? false
+      public? true
+    end
+
+    attribute :amount_eur, :integer do
+      public? true
+    end
+
+    attribute :likelihood, :integer do
+      constraints min: 0, max: 100
       public? true
     end
 

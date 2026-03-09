@@ -2,6 +2,7 @@ defmodule GutWeb.SponsorsLive do
   use GutWeb, :live_view
   use Cinder.Table.UrlSync
 
+  require Ash.Query
   require Logger
 
   on_mount {GutWeb.LiveUserAuth, :live_staff_required}
@@ -22,7 +23,11 @@ defmodule GutWeb.SponsorsLive do
       |> Map.put_new("sort", "-updated_at")
       |> Map.put_new("not_happening", "false")
 
-    socket = Cinder.Table.UrlSync.handle_params(params, uri, socket)
+    socket =
+      Cinder.Table.UrlSync.handle_params(params, uri, socket)
+      |> assign(:filter_params, params)
+      |> assign(:pipeline_value, compute_pipeline_value(params, socket.assigns.current_user))
+
     {:noreply, socket}
   end
 
@@ -36,7 +41,12 @@ defmodule GutWeb.SponsorsLive do
     >
       <div class="">
         <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
-          <div></div>
+          <div class="text-sm text-base-content/70">
+            Pipeline value:
+            <span class="font-semibold text-base-content">
+              EUR {format_number(@pipeline_value)}
+            </span>
+          </div>
           <.link
             navigate={~p"/sponsors/new"}
             class="btn btn-primary"
@@ -90,6 +100,22 @@ defmodule GutWeb.SponsorsLive do
             <:col :let={sponsor} field="sponsorship_level" filter sort label="Level">
               <%= if sponsor.sponsorship_level do %>
                 <span class="text-sm font-medium">{sponsor.sponsorship_level}</span>
+              <% else %>
+                <span class="text-base-content/40">-</span>
+              <% end %>
+            </:col>
+
+            <:col :let={sponsor} field="amount_eur" sort label="Amount (EUR)">
+              <%= if sponsor.amount_eur do %>
+                <span class="text-sm font-medium">EUR {format_number(sponsor.amount_eur)}</span>
+              <% else %>
+                <span class="text-base-content/40">-</span>
+              <% end %>
+            </:col>
+
+            <:col :let={sponsor} field="likelihood" sort label="Likelihood">
+              <%= if sponsor.likelihood do %>
+                <span class="text-sm font-medium">{sponsor.likelihood}%</span>
               <% else %>
                 <span class="text-base-content/40">-</span>
               <% end %>
@@ -165,7 +191,15 @@ defmodule GutWeb.SponsorsLive do
   end
 
   def handle_info(%{topic: "sponsors:changed"}, socket) do
-    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "sponsors-table")}
+    pipeline_value =
+      compute_pipeline_value(socket.assigns.filter_params, socket.assigns.current_user)
+
+    socket =
+      socket
+      |> assign(:pipeline_value, pipeline_value)
+      |> Cinder.Table.Refresh.refresh_table("sponsors-table")
+
+    {:noreply, socket}
   end
 
   def handle_event("delete", %{"id" => id}, socket) do
@@ -183,4 +217,51 @@ defmodule GutWeb.SponsorsLive do
         {:noreply, put_flash(socket, :error, "Failed to delete sponsor")}
     end
   end
+
+  @boolean_filters ~w(responded interested confirmed logos_received announced not_happening)
+  @status_values ~w(cold warm ok dismissed)
+
+  defp compute_pipeline_value(params, actor) do
+    query =
+      Enum.reduce(params, Ash.Query.for_read(Gut.Conference.Sponsor, :read), fn
+        {key, "true"}, query when key in @boolean_filters ->
+          Ash.Query.filter(query, ^ref(key) == true)
+
+        {key, "false"}, query when key in @boolean_filters ->
+          Ash.Query.filter(query, ^ref(key) == false)
+
+        {"status", value}, query when value in @status_values ->
+          Ash.Query.filter(query, status == ^String.to_existing_atom(value))
+
+        _, query ->
+          query
+      end)
+
+    case Ash.read(query, actor: actor) do
+      {:ok, sponsors} ->
+        Enum.reduce(sponsors, 0, fn sponsor, acc ->
+          amount = sponsor.amount_eur || 0
+          likelihood = sponsor.likelihood || 0
+          acc + div(amount * likelihood, 100)
+        end)
+
+      _ ->
+        0
+    end
+  end
+
+  defp ref(field_name) do
+    Ash.Expr.ref(String.to_existing_atom(field_name))
+  end
+
+  defp format_number(n) when is_integer(n) do
+    n
+    |> Integer.to_string()
+    |> String.reverse()
+    |> String.replace(~r/.{3}/, "\\0 ")
+    |> String.trim()
+    |> String.reverse()
+  end
+
+  defp format_number(_), do: "0"
 end

@@ -91,6 +91,14 @@ defmodule GutWeb.SponsorFormLive do
 
               <.input field={@form[:name]} type="text" label="Sponsor Name" required />
               <.input field={@form[:sponsorship_level]} type="text" label="Sponsorship Level" />
+              <.input field={@form[:amount_eur]} type="number" label="Amount (EUR)" />
+              <.input
+                field={@form[:likelihood]}
+                type="number"
+                label="Likelihood (%)"
+                min="0"
+                max="100"
+              />
 
               <div class="sm:col-span-2 mt-8">
                 <h3 class="text-lg font-medium text-base-content mb-4">User Account</h3>
