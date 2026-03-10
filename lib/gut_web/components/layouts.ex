@@ -53,21 +53,53 @@ defmodule GutWeb.Layouts do
           <span :if={@git_sha != ""} class="text-xs font-mono text-gray-400">{@git_sha}</span>
         </div>
       </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li :if={@staff?}>
+      <div class="flex-none flex items-center gap-2">
+        <%!-- Mobile hamburger menu --%>
+        <div :if={@staff?} class="dropdown dropdown-end sm:hidden">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+            <.icon name="hero-bars-3" class="size-5" />
+          </div>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow"
+          >
+            <li><.link navigate={~p"/speakers"}>Speakers</.link></li>
+            <li><.link navigate={~p"/sponsors"}>Sponsors</.link></li>
+            <li><.link navigate={~p"/workshops"}>Workshops</.link></li>
+            <li><.link navigate={~p"/users"}>Users</.link></li>
+            <li class="menu-title">Create</li>
+            <li>
+              <.link navigate={~p"/speakers/new"}>
+                <.icon name="hero-microphone" class="size-4" /> New Speaker
+              </.link>
+            </li>
+            <li>
+              <.link navigate={~p"/sponsors/new"}>
+                <.icon name="hero-currency-dollar" class="size-4" /> New Sponsor
+              </.link>
+            </li>
+            <li>
+              <.link navigate={~p"/users/new"}>
+                <.icon name="hero-user-plus" class="size-4" /> Invite User
+              </.link>
+            </li>
+          </ul>
+        </div>
+        <%!-- Desktop nav --%>
+        <ul :if={@staff?} class="hidden sm:flex px-1 space-x-4 items-center">
+          <li>
             <.link navigate={~p"/speakers"} class="btn btn-ghost">Speakers</.link>
           </li>
-          <li :if={@staff?}>
+          <li>
             <.link navigate={~p"/sponsors"} class="btn btn-ghost">Sponsors</.link>
           </li>
-          <li :if={@staff?}>
+          <li>
             <.link navigate={~p"/workshops"} class="btn btn-ghost">Workshops</.link>
           </li>
-          <li :if={@staff?}>
+          <li>
             <.link navigate={~p"/users"} class="btn btn-ghost">Users</.link>
           </li>
-          <li :if={@staff?}>
+          <li>
             <div class="dropdown dropdown-end">
               <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
                 <.icon name="hero-plus" class="size-5" />
@@ -94,10 +126,8 @@ defmodule GutWeb.Layouts do
               </ul>
             </div>
           </li>
-          <li>
-            <.theme_toggle />
-          </li>
         </ul>
+        <.theme_toggle />
       </div>
     </header>
 
@@ -194,8 +224,8 @@ defmodule GutWeb.Layouts do
   def workshop_subnav(assigns) do
     ~H"""
     <div class="border-b border-base-300 px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between">
-        <nav class="flex space-x-1" aria-label="Workshop navigation">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <nav class="flex overflow-x-auto -mb-px" aria-label="Workshop navigation">
           <.subnav_tab label="Workshops" href={~p"/workshops"} active={@active == "workshops"} />
           <.subnav_tab label="Rooms" href={~p"/workshop-rooms"} active={@active == "rooms"} />
           <.subnav_tab
@@ -209,7 +239,7 @@ defmodule GutWeb.Layouts do
             active={@active == "participants"}
           />
         </nav>
-        <div class="flex space-x-2 py-2">
+        <div class="flex flex-wrap gap-2 py-2">
           <.link navigate={~p"/workshops/new"} class="btn btn-primary btn-sm">
             <.icon name="hero-plus" class="h-3 w-3 mr-1" /> Workshop
           </.link>
