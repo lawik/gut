@@ -18,6 +18,8 @@ defmodule GutWeb.WorkshopBrowseLive do
     {participant, existing_participations, selections} =
       load_existing_registrations(socket.assigns[:current_user])
 
+    can_select = socket.assigns[:current_user] != nil
+
     socket =
       socket
       |> assign(:page_title, "Browse Workshops")
@@ -27,11 +29,13 @@ defmodule GutWeb.WorkshopBrowseLive do
       |> assign(:participant, participant)
       |> assign(:existing_participations, existing_participations)
       |> assign(:name, participant_name(participant, socket.assigns[:current_user]))
-      |> assign(:email, participant_email(socket.assigns[:current_user]))
       |> assign(:phone_number, participant_phone(participant))
       |> assign(:submitted, false)
       |> assign(:errors, %{})
       |> assign(:current_scope, nil)
+      |> assign(:can_select, can_select)
+      |> assign(:magic_link_sent, false)
+      |> assign(:login_email, "")
 
     {:ok, socket}
   end
@@ -77,15 +81,6 @@ defmodule GutWeb.WorkshopBrowseLive do
   defp participant_name(nil, nil), do: ""
   defp participant_name(nil, _user), do: ""
   defp participant_name(participant, _), do: participant.name || ""
-
-  defp participant_email(nil), do: ""
-
-  defp participant_email(user) do
-    case Ash.load(user, :email, actor: @public_actor) do
-      {:ok, user} -> user.email || ""
-      _ -> ""
-    end
-  end
 
   defp participant_phone(nil), do: ""
   defp participant_phone(participant), do: participant.phone_number || ""
@@ -143,6 +138,48 @@ defmodule GutWeb.WorkshopBrowseLive do
             </button>
           </div>
         <% else %>
+          <%!-- Top section: login prompt for unauthenticated users --%>
+          <%= if !@current_user do %>
+            <div class="bg-base-200 rounded-xl p-6 mb-8">
+              <%= if @magic_link_sent do %>
+                <div class="text-center">
+                  <h2 class="text-xl font-semibold text-success mb-2">Check your email!</h2>
+                  <p class="text-base-content/60">
+                    We've sent a login link to your email address.
+                    Click the link in the email to sign in, then come back here to select your workshops.
+                  </p>
+                </div>
+              <% else %>
+                <h2 class="text-xl font-semibold text-base-content mb-2">
+                  Sign in to register for workshops
+                </h2>
+                <p class="text-base-content/60 mb-4">
+                  Enter your email to receive a login link. Once signed in, you can select workshops below.
+                </p>
+                <form phx-submit="request_magic_link" class="flex gap-3 items-end max-w-lg">
+                  <div class="flex-1">
+                    <label class="label" for="login_email">
+                      <span class="label-text">Email address</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="login_email"
+                      name="email"
+                      value={@login_email}
+                      required
+                      placeholder="you@example.com"
+                      class="input input-bordered w-full"
+                    />
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    Send login link
+                  </button>
+                </form>
+              <% end %>
+            </div>
+          <% end %>
+
+          <%!-- Workshop grid --%>
           <%= for {date, slots} <- @workshops_by_day do %>
             <div class="mb-8">
               <h2 class="text-xl font-semibold text-base-content mb-4 border-b border-base-300 pb-2">
@@ -167,6 +204,7 @@ defmodule GutWeb.WorkshopBrowseLive do
                         workshop={workshop}
                         selected={Map.get(@selections, timeslot.id) == workshop.id}
                         timeslot_id={timeslot.id}
+                        can_select={@can_select}
                       />
                     <% end %>
                   </div>
@@ -175,83 +213,67 @@ defmodule GutWeb.WorkshopBrowseLive do
             </div>
           <% end %>
 
-          <div class="bg-base-200 rounded-xl p-6 mt-8">
-            <h2 class="text-xl font-semibold text-base-content mb-4">Your Information</h2>
-            <form phx-submit="save" phx-change="validate" class="space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="label" for="name">
-                    <span class="label-text">Name *</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={@name}
-                    required
-                    class={[
-                      "input input-bordered w-full",
-                      @errors[:name] && "input-error"
-                    ]}
-                  />
-                  <p :if={@errors[:name]} class="text-error text-sm mt-1">{@errors[:name]}</p>
+          <%!-- Bottom section: name/phone form for logged-in users --%>
+          <%= if @current_user do %>
+            <div class="bg-base-200 rounded-xl p-6 mt-8">
+              <h2 class="text-xl font-semibold text-base-content mb-4">Your Information</h2>
+              <form phx-submit="save" phx-change="validate" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="label" for="name">
+                      <span class="label-text">Name *</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={@name}
+                      required
+                      class={[
+                        "input input-bordered w-full",
+                        @errors[:name] && "input-error"
+                      ]}
+                    />
+                    <p :if={@errors[:name]} class="text-error text-sm mt-1">{@errors[:name]}</p>
+                  </div>
+                  <div>
+                    <label class="label" for="phone_number">
+                      <span class="label-text">Phone number (optional)</span>
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone_number"
+                      name="phone_number"
+                      value={@phone_number}
+                      class="input input-bordered w-full"
+                    />
+                    <p class="text-sm text-base-content/50 mt-1">
+                      Useful for last-minute attendance changes on the day of the event.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <label class="label" for="email">
-                    <span class="label-text">Email *</span>
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={@email}
-                    required
-                    disabled={@current_user != nil}
-                    class={[
-                      "input input-bordered w-full",
-                      @errors[:email] && "input-error",
-                      @current_user && "input-disabled"
-                    ]}
-                  />
-                  <p :if={@errors[:email]} class="text-error text-sm mt-1">{@errors[:email]}</p>
-                </div>
-              </div>
-              <div>
-                <label class="label" for="phone_number">
-                  <span class="label-text">Phone number (optional)</span>
-                </label>
-                <input
-                  type="tel"
-                  id="phone_number"
-                  name="phone_number"
-                  value={@phone_number}
-                  class="input input-bordered w-full max-w-sm"
-                />
-                <p class="text-sm text-base-content/50 mt-1">
-                  Useful for last-minute attendance changes on the day of the event.
-                </p>
-              </div>
 
-              <div class="pt-4">
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  disabled={map_size(@selections) == 0}
-                >
-                  <%= if @participant do %>
-                    Save Changes
-                  <% else %>
-                    Register
+                <div class="pt-4">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    disabled={map_size(@selections) == 0}
+                  >
+                    <%= if @participant do %>
+                      Save Changes
+                    <% else %>
+                      Register
+                    <% end %>
+                  </button>
+                  <%= if map_size(@selections) == 0 do %>
+                    <span class="text-sm text-base-content/50 ml-3">
+                      Select at least one workshop to register.
+                    </span>
                   <% end %>
-                </button>
-                <%= if map_size(@selections) == 0 do %>
-                  <span class="text-sm text-base-content/50 ml-3">
-                    Select at least one workshop to register.
-                  </span>
-                <% end %>
-              </div>
-            </form>
-          </div>
+                </div>
+              </form>
+            </div>
+          <% end %>
         <% end %>
       </div>
     </Layouts.app>
@@ -261,6 +283,7 @@ defmodule GutWeb.WorkshopBrowseLive do
   attr :workshop, :map, required: true
   attr :selected, :boolean, required: true
   attr :timeslot_id, :string, required: true
+  attr :can_select, :boolean, required: true
 
   defp workshop_card(assigns) do
     assigns =
@@ -272,29 +295,32 @@ defmodule GutWeb.WorkshopBrowseLive do
     ~H"""
     <div
       class={[
-        "card bg-base-100 shadow-sm border-2 cursor-pointer transition-all",
+        "card bg-base-100 shadow-sm border-2 transition-all",
+        @can_select && "cursor-pointer",
         if(@selected,
           do: "border-primary ring-2 ring-primary/20",
           else: "border-base-300 hover:border-base-content/20"
         ),
         @full && !@selected && "opacity-75"
       ]}
-      phx-click="select"
+      phx-click={@can_select && "select"}
       phx-value-timeslot_id={@timeslot_id}
       phx-value-workshop_id={@workshop.id}
     >
       <div class="card-body p-4">
         <div class="flex items-start justify-between gap-2">
           <h4 class="card-title text-base">{@workshop.name}</h4>
-          <input
-            type="radio"
-            name={"slot-#{@timeslot_id}"}
-            checked={@selected}
-            class="radio radio-primary mt-1"
-            phx-click="select"
-            phx-value-timeslot_id={@timeslot_id}
-            phx-value-workshop_id={@workshop.id}
-          />
+          <%= if @can_select do %>
+            <input
+              type="radio"
+              name={"slot-#{@timeslot_id}"}
+              checked={@selected}
+              class="radio radio-primary mt-1"
+              phx-click="select"
+              phx-value-timeslot_id={@timeslot_id}
+              phx-value-workshop_id={@workshop.id}
+            />
+          <% end %>
         </div>
 
         <%= if @workshop.description do %>
@@ -323,9 +349,17 @@ defmodule GutWeb.WorkshopBrowseLive do
             <span class="text-xs text-base-content/40">{@workshop.workshop_room.name}</span>
           <% end %>
         </div>
+
+        <%= if !@can_select do %>
+          <p class="text-xs text-base-content/40 mt-1">Log in to select</p>
+        <% end %>
       </div>
     </div>
     """
+  end
+
+  def handle_event("select", _params, %{assigns: %{can_select: false}} = socket) do
+    {:noreply, socket}
   end
 
   def handle_event(
@@ -343,25 +377,50 @@ defmodule GutWeb.WorkshopBrowseLive do
     {:noreply, assign(socket, :selections, selections)}
   end
 
+  def handle_event("request_magic_link", %{"email" => email}, socket) do
+    email = String.trim(email)
+
+    if email == "" do
+      {:noreply, socket}
+    else
+      # Find or create user with attendee role
+      case Gut.Accounts.get_user_by_email(email, actor: Gut.system_actor("workshop_browse")) do
+        {:ok, _user} ->
+          :ok
+
+        _ ->
+          Gut.Accounts.create_user(email, :attendee, actor: Gut.system_actor("workshop_browse"))
+      end
+
+      # Request magic link (ignoring errors - don't leak user existence)
+      Gut.Accounts.request_magic_link(email, actor: Gut.system_actor("workshop_browse"))
+
+      {:noreply, assign(socket, :magic_link_sent, true)}
+    end
+  end
+
   def handle_event("validate", params, socket) do
     errors = validate_params(params)
 
     socket =
       socket
       |> assign(:name, params["name"] || "")
-      |> assign(:email, params["email"] || socket.assigns.email)
       |> assign(:phone_number, params["phone_number"] || "")
       |> assign(:errors, errors)
 
     {:noreply, socket}
   end
 
+  def handle_event("save", _params, %{assigns: %{current_user: nil}} = socket) do
+    {:noreply, socket}
+  end
+
   def handle_event("save", params, socket) do
     name = String.trim(params["name"] || "")
-    email = String.trim(params["email"] || socket.assigns.email || "")
     phone_number = String.trim(params["phone_number"] || "")
+    email = to_string(socket.assigns.current_user.email)
 
-    errors = validate_params(params, socket.assigns.email)
+    errors = validate_params(params)
 
     if errors != %{} do
       {:noreply, assign(socket, :errors, errors)}
@@ -398,14 +457,10 @@ defmodule GutWeb.WorkshopBrowseLive do
     {:noreply, socket}
   end
 
-  defp validate_params(params, existing_email \\ nil) do
+  defp validate_params(params) do
     errors = %{}
     name = String.trim(params["name"] || "")
-    email = String.trim(params["email"] || existing_email || "")
-
-    errors = if name == "", do: Map.put(errors, :name, "Name is required"), else: errors
-    errors = if email == "", do: Map.put(errors, :email, "Email is required"), else: errors
-    errors
+    if name == "", do: Map.put(errors, :name, "Name is required"), else: errors
   end
 
   defp save_registrations(socket, name, email, phone_number) do
@@ -416,12 +471,12 @@ defmodule GutWeb.WorkshopBrowseLive do
     participant_result =
       case socket.assigns.participant do
         nil ->
-          attrs = %{name: name, phone_number: phone_number, email: email}
-
-          attrs =
-            if socket.assigns[:current_user],
-              do: Map.put(attrs, :user_id, socket.assigns.current_user.id),
-              else: attrs
+          attrs = %{
+            name: name,
+            phone_number: phone_number,
+            email: email,
+            user_id: socket.assigns.current_user.id
+          }
 
           Conference.create_workshop_participant(attrs, actor: @public_actor)
 
@@ -478,5 +533,10 @@ defmodule GutWeb.WorkshopBrowseLive do
     workshops = load_workshops()
     workshops_by_day = group_by_day(workshops)
     {:noreply, assign(socket, workshops: workshops, workshops_by_day: workshops_by_day)}
+  end
+
+  # Ignore Swoosh test adapter messages and other unexpected messages
+  def handle_info(_msg, socket) do
+    {:noreply, socket}
   end
 end

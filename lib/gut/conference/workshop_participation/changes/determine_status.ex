@@ -3,13 +3,15 @@ defmodule Gut.Conference.WorkshopParticipation.Changes.DetermineStatus do
 
   require Ash.Query
 
+  @system_actor Gut.system_actor("determine_status")
+
   def change(changeset, _opts, _context) do
     Ash.Changeset.before_action(changeset, fn changeset ->
       workshop_id = Ash.Changeset.get_attribute(changeset, :workshop_id)
 
       workshop =
         Ash.get!(Gut.Conference.Workshop, workshop_id,
-          authorize?: false,
+          actor: @system_actor,
           load: [:workshop_room]
         )
 
@@ -23,7 +25,7 @@ defmodule Gut.Conference.WorkshopParticipation.Changes.DetermineStatus do
       current_registrations =
         Gut.Conference.WorkshopParticipation
         |> Ash.Query.filter(workshop_id == ^workshop_id and status == :registered)
-        |> Ash.count!(authorize?: false)
+        |> Ash.count!(actor: @system_actor)
 
       status =
         if current_registrations < effective_limit do

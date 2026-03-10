@@ -13,7 +13,9 @@ defmodule GutWeb.AuthController do
       end
 
     if is_nil(user.activated_at) do
-      Gut.Accounts.update_user!(user, %{activated_at: DateTime.utc_now()}, authorize?: false)
+      Gut.Accounts.update_user!(user, %{activated_at: DateTime.utc_now()},
+        actor: Gut.system_actor("auth")
+      )
     end
 
     conn

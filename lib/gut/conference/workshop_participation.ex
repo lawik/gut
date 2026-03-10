@@ -27,10 +27,8 @@ defmodule Gut.Conference.WorkshopParticipation do
   end
 
   policies do
-    policy action([:read, :register, :destroy]) do
+    bypass action([:read, :register, :destroy]) do
       authorize_if Gut.Checks.PublicActor
-      authorize_if Gut.Checks.SystemActor
-      authorize_if Gut.Checks.StaffActor
     end
 
     policy always() do

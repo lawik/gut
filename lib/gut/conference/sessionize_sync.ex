@@ -49,6 +49,8 @@ defmodule Gut.Conference.SessionizeSync do
   """
   def sync_from_data(main_data, email_data, actor) do
     speakers = extract_speakers(main_data)
+    sessions = extract_sessions(main_data)
+    workshop_category_ids = extract_workshop_category_ids(main_data)
     email_map = build_email_map(email_data)
     existing = load_existing_speakers(actor)
 
@@ -75,8 +77,14 @@ defmodule Gut.Conference.SessionizeSync do
 
     Logger.info("Sessionize speaker sync: #{length(ok)} synced, #{length(errors)} errors")
 
-    # Sync workshops from session data embedded in speakers
-    workshop_result = sync_workshops(speakers, email_map, actor)
+    # Sync workshops from top-level sessions, filtering to workshop category only
+    workshop_sessions =
+      Enum.filter(sessions, fn session ->
+        category_items = MapSet.new(Map.get(session, "categoryItems", []))
+        MapSet.size(MapSet.intersection(category_items, workshop_category_ids)) > 0
+      end)
+
+    workshop_result = sync_workshops(workshop_sessions, speakers, email_map, actor)
 
     {:ok,
      %{
@@ -99,6 +107,29 @@ defmodule Gut.Conference.SessionizeSync do
   end
 
   def extract_speakers(_), do: []
+
+  @doc """
+  Extracts session entries from the main Sessionize response.
+  Sessions live at the top level of the response map, not inside speakers.
+  """
+  def extract_sessions(%{"sessions" => sessions}) when is_list(sessions), do: sessions
+  def extract_sessions(_), do: []
+
+  @workshop_category_names MapSet.new(["Workshop session", "workshop"])
+
+  @doc """
+  Extracts category item IDs that identify workshops from the Sessionize categories.
+  Matches items whose name is in #{inspect(@workshop_category_names)}.
+  """
+  def extract_workshop_category_ids(%{"categories" => categories}) when is_list(categories) do
+    categories
+    |> Enum.flat_map(fn cat -> Map.get(cat, "items", []) end)
+    |> Enum.filter(fn item -> MapSet.member?(@workshop_category_names, item["name"]) end)
+    |> Enum.map(fn item -> item["id"] end)
+    |> MapSet.new()
+  end
+
+  def extract_workshop_category_ids(_), do: MapSet.new()
 
   @doc """
   Builds a map of `%{sessionize_id => email}` from the email endpoint data.
@@ -189,32 +220,32 @@ defmodule Gut.Conference.SessionizeSync do
 
   @default_workshop_limit 30
 
-  defp sync_workshops(speakers, email_map, actor) do
-    # Collect unique sessions from all speakers, tracking which speakers belong to each
-    session_speakers =
-      speakers
-      |> Enum.reduce(%{}, fn speaker_data, acc ->
-        sessionize_id = to_string(Map.get(speaker_data, "id"))
-        email = Map.get(email_map, sessionize_id)
-        sessions = Map.get(speaker_data, "sessions", [])
-
-        Enum.reduce(sessions, acc, fn session, acc ->
-          session_id = to_string(Map.get(session, "id"))
-
-          Map.update(acc, session_id, {session, [email]}, fn {s, emails} ->
-            {s, [email | emails]}
-          end)
-        end)
-      end)
-
-    if session_speakers == %{} do
+  defp sync_workshops(sessions, speakers, email_map, actor) do
+    if sessions == [] do
       %{synced: 0, errors: 0}
     else
+      # Build a map of speaker UUID -> email for resolving session speakers
+      speaker_uuid_to_email =
+        Enum.reduce(speakers, %{}, fn speaker_data, acc ->
+          uuid = to_string(Map.get(speaker_data, "id"))
+          sessionize_id = to_string(Map.get(speaker_data, "id"))
+          email = Map.get(email_map, sessionize_id)
+          if email, do: Map.put(acc, uuid, email), else: acc
+        end)
+
       existing_workshops = load_existing_workshops(actor)
       existing_speakers = load_existing_speakers(actor)
 
       results =
-        Enum.map(session_speakers, fn {session_id, {session_data, speaker_emails}} ->
+        Enum.map(sessions, fn session_data ->
+          session_id = to_string(Map.get(session_data, "id"))
+          speaker_uuids = Map.get(session_data, "speakers", [])
+
+          speaker_emails =
+            Enum.map(speaker_uuids, fn uuid ->
+              Map.get(speaker_uuid_to_email, uuid)
+            end)
+
           upsert_workshop(
             session_id,
             session_data,
@@ -255,7 +286,7 @@ defmodule Gut.Conference.SessionizeSync do
          existing_speakers,
          actor
        ) do
-    name = Map.get(session_data, "name", "Untitled Workshop")
+    name = Map.get(session_data, "title", "Untitled Workshop")
 
     attrs = %{
       name: name,

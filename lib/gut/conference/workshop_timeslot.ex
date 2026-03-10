@@ -24,10 +24,8 @@ defmodule Gut.Conference.WorkshopTimeslot do
   end
 
   policies do
-    policy action(:read) do
+    bypass action(:read) do
       authorize_if Gut.Checks.PublicActor
-      authorize_if Gut.Checks.SystemActor
-      authorize_if Gut.Checks.StaffActor
     end
 
     policy always() do

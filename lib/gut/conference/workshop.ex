@@ -34,6 +34,8 @@ defmodule Gut.Conference.Workshop do
     end
 
     update :update do
+      require_atomic? false
+
       accept [
         :name,
         :description,
@@ -46,10 +48,8 @@ defmodule Gut.Conference.Workshop do
   end
 
   policies do
-    policy action([:read, :list, :browse]) do
+    bypass action([:read, :list, :browse]) do
       authorize_if Gut.Checks.PublicActor
-      authorize_if Gut.Checks.SystemActor
-      authorize_if Gut.Checks.StaffActor
     end
 
     policy always() do

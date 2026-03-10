@@ -31,6 +31,15 @@ defmodule GutWeb.WorkshopsLive do
     >
       <Layouts.workshop_subnav active="workshops" />
       <div class="mt-4">
+        <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+          <button
+            phx-click="sync_sessionize"
+            phx-disable-with="Syncing..."
+            class="btn btn-ghost"
+          >
+            <.icon name="hero-arrow-path" class="h-4 w-4 mr-2" /> Sync from Sessionize
+          </button>
+        </div>
         <div class="">
           <Cinder.Table.table
             id="workshops-table"
@@ -106,6 +115,25 @@ defmodule GutWeb.WorkshopsLive do
 
   def handle_info(%{topic: "workshops:changed"}, socket) do
     {:noreply, Cinder.Table.Refresh.refresh_table(socket, "workshops-table")}
+  end
+
+  def handle_event("sync_sessionize", _params, socket) do
+    case Gut.Conference.SessionizeSync.sync(socket.assigns.current_user) do
+      {:ok, %{workshops_synced: workshops_synced}} ->
+        socket =
+          socket
+          |> put_flash(:info, "Sessionize sync complete: #{workshops_synced} workshops synced")
+          |> Cinder.Table.Refresh.refresh_table("workshops-table")
+
+        {:noreply, socket}
+
+      {:error, :not_configured} ->
+        {:noreply, put_flash(socket, :error, "Sessionize URLs not configured")}
+
+      {:error, reason} ->
+        Logger.error("Sessionize sync failed: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Sessionize sync failed")}
+    end
   end
 
   def handle_event("delete", %{"id" => id}, socket) do

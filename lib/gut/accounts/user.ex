@@ -149,7 +149,7 @@ defmodule Gut.Accounts.User do
     end
 
     attribute :role, :atom do
-      constraints one_of: [:staff, :speaker, :sponsor]
+      constraints one_of: [:staff, :speaker, :sponsor, :attendee]
       allow_nil? false
       public? true
       default :staff

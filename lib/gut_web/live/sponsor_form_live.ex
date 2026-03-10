@@ -214,11 +214,11 @@ defmodule GutWeb.SponsorFormLive do
     user =
       case Gut.Accounts.get_user_by_email(email, actor: actor) do
         {:ok, user} -> user
-        {:error, _} -> Gut.Accounts.create_user!(email, :sponsor, authorize?: false)
+        {:error, _} -> Gut.Accounts.create_user!(email, :sponsor, actor: actor)
       end
 
     Gut.Conference.update_sponsor!(sponsor, %{user_id: user.id}, actor: actor)
-    Gut.Accounts.update_user!(user, %{role: :sponsor}, authorize?: false)
+    Gut.Accounts.update_user!(user, %{role: :sponsor}, actor: actor)
     socket
   end
 end

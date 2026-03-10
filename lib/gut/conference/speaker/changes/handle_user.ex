@@ -15,15 +15,17 @@ defmodule Gut.Conference.Speaker.Changes.HandleUser do
     end
   end
 
+  @system_actor Gut.system_actor("speaker_handle_user")
+
   defp set_user(changeset, email) do
     Ash.Changeset.before_action(changeset, fn changeset ->
       user =
-        case Gut.Accounts.get_user_by_email(email, authorize?: false) do
+        case Gut.Accounts.get_user_by_email(email, actor: @system_actor) do
           {:ok, user} ->
-            Gut.Accounts.update_user!(user, %{role: :speaker}, authorize?: false)
+            Gut.Accounts.update_user!(user, %{role: :speaker}, actor: @system_actor)
 
           {:error, _} ->
-            Gut.Accounts.create_user!(email, :speaker, authorize?: false)
+            Gut.Accounts.create_user!(email, :speaker, actor: @system_actor)
         end
 
       Ash.Changeset.force_change_attribute(changeset, :user_id, user.id)

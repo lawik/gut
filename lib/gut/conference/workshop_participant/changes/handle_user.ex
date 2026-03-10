@@ -9,15 +9,17 @@ defmodule Gut.Conference.WorkshopParticipant.Changes.HandleUser do
     end
   end
 
+  @system_actor Gut.system_actor("participant_handle_user")
+
   defp set_user(changeset, email) do
     Ash.Changeset.before_action(changeset, fn changeset ->
       user =
-        case Gut.Accounts.get_user_by_email(email, authorize?: false) do
+        case Gut.Accounts.get_user_by_email(email, actor: @system_actor) do
           {:ok, user} ->
             user
 
           {:error, _} ->
-            Gut.Accounts.create_user!(email, :staff, authorize?: false)
+            Gut.Accounts.create_user!(email, :staff, actor: @system_actor)
         end
 
       Ash.Changeset.force_change_attribute(changeset, :user_id, user.id)

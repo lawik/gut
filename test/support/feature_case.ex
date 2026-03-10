@@ -32,7 +32,7 @@ defmodule GutWeb.FeatureCase do
         Phoenix.Ecto.SQL.Sandbox.encode_metadata(metadata)
       )
 
-    {:ok, conn: conn, user: user}
+    {:ok, conn: conn, user: user, pid: pid}
   end
 
   @doc """
@@ -58,5 +58,19 @@ defmodule GutWeb.FeatureCase do
   def log_in_as(conn, role) do
     user = Gut.Generators.generate(Gut.Generators.user(email: "#{role}@test.com", role: role))
     log_in_user(conn, user)
+  end
+
+  @doc """
+  Builds an unauthenticated conn with sandbox metadata for testing public pages.
+  """
+  def build_unauthenticated_conn(pid) do
+    metadata = Phoenix.Ecto.SQL.Sandbox.metadata_for(Gut.Repo, pid)
+
+    Phoenix.ConnTest.build_conn()
+    |> Plug.Test.init_test_session(%{})
+    |> Plug.Conn.put_req_header(
+      "user-agent",
+      Phoenix.Ecto.SQL.Sandbox.encode_metadata(metadata)
+    )
   end
 end
