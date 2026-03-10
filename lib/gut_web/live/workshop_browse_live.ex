@@ -36,6 +36,7 @@ defmodule GutWeb.WorkshopBrowseLive do
       |> assign(:can_select, can_select)
       |> assign(:magic_link_sent, false)
       |> assign(:login_email, "")
+      |> assign(:description_workshop, nil)
 
     {:ok, socket}
   end
@@ -198,13 +199,14 @@ defmodule GutWeb.WorkshopBrowseLive do
                     </span>
                   </div>
 
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <%= for workshop <- workshops do %>
+                  <div class="rounded-2xl border-2 border-base-300 shadow-sm overflow-hidden md:border-0 md:shadow-none md:rounded-none md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
+                    <%= for {workshop, idx} <- Enum.with_index(workshops) do %>
                       <.workshop_card
                         workshop={workshop}
                         selected={Map.get(@selections, timeslot.id) == workshop.id}
                         timeslot_id={timeslot.id}
                         can_select={@can_select}
+                        last={idx == length(workshops) - 1}
                       />
                     <% end %>
                   </div>
@@ -275,6 +277,23 @@ defmodule GutWeb.WorkshopBrowseLive do
             </div>
           <% end %>
         <% end %>
+        <%= if @description_workshop do %>
+          <div class="modal modal-open" phx-window-keydown="close_description" phx-key="Escape">
+            <div class="modal-box max-w-2xl">
+              <h3 class="text-lg font-bold">{@description_workshop.name}</h3>
+              <%= if @description_workshop.speakers && @description_workshop.speakers != [] do %>
+                <p class="text-sm text-base-content/70 mt-1">
+                  {Enum.map_join(@description_workshop.speakers, ", ", & &1.full_name)}
+                </p>
+              <% end %>
+              <p class="py-4 whitespace-pre-line">{@description_workshop.description}</p>
+              <div class="modal-action">
+                <button class="btn" phx-click="close_description">Close</button>
+              </div>
+            </div>
+            <div class="modal-backdrop" phx-click="close_description"></div>
+          </div>
+        <% end %>
       </div>
     </Layouts.app>
     """
@@ -284,6 +303,7 @@ defmodule GutWeb.WorkshopBrowseLive do
   attr :selected, :boolean, required: true
   attr :timeslot_id, :string, required: true
   attr :can_select, :boolean, required: true
+  attr :last, :boolean, required: true
 
   defp workshop_card(assigns) do
     assigns =
@@ -295,11 +315,13 @@ defmodule GutWeb.WorkshopBrowseLive do
     ~H"""
     <div
       class={[
-        "card bg-base-100 shadow-sm border-2 transition-all",
+        "bg-base-100 transition-all",
+        !@last && "border-b border-base-300 md:border-b-2",
+        "md:card md:shadow-sm md:border-2 md:rounded-2xl",
         @can_select && "cursor-pointer",
         if(@selected,
-          do: "border-primary ring-2 ring-primary/20",
-          else: "border-base-300 hover:border-base-content/20"
+          do: "bg-primary/5 md:bg-transparent md:border-primary md:ring-2 md:ring-primary/20",
+          else: "md:border-base-300 md:hover:border-base-content/20"
         ),
         @full && !@selected && "opacity-75"
       ]}
@@ -323,14 +345,22 @@ defmodule GutWeb.WorkshopBrowseLive do
           <% end %>
         </div>
 
-        <%= if @workshop.description do %>
-          <p class="text-sm text-base-content/60 line-clamp-2">{@workshop.description}</p>
-        <% end %>
-
         <%= if @workshop.speakers && @workshop.speakers != [] do %>
           <div class="text-sm text-base-content/70">
             {Enum.map_join(@workshop.speakers, ", ", & &1.full_name)}
           </div>
+        <% end %>
+
+        <%= if @workshop.description do %>
+          <p class="text-sm text-base-content/60 line-clamp-2">{@workshop.description}</p>
+          <a
+            href="#"
+            class="text-sm text-primary hover:underline"
+            phx-click="show_description"
+            phx-value-workshop_id={@workshop.id}
+          >
+            Read more
+          </a>
         <% end %>
 
         <div class="flex items-center justify-between mt-2">
@@ -375,6 +405,15 @@ defmodule GutWeb.WorkshopBrowseLive do
       end
 
     {:noreply, assign(socket, :selections, selections)}
+  end
+
+  def handle_event("show_description", %{"workshop_id" => workshop_id}, socket) do
+    workshop = Enum.find(socket.assigns.workshops, &(&1.id == workshop_id))
+    {:noreply, assign(socket, :description_workshop, workshop)}
+  end
+
+  def handle_event("close_description", _params, socket) do
+    {:noreply, assign(socket, :description_workshop, nil)}
   end
 
   def handle_event("request_magic_link", %{"email" => email}, socket) do

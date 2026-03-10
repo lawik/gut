@@ -67,6 +67,36 @@ defmodule GutWeb.WorkshopBrowseLiveTest do
     end
   end
 
+  describe "read more modal" do
+    setup [:create_workshop_data]
+
+    test "shows read more link when workshop has description", %{conn: conn} do
+      conn
+      |> visit("/workshops/browse")
+      |> assert_has("a", text: "Read more")
+    end
+
+    test "clicking read more opens modal with full description", %{
+      conn: conn,
+      workshop: workshop
+    } do
+      conn
+      |> visit("/workshops/browse")
+      |> click_link("Read more")
+      |> assert_has(".modal h3", text: workshop.name)
+      |> assert_has(".modal p", text: workshop.description)
+    end
+
+    test "modal can be closed with close button", %{conn: conn} do
+      conn
+      |> visit("/workshops/browse")
+      |> click_link("Read more")
+      |> assert_has(".modal")
+      |> click_button(".modal-action button", "Close")
+      |> refute_has(".modal")
+    end
+  end
+
   describe "authenticated user" do
     setup [:create_workshop_data]
 
