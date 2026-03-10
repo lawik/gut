@@ -56,6 +56,7 @@ defmodule Gut.Conference do
 
     resource Gut.Conference.Workshop do
       define :list_workshops, action: :read
+      define :browse_workshops, action: :browse
       define :get_workshop, action: :read, get_by: [:id]
       define :create_workshop, action: :create
       define :update_workshop, action: :update

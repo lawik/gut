@@ -42,7 +42,7 @@ defmodule Gut.Conference.SessionizeSync do
   end
 
   @doc """
-  Syncs speakers from already-fetched Sessionize data.
+  Syncs speakers and workshops from already-fetched Sessionize data.
 
   `main_data` is the decoded JSON from the main Sessionize endpoint (speaker profiles).
   `email_data` is the decoded JSON from the email endpoint (list of `%{"id" => ..., "email" => ...}`).
@@ -52,7 +52,7 @@ defmodule Gut.Conference.SessionizeSync do
     email_map = build_email_map(email_data)
     existing = load_existing_speakers(actor)
 
-    results =
+    speaker_results =
       speakers
       |> Enum.map(fn speaker_data ->
         sessionize_id = to_string(Map.get(speaker_data, "id"))
@@ -68,14 +68,23 @@ defmodule Gut.Conference.SessionizeSync do
       |> Enum.reject(&match?({:skip, _}, &1))
 
     {ok, errors} =
-      Enum.split_with(results, fn
+      Enum.split_with(speaker_results, fn
         {:ok, _} -> true
         _ -> false
       end)
 
-    Logger.info("Sessionize sync complete: #{length(ok)} synced, #{length(errors)} errors")
+    Logger.info("Sessionize speaker sync: #{length(ok)} synced, #{length(errors)} errors")
 
-    {:ok, %{synced: length(ok), errors: length(errors)}}
+    # Sync workshops from session data embedded in speakers
+    workshop_result = sync_workshops(speakers, email_map, actor)
+
+    {:ok,
+     %{
+       synced: length(ok),
+       errors: length(errors),
+       workshops_synced: workshop_result.synced,
+       workshops_errors: workshop_result.errors
+     }}
   end
 
   @doc """
@@ -176,5 +185,127 @@ defmodule Gut.Conference.SessionizeSync do
       speaker ->
         Gut.Conference.update_speaker(speaker, attrs, actor: actor)
     end
+  end
+
+  @default_workshop_limit 30
+
+  defp sync_workshops(speakers, email_map, actor) do
+    # Collect unique sessions from all speakers, tracking which speakers belong to each
+    session_speakers =
+      speakers
+      |> Enum.reduce(%{}, fn speaker_data, acc ->
+        sessionize_id = to_string(Map.get(speaker_data, "id"))
+        email = Map.get(email_map, sessionize_id)
+        sessions = Map.get(speaker_data, "sessions", [])
+
+        Enum.reduce(sessions, acc, fn session, acc ->
+          session_id = to_string(Map.get(session, "id"))
+
+          Map.update(acc, session_id, {session, [email]}, fn {s, emails} ->
+            {s, [email | emails]}
+          end)
+        end)
+      end)
+
+    if session_speakers == %{} do
+      %{synced: 0, errors: 0}
+    else
+      existing_workshops = load_existing_workshops(actor)
+      existing_speakers = load_existing_speakers(actor)
+
+      results =
+        Enum.map(session_speakers, fn {session_id, {session_data, speaker_emails}} ->
+          upsert_workshop(
+            session_id,
+            session_data,
+            speaker_emails,
+            existing_workshops,
+            existing_speakers,
+            actor
+          )
+        end)
+
+      {ok, errors} =
+        Enum.split_with(results, fn
+          {:ok, _} -> true
+          _ -> false
+        end)
+
+      Logger.info("Sessionize workshop sync: #{length(ok)} synced, #{length(errors)} errors")
+      %{synced: length(ok), errors: length(errors)}
+    end
+  end
+
+  defp load_existing_workshops(actor) do
+    require Ash.Query
+
+    Gut.Conference.Workshop
+    |> Ash.Query.filter(not is_nil(sessionize_id))
+    |> Ash.read!(actor: actor, load: [:speakers])
+    |> Enum.reduce(%{}, fn workshop, acc ->
+      Map.put(acc, workshop.sessionize_id, workshop)
+    end)
+  end
+
+  defp upsert_workshop(
+         session_id,
+         session_data,
+         speaker_emails,
+         existing_workshops,
+         existing_speakers,
+         actor
+       ) do
+    name = Map.get(session_data, "name", "Untitled Workshop")
+
+    attrs = %{
+      name: name,
+      sessionize_id: session_id
+    }
+
+    workshop_result =
+      case Map.get(existing_workshops, session_id) do
+        nil ->
+          Gut.Conference.create_workshop(Map.put(attrs, :limit, @default_workshop_limit),
+            actor: actor
+          )
+
+        workshop ->
+          Gut.Conference.update_workshop(workshop, attrs, actor: actor)
+      end
+
+    case workshop_result do
+      {:ok, workshop} ->
+        sync_workshop_speakers(workshop, speaker_emails, existing_speakers, actor)
+        {:ok, workshop}
+
+      error ->
+        error
+    end
+  end
+
+  defp sync_workshop_speakers(workshop, speaker_emails, existing_speakers, actor) do
+    existing_speaker_ids =
+      case Ash.load(workshop, :speakers, actor: actor) do
+        {:ok, w} -> Enum.map(w.speakers, & &1.id) |> MapSet.new()
+        _ -> MapSet.new()
+      end
+
+    speaker_emails
+    |> Enum.filter(& &1)
+    |> Enum.uniq()
+    |> Enum.each(fn email ->
+      case Map.get(existing_speakers, String.downcase(email)) do
+        nil ->
+          nil
+
+        speaker ->
+          unless MapSet.member?(existing_speaker_ids, speaker.id) do
+            Gut.Conference.create_workshop_speaker(
+              %{workshop_id: workshop.id, speaker_id: speaker.id},
+              actor: actor
+            )
+          end
+      end
+    end)
   end
 end

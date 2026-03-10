@@ -18,16 +18,40 @@ defmodule Gut.Conference.Workshop do
       prepare build(load: [:workshop_room, :workshop_timeslot])
     end
 
+    read :browse do
+      prepare build(load: [:workshop_room, :workshop_timeslot, :speakers, :registration_count])
+    end
+
     create :create do
-      accept [:name, :description, :limit, :workshop_room_id, :workshop_timeslot_id]
+      accept [
+        :name,
+        :description,
+        :limit,
+        :workshop_room_id,
+        :workshop_timeslot_id,
+        :sessionize_id
+      ]
     end
 
     update :update do
-      accept [:name, :description, :limit, :workshop_room_id, :workshop_timeslot_id]
+      accept [
+        :name,
+        :description,
+        :limit,
+        :workshop_room_id,
+        :workshop_timeslot_id,
+        :sessionize_id
+      ]
     end
   end
 
   policies do
+    policy action([:read, :list, :browse]) do
+      authorize_if Gut.Checks.PublicActor
+      authorize_if Gut.Checks.SystemActor
+      authorize_if Gut.Checks.StaffActor
+    end
+
     policy always() do
       authorize_if Gut.Checks.SystemActor
       authorize_if Gut.Checks.StaffActor
@@ -59,6 +83,10 @@ defmodule Gut.Conference.Workshop do
       public? true
     end
 
+    attribute :sessionize_id, :string do
+      public? true
+    end
+
     create_timestamp :inserted_at
     update_timestamp :updated_at
   end
@@ -84,6 +112,12 @@ defmodule Gut.Conference.Workshop do
       through Gut.Conference.WorkshopParticipation
       source_attribute_on_join_resource :workshop_id
       destination_attribute_on_join_resource :workshop_participant_id
+    end
+  end
+
+  aggregates do
+    count :registration_count, :workshop_participations do
+      filter expr(status == :registered)
     end
   end
 

@@ -19,4 +19,14 @@ defmodule Gut do
   def system_actor(label) do
     %{type: :system, label: label}
   end
+
+  @doc """
+  Returns a public actor for use in unauthenticated public-facing pages.
+
+      Gut.public_actor()
+      #=> %{type: :public}
+  """
+  def public_actor do
+    %{type: :public}
+  end
 end

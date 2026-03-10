@@ -119,7 +119,13 @@ defmodule Gut.Conference.Speaker do
       authorize_if relates_to_actor_via(:user)
     end
 
-    policy action([:read, :create, :update, :destroy]) do
+    policy action(:read) do
+      authorize_if Gut.Checks.PublicActor
+      authorize_if Gut.Checks.SystemActor
+      authorize_if Gut.Checks.StaffActor
+    end
+
+    policy action([:create, :update, :destroy]) do
       authorize_if Gut.Checks.SystemActor
       authorize_if Gut.Checks.StaffActor
     end
