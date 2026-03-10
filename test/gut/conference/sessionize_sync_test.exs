@@ -324,6 +324,94 @@ defmodule Gut.Conference.SessionizeSyncTest do
     end
   end
 
+  describe "workshop sync" do
+    test "syncs workshop description from sessionize" do
+      main_data = %{
+        "speakers" => [
+          %{
+            "id" => "s1",
+            "firstName" => "Alice",
+            "lastName" => "Smith",
+            "fullName" => "Alice Smith"
+          }
+        ],
+        "sessions" => [
+          %{
+            "id" => "w1",
+            "title" => "Elixir Workshop",
+            "description" => "Learn Elixir from scratch in this hands-on workshop.",
+            "speakers" => ["s1"],
+            "categoryItems" => [101]
+          }
+        ],
+        "categories" => [
+          %{
+            "items" => [
+              %{"id" => 101, "name" => "Workshop session"}
+            ]
+          }
+        ]
+      }
+
+      email_data = [%{"id" => "s1", "email" => "alice@example.com"}]
+
+      {:ok, result} = SessionizeSync.sync_from_data(main_data, email_data, @actor)
+
+      assert result.workshops_synced == 1
+      assert result.workshops_errors == 0
+
+      require Ash.Query
+
+      [workshop] =
+        Gut.Conference.Workshop
+        |> Ash.Query.filter(not is_nil(sessionize_id))
+        |> Ash.read!(actor: @actor)
+
+      assert workshop.name == "Elixir Workshop"
+      assert workshop.description == "Learn Elixir from scratch in this hands-on workshop."
+    end
+
+    test "updates workshop description on re-sync" do
+      main_data = %{
+        "speakers" => [],
+        "sessions" => [
+          %{
+            "id" => "w1",
+            "title" => "Elixir Workshop",
+            "description" => "Original description.",
+            "speakers" => [],
+            "categoryItems" => [101]
+          }
+        ],
+        "categories" => [
+          %{
+            "items" => [
+              %{"id" => 101, "name" => "Workshop session"}
+            ]
+          }
+        ]
+      }
+
+      email_data = []
+
+      {:ok, _} = SessionizeSync.sync_from_data(main_data, email_data, @actor)
+
+      updated_data =
+        put_in(main_data, ["sessions", Access.at(0), "description"], "Updated description.")
+
+      {:ok, _} = SessionizeSync.sync_from_data(updated_data, email_data, @actor)
+
+      require Ash.Query
+
+      [workshop] =
+        Gut.Conference.Workshop
+        |> Ash.Query.filter(not is_nil(sessionize_id))
+        |> Ash.read!(actor: @actor)
+
+      assert workshop.description == "Updated description."
+    end
+  end
+
   describe "sync/1" do
     test "returns error when main URL is not configured" do
       Application.put_env(:gut, :sessionize_main_url, nil)

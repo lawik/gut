@@ -287,9 +287,11 @@ defmodule Gut.Conference.SessionizeSync do
          actor
        ) do
     name = Map.get(session_data, "title", "Untitled Workshop")
+    description = Map.get(session_data, "description")
 
     attrs = %{
       name: name,
+      description: description,
       sessionize_id: session_id
     }
 
