@@ -1,0 +1,96 @@
+defmodule Gut.Conference.Workshop do
+  use Ash.Resource,
+    otp_app: :gut,
+    domain: Gut.Conference,
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
+    notifiers: [Ash.Notifier.PubSub]
+
+  postgres do
+    table "workshops"
+    repo Gut.Repo
+  end
+
+  actions do
+    defaults [:read, :destroy]
+
+    read :list do
+      prepare build(load: [:workshop_room, :workshop_timeslot])
+    end
+
+    create :create do
+      accept [:name, :description, :limit, :workshop_room_id, :workshop_timeslot_id]
+    end
+
+    update :update do
+      accept [:name, :description, :limit, :workshop_room_id, :workshop_timeslot_id]
+    end
+  end
+
+  policies do
+    policy always() do
+      authorize_if Gut.Checks.SystemActor
+      authorize_if Gut.Checks.StaffActor
+    end
+  end
+
+  pub_sub do
+    module GutWeb.Endpoint
+    prefix "workshops"
+    publish :create, ["changed"]
+    publish :update, ["changed"]
+    publish :destroy, ["changed"]
+  end
+
+  attributes do
+    uuid_primary_key :id
+
+    attribute :name, :string do
+      allow_nil? false
+      public? true
+    end
+
+    attribute :description, :string do
+      public? true
+    end
+
+    attribute :limit, :integer do
+      allow_nil? false
+      public? true
+    end
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  relationships do
+    belongs_to :workshop_room, Gut.Conference.WorkshopRoom do
+      public? true
+    end
+
+    belongs_to :workshop_timeslot, Gut.Conference.WorkshopTimeslot do
+      public? true
+    end
+
+    many_to_many :speakers, Gut.Conference.Speaker do
+      through Gut.Conference.WorkshopSpeaker
+      source_attribute_on_join_resource :workshop_id
+      destination_attribute_on_join_resource :speaker_id
+    end
+
+    has_many :workshop_participations, Gut.Conference.WorkshopParticipation
+
+    many_to_many :participants, Gut.Conference.WorkshopParticipant do
+      through Gut.Conference.WorkshopParticipation
+      source_attribute_on_join_resource :workshop_id
+      destination_attribute_on_join_resource :workshop_participant_id
+    end
+  end
+
+  identities do
+    identity :unique_room_timeslot, [:workshop_room_id, :workshop_timeslot_id],
+      pre_check_with: Gut.Repo,
+      nils_distinct?: true,
+      message: "a workshop already exists in this room and timeslot"
+  end
+end

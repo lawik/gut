@@ -62,6 +62,9 @@ defmodule GutWeb.Layouts do
             <.link navigate={~p"/sponsors"} class="btn btn-ghost">Sponsors</.link>
           </li>
           <li :if={@staff?}>
+            <.link navigate={~p"/workshops"} class="btn btn-ghost">Workshops</.link>
+          </li>
+          <li :if={@staff?}>
             <.link navigate={~p"/users"} class="btn btn-ghost">Users</.link>
           </li>
           <li :if={@staff?}>
@@ -183,6 +186,63 @@ defmodule GutWeb.Layouts do
         <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
       </button>
     </div>
+    """
+  end
+
+  attr :active, :string, required: true, doc: "the active tab"
+
+  def workshop_subnav(assigns) do
+    ~H"""
+    <div class="border-b border-base-300 px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between">
+        <nav class="flex space-x-1" aria-label="Workshop navigation">
+          <.subnav_tab label="Workshops" href={~p"/workshops"} active={@active == "workshops"} />
+          <.subnav_tab label="Rooms" href={~p"/workshop-rooms"} active={@active == "rooms"} />
+          <.subnav_tab
+            label="Timeslots"
+            href={~p"/workshop-timeslots"}
+            active={@active == "timeslots"}
+          />
+          <.subnav_tab
+            label="Participants"
+            href={~p"/workshop-participants"}
+            active={@active == "participants"}
+          />
+        </nav>
+        <div class="flex space-x-2 py-2">
+          <.link navigate={~p"/workshops/new"} class="btn btn-primary btn-sm">
+            <.icon name="hero-plus" class="h-3 w-3 mr-1" /> Workshop
+          </.link>
+          <.link navigate={~p"/workshop-rooms/new"} class="btn btn-ghost btn-sm">
+            <.icon name="hero-plus" class="h-3 w-3 mr-1" /> Room
+          </.link>
+          <.link navigate={~p"/workshop-timeslots/new"} class="btn btn-ghost btn-sm">
+            <.icon name="hero-plus" class="h-3 w-3 mr-1" /> Timeslot
+          </.link>
+          <.link navigate={~p"/workshop-participants/new"} class="btn btn-ghost btn-sm">
+            <.icon name="hero-plus" class="h-3 w-3 mr-1" /> Participant
+          </.link>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp subnav_tab(assigns) do
+    ~H"""
+    <.link
+      navigate={@href}
+      class={[
+        "px-3 py-3 text-sm font-medium border-b-2 -mb-px",
+        if(@active,
+          do: "border-primary text-primary",
+          else:
+            "border-transparent text-base-content/60 hover:text-base-content hover:border-base-300"
+        )
+      ]}
+    >
+      {@label}
+    </.link>
     """
   end
 

@@ -57,6 +57,24 @@ defmodule GutWeb.Router do
       live "/sponsors/:id", SponsorDetailLive
       live "/sponsors/:id/edit", SponsorFormLive
 
+      live "/workshops", WorkshopsLive
+      live "/workshops/new", WorkshopFormLive
+      live "/workshops/:id", WorkshopDetailLive
+      live "/workshops/:id/edit", WorkshopFormLive
+
+      live "/workshop-rooms", WorkshopRoomsLive
+      live "/workshop-rooms/new", WorkshopRoomFormLive
+      live "/workshop-rooms/:id/edit", WorkshopRoomFormLive
+
+      live "/workshop-timeslots", WorkshopTimeslotsLive
+      live "/workshop-timeslots/new", WorkshopTimeslotFormLive
+      live "/workshop-timeslots/:id/edit", WorkshopTimeslotFormLive
+
+      live "/workshop-participants", WorkshopParticipantsLive
+      live "/workshop-participants/new", WorkshopParticipantFormLive
+      live "/workshop-participants/:id", WorkshopParticipantDetailLive
+      live "/workshop-participants/:id/edit", WorkshopParticipantFormLive
+
       live "/users", UsersLive
       live "/users/new", UserFormLive
       live "/users/:id", UserDetailLive

@@ -68,4 +68,59 @@ defmodule Gut.Generators do
       overrides: opts
     )
   end
+
+  def workshop_timeslot(opts \\ []) do
+    changeset_generator(
+      Gut.Conference.WorkshopTimeslot,
+      :create,
+      actor: Gut.system_actor("test"),
+      defaults: [
+        name: "Morning Slot",
+        start: ~U[2026-06-15 09:00:00Z],
+        end: ~U[2026-06-15 12:00:00Z]
+      ],
+      overrides: opts
+    )
+  end
+
+  def workshop_room(opts \\ []) do
+    changeset_generator(
+      Gut.Conference.WorkshopRoom,
+      :create,
+      actor: Gut.system_actor("test"),
+      defaults: [
+        name: "Room A",
+        limit: 30
+      ],
+      overrides: opts
+    )
+  end
+
+  def workshop(opts \\ []) do
+    changeset_generator(
+      Gut.Conference.Workshop,
+      :create,
+      actor: Gut.system_actor("test"),
+      defaults: [
+        name: "Intro to Elixir",
+        description: "A beginner workshop",
+        limit: 20
+      ],
+      overrides: opts
+    )
+  end
+
+  def workshop_participant(opts \\ []) do
+    changeset_generator(
+      Gut.Conference.WorkshopParticipant,
+      :create,
+      actor: Gut.system_actor("test"),
+      defaults: [
+        name: sequence(:participant_name, &"Participant #{&1}"),
+        phone_number: nil,
+        user_id: nil
+      ],
+      overrides: opts
+    )
+  end
 end

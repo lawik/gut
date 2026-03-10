@@ -37,5 +37,49 @@ defmodule Gut.Conference do
       define :update_sponsor, action: :update
       define :destroy_sponsor, action: :destroy
     end
+
+    resource Gut.Conference.WorkshopTimeslot do
+      define :list_workshop_timeslots, action: :read
+      define :get_workshop_timeslot, action: :read, get_by: [:id]
+      define :create_workshop_timeslot, action: :create
+      define :update_workshop_timeslot, action: :update
+      define :destroy_workshop_timeslot, action: :destroy
+    end
+
+    resource Gut.Conference.WorkshopRoom do
+      define :list_workshop_rooms, action: :read
+      define :get_workshop_room, action: :read, get_by: [:id]
+      define :create_workshop_room, action: :create
+      define :update_workshop_room, action: :update
+      define :destroy_workshop_room, action: :destroy
+    end
+
+    resource Gut.Conference.Workshop do
+      define :list_workshops, action: :read
+      define :get_workshop, action: :read, get_by: [:id]
+      define :create_workshop, action: :create
+      define :update_workshop, action: :update
+      define :destroy_workshop, action: :destroy
+    end
+
+    resource Gut.Conference.WorkshopSpeaker do
+      define :create_workshop_speaker, action: :create
+      define :destroy_workshop_speaker, action: :destroy
+    end
+
+    resource Gut.Conference.WorkshopParticipant do
+      define :list_workshop_participants, action: :read
+      define :get_workshop_participant, action: :read, get_by: [:id]
+      define :create_workshop_participant, action: :create
+      define :update_workshop_participant, action: :update
+      define :destroy_workshop_participant, action: :destroy
+    end
+
+    resource Gut.Conference.WorkshopParticipation do
+      define :list_workshop_participations, action: :read
+      define :register_for_workshop, action: :register
+      define :update_workshop_participation, action: :update
+      define :destroy_workshop_participation, action: :destroy
+    end
   end
 end
