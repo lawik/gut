@@ -47,7 +47,7 @@ defmodule GutWeb.Layouts do
       <div class="flex-1">
         <div class="flex-1 flex w-fit items-center gap-2">
           <a href="/">
-            Gut
+            {Application.get_env(:gut, :page_name)}
           </a>
           <a href="#" class="font-bold">{assigns[:page_title]}</a>
           <span :if={@git_sha != ""} class="text-xs font-mono text-gray-400">{@git_sha}</span>
