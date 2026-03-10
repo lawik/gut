@@ -90,6 +90,17 @@ defmodule GutWeb.SponsorFormLive do
               </div>
 
               <.input field={@form[:name]} type="text" label="Sponsor Name" required />
+              <.input
+                field={@form[:status]}
+                type="select"
+                label="Status"
+                options={[
+                  {"Cold", :cold},
+                  {"Warm", :warm},
+                  {"OK", :ok},
+                  {"Dismissed", :dismissed}
+                ]}
+              />
               <.input field={@form[:sponsorship_level]} type="text" label="Sponsorship Level" />
               <.input field={@form[:amount_eur]} type="number" label="Amount (EUR)" />
               <.input

@@ -57,19 +57,27 @@ defmodule GutWeb.SponsorLiveTest do
   end
 
   describe "SponsorFormLive (create)" do
-    test "renders the new sponsor form", %{conn: conn} do
+    test "renders all form fields", %{conn: conn} do
       conn
       |> visit("/sponsors/new")
       |> assert_has("h1", text: "Adding new sponsor")
+      # Basic Information
       |> assert_has("label", text: "Sponsor Name")
+      |> assert_has("label", text: "Status")
       |> assert_has("label", text: "Sponsorship Level")
-    end
-
-    test "renders amount and likelihood fields", %{conn: conn} do
-      conn
-      |> visit("/sponsors/new")
       |> assert_has("label", text: "Amount (EUR)")
       |> assert_has("label", text: "Likelihood (%)")
+      # User Account
+      |> assert_has("label", text: "Connect user (email)")
+      # Outreach
+      |> assert_has("label", text: "Outreach Details")
+      # Pipeline Checkpoints
+      |> assert_has("label", text: "Responded")
+      |> assert_has("label", text: "Interested")
+      |> assert_has("label", text: "Confirmed (said yes)")
+      |> assert_has("label", text: "Logos received")
+      |> assert_has("label", text: "Announced")
+      |> assert_has("label", text: "Not happening")
     end
 
     test "creates a sponsor with valid data", %{conn: conn} do
