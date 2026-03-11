@@ -225,7 +225,7 @@ defmodule GutWeb.Layouts do
     ~H"""
     <div class="border-b border-base-300 px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <nav class="flex overflow-x-auto -mb-px" aria-label="Workshop navigation">
+        <nav class="flex overflow-x-auto overflow-y-hidden -mb-px" aria-label="Workshop navigation">
           <.subnav_tab label="Workshops" href={~p"/workshops"} active={@active == "workshops"} />
           <.subnav_tab label="Rooms" href={~p"/workshop-rooms"} active={@active == "rooms"} />
           <.subnav_tab
