@@ -84,7 +84,12 @@ defmodule GutWeb.UserFormLive do
                 field={@form[:role]}
                 type="select"
                 label="Role"
-                options={[{"Staff", "staff"}, {"Speaker", "speaker"}, {"Sponsor", "sponsor"}]}
+                options={[
+                  {"Attendee", "attendee"},
+                  {"Speaker", "speaker"},
+                  {"Sponsor", "sponsor"},
+                  {"Staff", "staff"}
+                ]}
               />
             </div>
 
