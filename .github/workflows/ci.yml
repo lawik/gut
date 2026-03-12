@@ -89,7 +89,7 @@ jobs:
 
           # Rewrite URL to go through the local proxy
           PROXY_URL=$(echo "$DB_URL" | sed -E 's|@[^/]+/|@localhost:15432/|')
-          pg_dump -Fc --no-owner --no-acl "$PROXY_URL" > backup.dump
+          /usr/lib/postgresql/17/bin/pg_dump -Fc --no-owner --no-acl "$PROXY_URL" > backup.dump
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
