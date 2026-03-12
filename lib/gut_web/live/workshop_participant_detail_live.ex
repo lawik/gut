@@ -4,11 +4,11 @@ defmodule GutWeb.WorkshopParticipantDetailLive do
   on_mount {GutWeb.LiveUserAuth, :live_staff_required}
 
   def mount(%{"id" => id}, _session, socket) do
-    participant =
-      Gut.Conference.get_workshop_participant!(id,
-        actor: socket.assigns.current_user,
-        load: [:user, workshop_participations: [:workshop]]
-      )
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Gut.PubSub, "workshop_participations:changed")
+    end
+
+    participant = load_participant(id, socket.assigns.current_user)
 
     socket =
       socket
@@ -87,15 +87,25 @@ defmodule GutWeb.WorkshopParticipantDetailLive do
                         >
                           {participation.workshop.name}
                         </.link>
-                        <span class={[
-                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                          if(participation.status == :registered,
-                            do: "bg-success/10 text-success",
-                            else: "bg-warning/10 text-warning"
-                          )
-                        ]}>
-                          {participation.status}
-                        </span>
+                        <div class="flex items-center gap-2">
+                          <span class={[
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                            if(participation.status == :registered,
+                              do: "bg-success/10 text-success",
+                              else: "bg-warning/10 text-warning"
+                            )
+                          ]}>
+                            {participation.status}
+                          </span>
+                          <button
+                            phx-click="remove_participation"
+                            phx-value-id={participation.id}
+                            data-confirm="Remove this workshop registration?"
+                            class="text-error hover:text-error/80 text-xs font-medium"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </li>
                     </ul>
                   <% else %>
@@ -126,5 +136,34 @@ defmodule GutWeb.WorkshopParticipantDetailLive do
       </div>
     </Layouts.app>
     """
+  end
+
+  def handle_event("remove_participation", %{"id" => id}, socket) do
+    case Gut.Conference.destroy_workshop_participation(id, actor: socket.assigns.current_user) do
+      :ok ->
+        participant = load_participant(socket.assigns.participant.id, socket.assigns.current_user)
+
+        socket =
+          socket
+          |> assign(:participant, participant)
+          |> put_flash(:info, "Workshop registration removed")
+
+        {:noreply, socket}
+
+      {:error, _error} ->
+        {:noreply, put_flash(socket, :error, "Failed to remove registration")}
+    end
+  end
+
+  def handle_info(%{topic: "workshop_participations:changed"}, socket) do
+    participant = load_participant(socket.assigns.participant.id, socket.assigns.current_user)
+    {:noreply, assign(socket, :participant, participant)}
+  end
+
+  defp load_participant(id, actor) do
+    Gut.Conference.get_workshop_participant!(id,
+      actor: actor,
+      load: [:user, workshop_participations: [:workshop]]
+    )
   end
 end

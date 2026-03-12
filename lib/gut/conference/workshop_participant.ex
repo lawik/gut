@@ -12,7 +12,11 @@ defmodule Gut.Conference.WorkshopParticipant do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
+
+    destroy :destroy do
+      change cascade_destroy(:workshop_participations)
+    end
 
     create :create do
       accept [:name, :phone_number, :user_id]
