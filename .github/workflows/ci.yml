@@ -78,7 +78,7 @@ jobs:
           DB_URL=$(flyctl ssh console -a goatbiz -C 'printenv DATABASE_URL' 2>/dev/null | tr -d '\r\n')
 
           # Proxy to the postgres app
-          flyctl proxy 15432:5432 -a goatbiz-db &
+          flyctl proxy 15432:5432 goatbiz-db.flycast -a goatbiz &
           sleep 3
 
           # Rewrite URL to go through the local proxy
