@@ -72,11 +72,18 @@ jobs:
     steps:
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
-      - name: Dump database
+      - name: Dump database via proxy
         run: |
-          flyctl ssh console \
-            --command 'pg_dump -Fc --no-owner --no-acl $DATABASE_URL' \
-            -a goatbiz > backup.dump
+          # Get DATABASE_URL from the app
+          DB_URL=$(flyctl ssh console -a goatbiz -C 'printenv DATABASE_URL' 2>/dev/null | tr -d '\r\n')
+
+          # Proxy to the postgres app
+          flyctl proxy 15432:5432 -a goatbiz-db &
+          sleep 3
+
+          # Rewrite URL to go through the local proxy
+          PROXY_URL=$(echo "$DB_URL" | sed -E 's|@[^/]+/|@localhost:15432/|')
+          pg_dump -Fc --no-owner --no-acl "$PROXY_URL" > backup.dump
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
