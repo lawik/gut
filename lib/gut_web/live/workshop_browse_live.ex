@@ -371,7 +371,7 @@ defmodule GutWeb.WorkshopBrowseLive do
             <%= if @full do %>
               Full (waitlist available)
             <% else %>
-              {@remaining}/{@limit} spots
+              {@remaining} seats left
             <% end %>
           </span>
 
