@@ -124,7 +124,7 @@ defmodule GutWeb.WorkshopBrowseLive do
         <div class="mb-8">
           <h1 class="text-3xl font-bold text-base-content">Workshop Registration</h1>
           <p class="mt-2 text-base-content/60">
-            Select one workshop per timeslot and register below. We intend to open more slots as we pin down the details of workshops and the spaces they are held in. If you are on the waitlist for a workshop we'll contact you by email leading up to the event.
+            Select one workshop per timeslot and register below. We intend to open more slots as we pin down the details of workshops and the spaces they are held in. If you are on the waitlist for a workshop we'll contact you by email leading up to the event. These all require you to be on site at Campus Varberg in Varberg, Sweden. There will be no recordings or remote dealios. It's going to be legendary though.
           </p>
         </div>
 
