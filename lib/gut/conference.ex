@@ -61,6 +61,7 @@ defmodule Gut.Conference do
       define :create_workshop, action: :create
       define :update_workshop, action: :update
       define :destroy_workshop, action: :destroy
+      define :promote_waitlist, action: :promote_waitlist, args: [:workshop_id]
     end
 
     resource Gut.Conference.WorkshopSpeaker do

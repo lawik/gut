@@ -111,6 +111,14 @@ defmodule GutWeb.WorkshopDetailLive do
                         <%= if waitlisted > 0 do %>
                           , <span class="text-warning font-medium">{waitlisted}</span> waitlisted
                         <% end %>
+                        <%= if waitlisted > 0 and registered < effective_limit do %>
+                          <button
+                            phx-click="promote_waitlist"
+                            class="ml-2 btn btn-sm btn-warning"
+                          >
+                            Promote from waitlist
+                          </button>
+                        <% end %>
                       </dd>
                     </div>
                   </div>
@@ -190,6 +198,26 @@ defmodule GutWeb.WorkshopDetailLive do
       min(workshop.limit, workshop.workshop_room.limit)
     else
       workshop.limit
+    end
+  end
+
+  def handle_event("promote_waitlist", _params, socket) do
+    case Gut.Conference.promote_waitlist(socket.assigns.workshop.id,
+           actor: socket.assigns.current_user
+         ) do
+      {:ok, 0} ->
+        {:noreply, put_flash(socket, :info, "No participants to promote.")}
+
+      {:ok, count} ->
+        workshop = load_workshop(socket.assigns.workshop.id, socket.assigns.current_user)
+
+        {:noreply,
+         socket
+         |> assign(:workshop, workshop)
+         |> put_flash(:info, "Promoted #{count} participant(s) from waitlist.")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to promote waitlisted participants.")}
     end
   end
 

@@ -15,7 +15,9 @@ defmodule Gut.Conference.Workshop do
     defaults [:read, :destroy]
 
     read :list do
-      prepare build(load: [:workshop_room, :workshop_timeslot])
+      prepare build(
+                load: [:workshop_room, :workshop_timeslot, :registration_count, :waitlist_count]
+              )
     end
 
     read :browse do
@@ -44,6 +46,12 @@ defmodule Gut.Conference.Workshop do
         :workshop_timeslot_id,
         :sessionize_id
       ]
+    end
+
+    action :promote_waitlist, :integer do
+      argument :workshop_id, :uuid, allow_nil?: false
+
+      run Gut.Conference.Workshop.Actions.PromoteWaitlist
     end
   end
 
@@ -118,6 +126,10 @@ defmodule Gut.Conference.Workshop do
   aggregates do
     count :registration_count, :workshop_participations do
       filter expr(status == :registered)
+    end
+
+    count :waitlist_count, :workshop_participations do
+      filter expr(status == :waitlisted)
     end
   end
 

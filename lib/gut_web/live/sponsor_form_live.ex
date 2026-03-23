@@ -101,7 +101,17 @@ defmodule GutWeb.SponsorFormLive do
                   {"Dismissed", :dismissed}
                 ]}
               />
-              <.input field={@form[:sponsorship_level]} type="text" label="Sponsorship Level" />
+              <.input
+                field={@form[:sponsorship_level]}
+                type="select"
+                label="Sponsorship Level"
+                prompt="Select level"
+                options={[
+                  {"Supporting", "supporting"},
+                  {"Foundation", "foundation"},
+                  {"Custom", "custom"}
+                ]}
+              />
               <.input field={@form[:amount_eur]} type="number" label="Amount (EUR)" />
               <.input
                 field={@form[:likelihood]}

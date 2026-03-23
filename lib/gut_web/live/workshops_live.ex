@@ -66,6 +66,18 @@ defmodule GutWeb.WorkshopsLive do
               <span class="text-sm">{workshop.limit}</span>
             </:col>
 
+            <:col :let={workshop} field="registration_count" sort label="Registered">
+              <span class="text-sm">{workshop.registration_count}</span>
+            </:col>
+
+            <:col :let={workshop} field="waitlist_count" sort label="Waitlisted">
+              <%= if workshop.waitlist_count > 0 do %>
+                <span class="text-sm text-warning font-medium">{workshop.waitlist_count}</span>
+              <% else %>
+                <span class="text-sm text-base-content/40">0</span>
+              <% end %>
+            </:col>
+
             <:col :let={workshop} field="workshop_room_id" label="Room">
               <%= if Ash.Resource.loaded?(workshop, :workshop_room) && workshop.workshop_room do %>
                 <span class="text-sm">{workshop.workshop_room.name}</span>
