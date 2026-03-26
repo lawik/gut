@@ -18,6 +18,7 @@ config :gut, Oban,
   plugins: [{Oban.Plugins.Cron, []}]
 
 config :ash,
+  tracer: [OpentelemetryAsh],
   allow_forbidden_field_for_relationships_by_default?: true,
   include_embedded_source_by_default?: false,
   show_keysets_for_all_actions?: false,
@@ -27,6 +28,9 @@ config :ash,
   default_actions_require_atomic?: true,
   read_action_after_action_hooks_in_order?: true,
   bulk_actions_default_to_errors?: true
+
+config :opentelemetry_ash,
+  trace_types: [:custom, :action, :flow]
 
 config :spark,
   formatter: [

@@ -11,6 +11,10 @@ defmodule Gut.Application do
       config: %{metadata: [:file, :line]}
     })
 
+    OpentelemetryBandit.setup()
+    OpentelemetryPhoenix.setup(adapter: :bandit)
+    OpentelemetryEcto.setup([:gut, :repo], db_statement: :enabled)
+
     children =
       [
         GutWeb.Telemetry,

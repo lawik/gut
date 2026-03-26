@@ -19,7 +19,12 @@ config :logger, level: :info
 config :sentry,
   environment_name: Mix.env(),
   enable_source_code_context: true,
-  root_source_code_paths: [File.cwd!()]
+  root_source_code_paths: [File.cwd!()],
+  traces_sample_rate: 1.0
+
+config :opentelemetry,
+  span_processor: {Sentry.OpenTelemetry.SpanProcessor, []},
+  sampler: {Sentry.OpenTelemetry.Sampler, []}
 
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.

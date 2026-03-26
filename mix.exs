@@ -87,8 +87,15 @@ defmodule Gut.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:nostrum, "~> 0.10", runtime: Mix.env() == :prod},
-      {:sentry, "~> 10.2.0"},
+      {:sentry, "~> 12.0"},
       {:hackney, "~> 1.8"},
+      {:opentelemetry, "~> 1.5"},
+      {:opentelemetry_api, "~> 1.4"},
+      {:opentelemetry_exporter, "~> 1.8"},
+      {:opentelemetry_phoenix, "~> 2.0"},
+      {:opentelemetry_bandit, "~> 0.2"},
+      {:opentelemetry_ecto, "~> 1.2"},
+      {:opentelemetry_ash, "~> 0.1"},
       {:entrace, github: "underjord/entrace", branch: "main", override: true},
       {:entrace_opentelemetry, github: "underjord/entrace_opentelemetry", branch: "main"}
     ]
