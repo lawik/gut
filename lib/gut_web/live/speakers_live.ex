@@ -31,13 +31,22 @@ defmodule GutWeb.SpeakersLive do
     >
       <div class="">
         <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
-          <button
-            phx-click="sync_sessionize"
-            phx-disable-with="Syncing..."
-            class="btn btn-ghost"
-          >
-            <.icon name="hero-arrow-path" class="h-4 w-4 mr-2" /> Sync from Sessionize
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              phx-click="sync_sessionize"
+              phx-disable-with="Syncing..."
+              class="btn btn-ghost"
+            >
+              <.icon name="hero-arrow-path" class="h-4 w-4 mr-2" /> Sync from Sessionize
+            </button>
+            <a
+              href={csv_export_path("/export/speakers", @url_state)}
+              download="speakers.csv"
+              class="btn btn-ghost"
+            >
+              <.icon name="hero-arrow-down-tray" class="h-4 w-4 mr-2" /> Export CSV
+            </a>
+          </div>
           <.link
             navigate={~p"/speakers/new"}
             class="btn btn-primary"
@@ -196,6 +205,16 @@ defmodule GutWeb.SpeakersLive do
         Logger.error("Failed to delete speaker #{id}: #{inspect(error)}")
         {:noreply, put_flash(socket, :error, "Failed to delete speaker")}
     end
+  end
+
+  defp csv_export_path(base_path, url_state) do
+    params =
+      Map.get(url_state || %{}, :filters, %{})
+      |> Map.drop(["page", "page_size"])
+
+    if map_size(params) == 0,
+      do: base_path,
+      else: base_path <> "?" <> URI.encode_query(params)
   end
 
   defp hotel_status_class(:confirmed), do: "bg-success/20 text-success"

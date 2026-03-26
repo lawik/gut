@@ -86,6 +86,9 @@ defmodule GutWeb.Router do
   scope "/", GutWeb do
     pipe_through :browser
 
+    get "/export/speakers", CsvExportController, :speakers
+    get "/export/workshops", CsvExportController, :workshops
+    get "/export/sponsors", CsvExportController, :sponsors
     get "/", PageController, :home
     auth_routes AuthController, Gut.Accounts.User, path: "/auth"
     sign_out_route AuthController

@@ -42,11 +42,20 @@ defmodule GutWeb.SponsorsLive do
     >
       <div class="">
         <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
-          <div class="text-sm text-base-content/70">
-            Pipeline value:
-            <span class="font-semibold text-base-content">
-              EUR {format_number(@pipeline_value)}
-            </span>
+          <div class="flex items-center gap-4">
+            <div class="text-sm text-base-content/70">
+              Pipeline value:
+              <span class="font-semibold text-base-content">
+                EUR {format_number(@pipeline_value)}
+              </span>
+            </div>
+            <a
+              href={csv_export_path("/export/sponsors", @url_state)}
+              download="sponsors.csv"
+              class="btn btn-ghost"
+            >
+              <.icon name="hero-arrow-down-tray" class="h-4 w-4 mr-2" /> Export CSV
+            </a>
           </div>
           <.link
             navigate={~p"/sponsors/new"}
@@ -169,6 +178,16 @@ defmodule GutWeb.SponsorsLive do
       </div>
     </Layouts.app>
     """
+  end
+
+  defp csv_export_path(base_path, url_state) do
+    params =
+      Map.get(url_state || %{}, :filters, %{})
+      |> Map.drop(["page", "page_size"])
+
+    if map_size(params) == 0,
+      do: base_path,
+      else: base_path <> "?" <> URI.encode_query(params)
   end
 
   defp status_badge_class(:cold), do: "bg-info/10 text-info"
