@@ -86,7 +86,9 @@ defmodule Gut.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      {:nostrum, "~> 0.10", runtime: Mix.env() == :prod}
+      {:nostrum, "~> 0.10", runtime: Mix.env() == :prod},
+      {:sentry, "~> 10.2.0"},
+      {:hackney, "~> 1.8"}
     ]
   end
 

@@ -121,4 +121,9 @@ if config_env() == :prod do
   config :nostrum,
     token: System.get_env("DISCORD_BOT_TOKEN"),
     gateway_intents: [:guilds]
+
+  if System.get_env("SENTRY_DSN") do
+    config :sentry,
+      dsn: System.get_env("SENTRY_DSN")
+  end
 end

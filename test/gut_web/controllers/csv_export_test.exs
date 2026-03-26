@@ -19,6 +19,22 @@ defmodule GutWeb.CsvExportTest do
       assert resp.resp_body =~ "Bob Jones"
     end
 
+    test "exports all speakers regardless of default page size", %{conn: conn} do
+      for i <- 1..30 do
+        generate(
+          speaker(full_name: "Speaker #{i}", first_name: "First#{i}", last_name: "Last#{i}")
+        )
+      end
+
+      resp = get(conn, "/export/speakers")
+
+      assert resp.status == 200
+
+      for i <- 1..30 do
+        assert resp.resp_body =~ "Speaker #{i},"
+      end
+    end
+
     test "includes all CSV headers", %{conn: conn} do
       resp = get(conn, "/export/speakers")
 
