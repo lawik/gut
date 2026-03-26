@@ -1,4 +1,5 @@
 defmodule GutWeb.Endpoint do
+  use Sentry.PlugCapture
   use Phoenix.Endpoint, otp_app: :gut
 
   # The session will be stored in the cookie and signed,
@@ -62,6 +63,7 @@ defmodule GutWeb.Endpoint do
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 
+  plug Sentry.PlugContext
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options

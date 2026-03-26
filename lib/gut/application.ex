@@ -7,6 +7,10 @@ defmodule Gut.Application do
 
   @impl true
   def start(_type, _args) do
+    :logger.add_handler(:sentry_handler, Sentry.LoggerHandler, %{
+      config: %{metadata: [:file, :line]}
+    })
+
     children =
       [
         GutWeb.Telemetry,
@@ -18,6 +22,7 @@ defmodule Gut.Application do
            Application.fetch_env!(:gut, Oban)
          )},
         {Phoenix.PubSub, name: Gut.PubSub},
+        Gut.Tracer,
         GutWeb.Endpoint,
         {AshAuthentication.Supervisor, [otp_app: :gut]}
       ] ++ discord_children()
