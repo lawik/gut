@@ -88,7 +88,9 @@ defmodule Gut.MixProject do
       {:bandit, "~> 1.5"},
       {:nostrum, "~> 0.10", runtime: Mix.env() == :prod},
       {:sentry, "~> 10.2.0"},
-      {:hackney, "~> 1.8"}
+      {:hackney, "~> 1.8"},
+      {:entrace, github: "underjord/entrace", branch: "main", override: true},
+      {:entrace_opentelemetry, github: "underjord/entrace_opentelemetry", branch: "main"}
     ]
   end
 
