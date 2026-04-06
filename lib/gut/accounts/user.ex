@@ -43,6 +43,7 @@ defmodule Gut.Accounts.User do
         identity_field :email
         registration_enabled? false
         require_interaction? true
+        token_lifetime {30, :minutes}
 
         sender Gut.Accounts.User.Senders.SendMagicLinkEmail
       end
