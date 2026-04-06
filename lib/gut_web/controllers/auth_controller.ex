@@ -27,6 +27,18 @@ defmodule GutWeb.AuthController do
   end
 
   def failure(conn, activity, reason) do
+    {strategy, action} = activity
+
+    Sentry.capture_message("Authentication failure",
+      level: :warning,
+      extra: %{
+        strategy: strategy,
+        action: action,
+        reason: inspect(reason, pretty: true, limit: 5)
+      },
+      tags: %{auth_strategy: strategy}
+    )
+
     message =
       case {activity, reason} do
         {_,
