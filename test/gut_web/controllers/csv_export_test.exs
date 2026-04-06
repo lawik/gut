@@ -189,6 +189,28 @@ defmodule GutWeb.CsvExportTest do
       assert resp.resp_body =~ "Phoenix Deep Dive"
     end
 
+    test "exports all workshops regardless of pagination", %{conn: conn} do
+      for i <- 1..30 do
+        generate(
+          workshop(
+            name: "Workshop #{i}",
+            description: "Desc #{i}",
+            limit: 10 + i,
+            workshop_room_id: nil,
+            workshop_timeslot_id: nil
+          )
+        )
+      end
+
+      resp = get(conn, "/export/workshops")
+
+      assert resp.status == 200
+
+      for i <- 1..30 do
+        assert resp.resp_body =~ "Workshop #{i},"
+      end
+    end
+
     test "includes all CSV headers", %{conn: conn} do
       resp = get(conn, "/export/workshops")
 
