@@ -21,7 +21,7 @@ defmodule GutWeb.CsvExportController do
         |> apply_atom_filters(params, @speaker_atom_filters)
         |> apply_sort(params)
 
-      {:ok, records} = Ash.read(query, actor: user)
+      {:ok, records} = Ash.read(query, actor: user, page: false)
 
       headers = [
         "Full Name",
@@ -77,11 +77,18 @@ defmodule GutWeb.CsvExportController do
   def workshops(conn, params) do
     with {:ok, user} <- require_staff(conn) do
       query =
-        Ash.Query.for_read(Gut.Conference.Workshop, :list)
+        Gut.Conference.Workshop
+        |> Ash.Query.for_read(:read)
+        |> Ash.Query.load([
+          :workshop_room,
+          :workshop_timeslot,
+          :registration_count,
+          :waitlist_count
+        ])
         |> apply_text_filters(params, @workshop_text_filters)
         |> apply_sort(params)
 
-      {:ok, records} = Ash.read(query, actor: user)
+      {:ok, records} = Ash.read(query, actor: user, page: false)
 
       headers = [
         "Name",
@@ -125,7 +132,7 @@ defmodule GutWeb.CsvExportController do
         |> apply_sponsor_status(params)
         |> apply_sort(params)
 
-      {:ok, records} = Ash.read(query, actor: user)
+      {:ok, records} = Ash.read(query, actor: user, page: false)
 
       headers = [
         "Name",

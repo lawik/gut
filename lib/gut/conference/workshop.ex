@@ -15,6 +15,8 @@ defmodule Gut.Conference.Workshop do
     defaults [:read, :destroy]
 
     read :list do
+      pagination offset?: true, default_limit: 25, countable: :by_default
+
       prepare build(
                 load: [:workshop_room, :workshop_timeslot, :registration_count, :waitlist_count]
               )
