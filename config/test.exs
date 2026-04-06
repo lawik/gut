@@ -42,3 +42,5 @@ config :phoenix_live_view,
   enable_expensive_runtime_checks: true
 
 config :phoenix_test, :endpoint, GutWeb.Endpoint
+
+config :opentelemetry, traces_exporter: :none

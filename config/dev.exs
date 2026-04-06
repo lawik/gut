@@ -94,3 +94,5 @@ config :phoenix_live_view,
 config :swoosh, :api_client, false
 
 config :gut, Gut.Mailer, from_email: "noreply@example.com"
+
+config :opentelemetry, traces_exporter: :none
