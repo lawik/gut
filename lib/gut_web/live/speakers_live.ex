@@ -12,6 +12,7 @@ defmodule GutWeb.SpeakersLive do
     socket =
       socket
       |> assign(:current_scope, nil)
+      |> assign(:any_missing?, any_missing_speakers?(socket.assigns.current_user))
 
     {:ok, socket}
   end
@@ -30,6 +31,10 @@ defmodule GutWeb.SpeakersLive do
       page_title="Speakers"
     >
       <div class="">
+        <div :if={@any_missing?} class="alert alert-warning mx-4 sm:mx-6 lg:mx-8 mt-4">
+          <.icon name="hero-exclamation-triangle" class="h-5 w-5" />
+          <span>Some speakers are no longer in Sessionize.</span>
+        </div>
         <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
           <div class="flex items-center gap-2">
             <button
@@ -169,7 +174,12 @@ defmodule GutWeb.SpeakersLive do
   end
 
   def handle_info(%{topic: "speakers:changed"}, socket) do
-    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "speakers-table")}
+    socket =
+      socket
+      |> assign(:any_missing?, any_missing_speakers?(socket.assigns.current_user))
+      |> Cinder.Table.Refresh.refresh_table("speakers-table")
+
+    {:noreply, socket}
   end
 
   def handle_event("sync_sessionize", _params, socket) do
@@ -205,6 +215,14 @@ defmodule GutWeb.SpeakersLive do
         Logger.error("Failed to delete speaker #{id}: #{inspect(error)}")
         {:noreply, put_flash(socket, :error, "Failed to delete speaker")}
     end
+  end
+
+  defp any_missing_speakers?(actor) do
+    require Ash.Query
+
+    Gut.Conference.Speaker
+    |> Ash.Query.filter(missing_from_sessionize == true)
+    |> Ash.exists?(actor: actor)
   end
 
   defp csv_export_path(base_path, url_state) do

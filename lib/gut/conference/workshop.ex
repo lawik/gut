@@ -33,7 +33,8 @@ defmodule Gut.Conference.Workshop do
         :limit,
         :workshop_room_id,
         :workshop_timeslot_id,
-        :sessionize_id
+        :sessionize_id,
+        :missing_from_sessionize
       ]
     end
 
@@ -46,7 +47,8 @@ defmodule Gut.Conference.Workshop do
         :limit,
         :workshop_room_id,
         :workshop_timeslot_id,
-        :sessionize_id
+        :sessionize_id,
+        :missing_from_sessionize
       ]
     end
 
@@ -95,6 +97,11 @@ defmodule Gut.Conference.Workshop do
 
     attribute :sessionize_id, :string do
       public? true
+    end
+
+    attribute :missing_from_sessionize, :boolean do
+      public? true
+      default false
     end
 
     create_timestamp :inserted_at

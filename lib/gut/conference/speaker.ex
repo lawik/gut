@@ -48,6 +48,7 @@ defmodule Gut.Conference.Speaker do
         :special_requests,
         :notes,
         :sessionize_data,
+        :missing_from_sessionize,
         :user_id
       ]
 
@@ -86,6 +87,7 @@ defmodule Gut.Conference.Speaker do
         :special_requests,
         :notes,
         :sessionize_data,
+        :missing_from_sessionize,
         :user_id
       ]
 
@@ -221,6 +223,11 @@ defmodule Gut.Conference.Speaker do
 
     attribute :sessionize_data, :map do
       public? true
+    end
+
+    attribute :missing_from_sessionize, :boolean do
+      public? true
+      default false
     end
 
     create_timestamp :inserted_at

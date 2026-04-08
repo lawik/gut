@@ -77,6 +77,9 @@ defmodule Gut.Conference.SessionizeSync do
 
     Logger.info("Sessionize speaker sync: #{length(ok)} synced, #{length(errors)} errors")
 
+    sessionize_emails = email_map |> Map.values() |> MapSet.new()
+    flag_missing_speakers(existing, sessionize_emails, actor)
+
     # Sync workshops from top-level sessions, filtering to workshop category only
     workshop_sessions =
       Enum.filter(sessions, fn session ->
@@ -85,6 +88,11 @@ defmodule Gut.Conference.SessionizeSync do
       end)
 
     workshop_result = sync_workshops(workshop_sessions, speakers, email_map, actor)
+
+    sessionize_workshop_ids =
+      workshop_sessions |> Enum.map(&to_string(Map.get(&1, "id"))) |> MapSet.new()
+
+    flag_missing_workshops(sessionize_workshop_ids, actor)
 
     {:ok,
      %{
@@ -338,6 +346,49 @@ defmodule Gut.Conference.SessionizeSync do
               actor: actor
             )
           end
+      end
+    end)
+  end
+
+  defp flag_missing_speakers(existing_by_email, sessionize_emails, actor) do
+    Enum.each(existing_by_email, fn {email, speaker} ->
+      # Only flag speakers that came from Sessionize (have sessionize_data)
+      has_sessionize_data = speaker.sessionize_data != nil and speaker.sessionize_data != %{}
+      in_sessionize = MapSet.member?(sessionize_emails, email)
+
+      cond do
+        has_sessionize_data and not in_sessionize and not speaker.missing_from_sessionize ->
+          Gut.Conference.update_speaker(speaker, %{missing_from_sessionize: true}, actor: actor)
+
+        has_sessionize_data and in_sessionize and speaker.missing_from_sessionize ->
+          Gut.Conference.update_speaker(speaker, %{missing_from_sessionize: false}, actor: actor)
+
+        true ->
+          :ok
+      end
+    end)
+  end
+
+  defp flag_missing_workshops(sessionize_workshop_ids, actor) do
+    require Ash.Query
+
+    Gut.Conference.Workshop
+    |> Ash.Query.filter(not is_nil(sessionize_id))
+    |> Ash.read!(actor: actor)
+    |> Enum.each(fn workshop ->
+      in_sessionize = MapSet.member?(sessionize_workshop_ids, workshop.sessionize_id)
+
+      cond do
+        not in_sessionize and not workshop.missing_from_sessionize ->
+          Gut.Conference.update_workshop(workshop, %{missing_from_sessionize: true}, actor: actor)
+
+        in_sessionize and workshop.missing_from_sessionize ->
+          Gut.Conference.update_workshop(workshop, %{missing_from_sessionize: false},
+            actor: actor
+          )
+
+        true ->
+          :ok
       end
     end)
   end

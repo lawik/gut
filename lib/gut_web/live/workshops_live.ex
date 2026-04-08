@@ -12,6 +12,7 @@ defmodule GutWeb.WorkshopsLive do
     socket =
       socket
       |> assign(:current_scope, nil)
+      |> assign(:any_missing?, any_missing_workshops?(socket.assigns.current_user))
 
     {:ok, socket}
   end
@@ -30,6 +31,10 @@ defmodule GutWeb.WorkshopsLive do
       page_title="Workshops"
     >
       <Layouts.workshop_subnav active="workshops" />
+      <div :if={@any_missing?} class="alert alert-warning mx-4 sm:mx-6 lg:mx-8 mt-4">
+        <.icon name="hero-exclamation-triangle" class="h-5 w-5" />
+        <span>Some workshops are no longer in Sessionize.</span>
+      </div>
       <div class="mt-4">
         <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
           <div class="flex items-center gap-2">
@@ -134,6 +139,14 @@ defmodule GutWeb.WorkshopsLive do
     """
   end
 
+  defp any_missing_workshops?(actor) do
+    require Ash.Query
+
+    Gut.Conference.Workshop
+    |> Ash.Query.filter(missing_from_sessionize == true)
+    |> Ash.exists?(actor: actor)
+  end
+
   defp csv_export_path(base_path, url_state) do
     params =
       Map.get(url_state || %{}, :filters, %{})
@@ -145,7 +158,12 @@ defmodule GutWeb.WorkshopsLive do
   end
 
   def handle_info(%{topic: "workshops:changed"}, socket) do
-    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "workshops-table")}
+    socket =
+      socket
+      |> assign(:any_missing?, any_missing_workshops?(socket.assigns.current_user))
+      |> Cinder.Table.Refresh.refresh_table("workshops-table")
+
+    {:noreply, socket}
   end
 
   def handle_event("sync_sessionize", _params, socket) do
