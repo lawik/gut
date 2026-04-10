@@ -45,6 +45,14 @@ defmodule GutWeb.WorkshopDetailLive do
           </.link>
         </div>
 
+        <div
+          :if={@workshop.missing_from_sessionize}
+          class="alert alert-warning mb-6"
+        >
+          <.icon name="hero-exclamation-triangle" class="h-5 w-5" />
+          <span>This workshop is no longer in Sessionize.</span>
+        </div>
+
         <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl overflow-hidden">
           <div class="px-6 py-8 bg-base-200 border-b border-base-300">
             <div class="flex items-center justify-between">

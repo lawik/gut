@@ -65,7 +65,15 @@ defmodule GutWeb.WorkshopsLive do
             row_click={fn workshop -> JS.navigate(~p"/workshops/#{workshop.id}") end}
           >
             <:col :let={workshop} field="name" filter sort label="Name">
-              <div class="font-medium">{workshop.name}</div>
+              <div class="font-medium">
+                {workshop.name}
+                <span
+                  :if={workshop.missing_from_sessionize}
+                  class="ml-2 inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning"
+                >
+                  Missing from Sessionize
+                </span>
+              </div>
             </:col>
 
             <:col :let={workshop} field="description" label="Description">
