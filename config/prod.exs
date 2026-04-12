@@ -20,7 +20,7 @@ config :sentry,
   environment_name: Mix.env(),
   enable_source_code_context: true,
   root_source_code_paths: [File.cwd!()],
-  traces_sample_rate: 1.0
+  traces_sample_rate: 0.05
 
 config :opentelemetry,
   span_processor: {Sentry.OpenTelemetry.SpanProcessor, []},
