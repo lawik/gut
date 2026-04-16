@@ -9,6 +9,10 @@ defmodule Gut.Conference.WorkshopParticipation do
   postgres do
     table "workshop_participations"
     repo Gut.Repo
+
+    references do
+      reference :workshop, on_delete: :delete
+    end
   end
 
   actions do

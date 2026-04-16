@@ -12,7 +12,27 @@ defmodule Gut.Conference.Workshop do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
+
+    destroy :destroy do
+      require_atomic? false
+
+      validate fn changeset, context ->
+        require Ash.Query
+        workshop_id = changeset.data.id
+
+        has_participants =
+          Gut.Conference.WorkshopParticipation
+          |> Ash.Query.filter(workshop_id == ^workshop_id)
+          |> Ash.exists?(Ash.Context.to_opts(context))
+
+        if has_participants do
+          {:error, field: :base, message: "cannot delete a workshop with participants"}
+        else
+          :ok
+        end
+      end
+    end
 
     read :list do
       pagination offset?: true, default_limit: 25, countable: :by_default
@@ -140,6 +160,8 @@ defmodule Gut.Conference.Workshop do
     count :waitlist_count, :workshop_participations do
       filter expr(status == :waitlisted)
     end
+
+    count :participant_count, :workshop_participations
   end
 
   identities do
