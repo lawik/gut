@@ -41,6 +41,16 @@ defmodule GutWeb.WorkshopBrowseLive do
     {:ok, socket}
   end
 
+  def handle_params(params, _uri, socket) do
+    description_workshop =
+      case params["workshop"] do
+        nil -> nil
+        id -> Enum.find(socket.assigns.workshops, &(&1.id == id))
+      end
+
+    {:noreply, assign(socket, :description_workshop, description_workshop)}
+  end
+
   @public_actor Gut.public_actor()
 
   defp load_workshops do
@@ -408,12 +418,11 @@ defmodule GutWeb.WorkshopBrowseLive do
   end
 
   def handle_event("show_description", %{"workshop_id" => workshop_id}, socket) do
-    workshop = Enum.find(socket.assigns.workshops, &(&1.id == workshop_id))
-    {:noreply, assign(socket, :description_workshop, workshop)}
+    {:noreply, push_patch(socket, to: ~p"/workshops/browse?workshop=#{workshop_id}")}
   end
 
   def handle_event("close_description", _params, socket) do
-    {:noreply, assign(socket, :description_workshop, nil)}
+    {:noreply, push_patch(socket, to: ~p"/workshops/browse")}
   end
 
   def handle_event("request_magic_link", %{"email" => email}, socket) do
