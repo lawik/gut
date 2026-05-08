@@ -5,25 +5,20 @@ defmodule GutWeb.MyTravelLiveTest do
 
   @system_actor Gut.system_actor("test")
 
-  defp build_speaker(conn, opts \\ []) do
-    user_email =
-      Keyword.get(opts, :user_email, "speaker-#{System.unique_integer([:positive])}@test.com")
+  defp build_speaker(conn) do
+    user = generate(user(role: :speaker))
 
-    user = generate(user(email: user_email, role: :speaker))
-
-    speaker_attrs =
-      Keyword.merge(
-        [first_name: "Grace", last_name: "Hopper", full_name: "Grace Hopper", user_id: user.id],
-        Keyword.get(opts, :speaker_attrs, [])
+    speaker =
+      generate(
+        speaker(
+          first_name: "Grace",
+          last_name: "Hopper",
+          full_name: "Grace Hopper",
+          user_id: user.id
+        )
       )
 
-    speaker = generate(speaker(speaker_attrs))
-
-    conn =
-      conn
-      |> Plug.Test.init_test_session(%{})
-      |> log_in_user(user)
-
+    conn = log_in_user(conn, user)
     {conn, user, speaker}
   end
 

@@ -43,7 +43,11 @@ defmodule Gut.Generators do
         contract_approved_at: nil,
         contract_approved_git_sha: nil,
         sessionize_data: nil,
-        user_id: nil
+        user_id: nil,
+        # Stop Ash.Generator from auto-generating a random email argument that
+        # makes the HandleUser change relink the speaker to a freshly-created
+        # user, overriding any user_id we pass in.
+        email: nil
       ],
       overrides: opts
     )

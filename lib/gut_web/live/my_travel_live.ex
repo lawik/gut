@@ -43,15 +43,15 @@ defmodule GutWeb.MyTravelLive do
 
     dates = effective_dates(speaker)
 
-    speaker_for_form = %{
-      speaker
-      | hotel_stay_start_date: dates.hotel_stay_start_date,
-        hotel_stay_end_date: dates.hotel_stay_end_date
-    }
-
     hotel_form =
-      speaker_for_form
-      |> AshPhoenix.Form.for_update(:update_hotel_request, actor: user)
+      speaker
+      |> AshPhoenix.Form.for_update(:update_hotel_request,
+        actor: user,
+        params: %{
+          "hotel_stay_start_date" => Date.to_iso8601(dates.hotel_stay_start_date),
+          "hotel_stay_end_date" => Date.to_iso8601(dates.hotel_stay_end_date)
+        }
+      )
       |> to_form()
 
     socket
