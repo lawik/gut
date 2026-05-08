@@ -45,10 +45,14 @@ defmodule Gut.Conference.Speaker do
         :sharing_with,
         :wants_early_checkin,
         :double_bed,
+        :plus_one,
+        :days_covered,
         :special_requests,
         :notes,
         :sessionize_data,
         :missing_from_sessionize,
+        :contract_approved_at,
+        :contract_approved_git_sha,
         :user_id
       ]
 
@@ -84,10 +88,14 @@ defmodule Gut.Conference.Speaker do
         :sharing_with,
         :wants_early_checkin,
         :double_bed,
+        :plus_one,
+        :days_covered,
         :special_requests,
         :notes,
         :sessionize_data,
         :missing_from_sessionize,
+        :contract_approved_at,
+        :contract_approved_git_sha,
         :user_id
       ]
 
@@ -103,8 +111,35 @@ defmodule Gut.Conference.Speaker do
       filter expr(user_id == ^actor(:id))
     end
 
+    update :approve_contract do
+      require_atomic? false
+      accept []
+
+      change fn changeset, _ctx ->
+        changeset
+        |> Ash.Changeset.force_change_attribute(:contract_approved_at, DateTime.utc_now())
+        |> Ash.Changeset.force_change_attribute(
+          :contract_approved_git_sha,
+          Gut.GitSha.current()
+        )
+      end
+
+      change Gut.Conference.Changes.NotifyDiscord
+    end
+
     update :update_travel do
+      require_atomic? false
       accept [:arrival_date, :arrival_time, :leaving_date, :leaving_time]
+      validate Gut.Conference.Speaker.Validations.ContractApproved
+      change Gut.Conference.Changes.NotifyDiscord
+    end
+
+    update :update_hotel_request do
+      require_atomic? false
+      accept [:hotel_stay_start_date, :hotel_stay_end_date, :plus_one, :special_requests]
+      validate Gut.Conference.Speaker.Validations.ContractApproved
+      change Gut.Conference.Speaker.Changes.FlipHotelConfirmation
+      change Gut.Conference.Changes.NotifyDiscord
     end
   end
 
@@ -118,6 +153,14 @@ defmodule Gut.Conference.Speaker do
     end
 
     policy action(:update_travel) do
+      authorize_if relates_to_actor_via(:user)
+    end
+
+    policy action(:update_hotel_request) do
+      authorize_if relates_to_actor_via(:user)
+    end
+
+    policy action(:approve_contract) do
       authorize_if relates_to_actor_via(:user)
     end
 
@@ -228,6 +271,25 @@ defmodule Gut.Conference.Speaker do
     attribute :missing_from_sessionize, :boolean do
       public? true
       default false
+    end
+
+    attribute :plus_one, :boolean do
+      public? true
+      default false
+    end
+
+    attribute :days_covered, :integer do
+      public? true
+
+      description "Nights of hotel stay covered by the conference. nil means use the global default."
+    end
+
+    attribute :contract_approved_at, :utc_datetime_usec do
+      public? true
+    end
+
+    attribute :contract_approved_git_sha, :string do
+      public? true
     end
 
     create_timestamp :inserted_at

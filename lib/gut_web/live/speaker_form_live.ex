@@ -145,6 +145,14 @@ defmodule GutWeb.SpeakerFormLive do
                 type="date"
                 label="Hotel Coverage End"
               />
+              <.input
+                field={@form[:days_covered]}
+                type="number"
+                label="Days Covered"
+                min="0"
+                placeholder="Leave blank for global default"
+              />
+              <div></div>
 
               <.input field={@form[:room_number]} type="text" label="Room Number" />
               <.input field={@form[:sharing_with]} type="text" label="Sharing With" />

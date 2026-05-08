@@ -38,6 +38,10 @@ defmodule Gut.Generators do
         double_bed: false,
         special_requests: nil,
         notes: nil,
+        plus_one: false,
+        days_covered: nil,
+        contract_approved_at: nil,
+        contract_approved_git_sha: nil,
         sessionize_data: nil,
         user_id: nil
       ],

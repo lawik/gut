@@ -28,6 +28,8 @@ defmodule Gut.Conference do
       define :sync_from_sessionize, action: :sync_from_sessionize
       define :get_own_speaker, action: :read_own
       define :update_speaker_travel, action: :update_travel
+      define :update_speaker_hotel_request, action: :update_hotel_request
+      define :approve_speaker_contract, action: :approve_contract
     end
 
     resource Gut.Conference.Sponsor do

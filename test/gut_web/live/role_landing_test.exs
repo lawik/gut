@@ -21,7 +21,7 @@ defmodule GutWeb.RoleLandingTest do
 
       conn
       |> visit("/")
-      |> assert_has("h1", text: "My Travel Details")
+      |> assert_has("h1", text: "My Speaker Details")
     end
 
     test "speaker sees travel form with fields", %{conn: conn} do
@@ -31,7 +31,7 @@ defmodule GutWeb.RoleLandingTest do
 
       conn
       |> visit("/my-travel")
-      |> assert_has("h1", text: "My Travel Details")
+      |> assert_has("h1", text: "My Speaker Details")
       |> assert_has("label", text: "Arrival Date")
       |> assert_has("label", text: "Arrival Time")
       |> assert_has("label", text: "Departure Date")
@@ -49,7 +49,10 @@ defmodule GutWeb.RoleLandingTest do
 
     test "speaker can submit travel details", %{conn: conn} do
       user = generate(user(email: "speaker-save@test.com", role: :speaker))
-      _speaker = generate(speaker(user_id: user.id))
+
+      _speaker =
+        generate(speaker(user_id: user.id, contract_approved_at: DateTime.utc_now()))
+
       conn = log_in_user(conn, user)
 
       conn
@@ -57,7 +60,7 @@ defmodule GutWeb.RoleLandingTest do
       |> fill_in("Arrival Date", with: "2026-06-15")
       |> fill_in("Departure Date", with: "2026-06-18")
       |> click_button("Save Travel Details")
-      |> assert_has("p", text: "Travel details saved successfully")
+      |> assert_has("p", text: "Travel details saved")
     end
 
     test "speaker navigating to /speakers is redirected to travel form", %{conn: conn} do
@@ -65,7 +68,7 @@ defmodule GutWeb.RoleLandingTest do
 
       conn
       |> visit("/speakers")
-      |> assert_has("h1", text: "My Travel Details")
+      |> assert_has("h1", text: "My Speaker Details")
     end
 
     test "speaker navigating to /sponsors is redirected to travel form", %{conn: conn} do
@@ -73,7 +76,7 @@ defmodule GutWeb.RoleLandingTest do
 
       conn
       |> visit("/sponsors")
-      |> assert_has("h1", text: "My Travel Details")
+      |> assert_has("h1", text: "My Speaker Details")
     end
 
     test "speaker navigating to /users is redirected to travel form", %{conn: conn} do
@@ -81,7 +84,7 @@ defmodule GutWeb.RoleLandingTest do
 
       conn
       |> visit("/users")
-      |> assert_has("h1", text: "My Travel Details")
+      |> assert_has("h1", text: "My Speaker Details")
     end
   end
 

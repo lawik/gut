@@ -27,7 +27,7 @@ defmodule GutWeb.NavigationTest do
 
       conn
       |> visit("/speakers")
-      |> assert_has("h1", text: "My Travel Details")
+      |> assert_has("h1", text: "My Speaker Details")
     end
   end
 
