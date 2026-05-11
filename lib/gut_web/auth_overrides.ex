@@ -12,7 +12,7 @@ defmodule GutWeb.AuthOverrides do
   override AshAuthentication.Phoenix.Components.Banner do
     set :image_url, nil
     set :dark_image_url, nil
-    set :text, "Gut"
+    set :text, "Goatmire"
     set :text_class, "text-3xl font-bold text-base-content"
   end
 end
