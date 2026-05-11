@@ -141,7 +141,8 @@ defmodule GutWeb.MyTravelLive do
         <div>
           <h1 class="text-2xl font-semibold leading-6 text-base-content">My Speaker Details</h1>
           <p class="mt-2 text-sm text-base-content/70">
-            Please review the speaker agreement, then provide your travel and hotel preferences.
+            Approve the speaker agreement once. Travel and hotel preferences are
+            separate and you can come back to update them any time before <strong>16 August 2026</strong>.
           </p>
         </div>
 
@@ -227,8 +228,16 @@ defmodule GutWeb.MyTravelLive do
           <span class="badge badge-ghost">Locked until agreement approved</span>
         <% end %>
       </div>
-      <p class="text-sm text-base-content/70 mb-6">
+      <p class="text-sm text-base-content/70 mb-2">
         Used to inform the hotel about late-evening arrivals and to figure out who is around for activities beyond the conference itself. All fields are optional.
+      </p>
+      <p class="text-sm text-base-content/70 mb-6">
+        You can update these any time. Changes requested after <strong>16 August 2026</strong>
+        are not guaranteed — reach out to Helene at
+        <a href="mailto:helene@goatmire.com" class="text-primary hover:underline">
+          helene@goatmire.com
+        </a>
+        if you need help.
       </p>
 
       <.form for={@form} id="travel-form" phx-change="validate_travel" phx-submit="save_travel">
@@ -272,8 +281,16 @@ defmodule GutWeb.MyTravelLive do
         Tell us how long you would like us to book a room at the speaker hotel.
         We cover up to <strong>{@speaker.days_covered || 3} nights</strong>; anything beyond that is settled by you directly with the hotel.
       </p>
+      <p class="text-sm text-base-content/70 mb-2">
+        Bookings and changes are firm until <strong>16 August 2026</strong>. After that the hotel can't guarantee
+        availability — contact Helene at
+        <a href="mailto:helene@goatmire.com" class="text-primary hover:underline">
+          helene@goatmire.com
+        </a>
+        for late changes.
+      </p>
       <p class="text-sm text-base-content/70 mb-6">
-        If your needs don't quite fit the form — odd dates, unusual setup, anything else — pick something close and reach out to the organizer. We're quite flexible.
+        If your needs don't quite fit the form — odd dates, unusual setup, anything else — pick something close and reach out to Helene. We're quite flexible.
       </p>
 
       <.form for={@form} id="hotel-form" phx-change="validate_hotel" phx-submit="save_hotel">
