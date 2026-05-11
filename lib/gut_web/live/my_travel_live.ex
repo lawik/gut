@@ -291,7 +291,7 @@ defmodule GutWeb.MyTravelLive do
       </div>
       <p class="text-sm text-base-content/70 mb-2">
         Tell us how long you would like us to book a room at the speaker hotel.
-        We cover up to <strong>{@speaker.days_covered || 3} nights</strong>; anything beyond that is settled by you directly with the hotel.
+        We cover <strong>{@speaker.days_covered || 3} nights for you</strong>; anything beyond that is settled by you directly with the hotel.
       </p>
       <p class="text-sm text-base-content/70 mb-2">
         Bookings and changes are firm until <strong>16 August 2026</strong>. After that the hotel can't guarantee
