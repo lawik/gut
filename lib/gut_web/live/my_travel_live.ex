@@ -189,15 +189,27 @@ defmodule GutWeb.MyTravelLive do
         <% end %>
       </div>
 
-      <div class="border border-base-300 rounded-lg p-6 sm:p-8 bg-base-100 max-h-[36rem] overflow-y-auto shadow-inner">
-        {Phoenix.HTML.raw(@agreement_html)}
-      </div>
-
       <%= if @approved? do %>
-        <p class="mt-4 text-sm text-base-content/70">
-          You approved this agreement on <strong>{Calendar.strftime(@speaker.contract_approved_at, "%Y-%m-%d at %H:%M UTC")}</strong>.
-        </p>
+        <details class="group border border-base-300 rounded-lg bg-base-100 shadow-inner">
+          <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer select-none flex items-center justify-between gap-2 px-4 py-3 text-sm text-base-content/80 hover:bg-base-200/40 rounded-lg">
+            <span>
+              Approved on
+              <strong>
+                {Calendar.strftime(@speaker.contract_approved_at, "%Y-%m-%d at %H:%M UTC")}
+              </strong>
+              — click to review
+            </span>
+            <span class="text-base-content/50 transition-transform group-open:rotate-180">▾</span>
+          </summary>
+          <div class="border-t border-base-300 p-6 sm:p-8 max-h-[36rem] overflow-y-auto">
+            {Phoenix.HTML.raw(@agreement_html)}
+          </div>
+        </details>
       <% else %>
+        <div class="border border-base-300 rounded-lg p-6 sm:p-8 bg-base-100 max-h-[36rem] overflow-y-auto shadow-inner">
+          {Phoenix.HTML.raw(@agreement_html)}
+        </div>
+
         <div class="mt-4 flex justify-end">
           <button
             type="button"
