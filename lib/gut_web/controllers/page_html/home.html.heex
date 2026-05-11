@@ -1,9 +1,21 @@
-<div class="px-4 sm:px-6 lg:px-8 py-8">
-  <div class="sm:flex sm:items-center">
-    <div class="sm:flex-auto">
-      <p class="mt-2 text-sm text-base-content">
-        <a href="/sign-in">Log in</a>
+<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+  <div class="max-w-xl text-center space-y-8">
+    <div class="space-y-3">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-base-content">
+        Goatmire Elixir 2026
+      </h1>
+      <p class="text-base text-base-content/70">
+        Varberg, Sweden &middot; 28 September &ndash; 2 October 2026
       </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <.link navigate={~p"/workshops/browse"} class="btn btn-primary">
+        Browse workshops
+      </.link>
+      <.link navigate={~p"/sign-in"} class="btn btn-outline">
+        Log in
+      </.link>
     </div>
   </div>
 </div>
