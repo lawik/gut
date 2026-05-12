@@ -44,12 +44,21 @@ defmodule GutWeb.WorkshopBrowseLive do
   def handle_params(params, _uri, socket) do
     description_workshop =
       case params["workshop"] do
-        nil -> nil
-        id -> Enum.find(socket.assigns.workshops, &(&1.id == id))
+        nil ->
+          nil
+
+        key ->
+          Enum.find(socket.assigns.workshops, &(&1.sessionize_id == key)) ||
+            Enum.find(socket.assigns.workshops, &(&1.id == key))
       end
 
     {:noreply, assign(socket, :description_workshop, description_workshop)}
   end
+
+  defp workshop_link_key(%{sessionize_id: sessionize_id}) when is_binary(sessionize_id),
+    do: sessionize_id
+
+  defp workshop_link_key(%{id: id}), do: id
 
   @public_actor Gut.public_actor()
 
@@ -418,7 +427,9 @@ defmodule GutWeb.WorkshopBrowseLive do
   end
 
   def handle_event("show_description", %{"workshop_id" => workshop_id}, socket) do
-    {:noreply, push_patch(socket, to: ~p"/workshops/browse?workshop=#{workshop_id}")}
+    workshop = Enum.find(socket.assigns.workshops, &(&1.id == workshop_id))
+    key = if workshop, do: workshop_link_key(workshop), else: workshop_id
+    {:noreply, push_patch(socket, to: ~p"/workshops/browse?workshop=#{key}")}
   end
 
   def handle_event("close_description", _params, socket) do
