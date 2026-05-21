@@ -12,8 +12,8 @@ defmodule GutWeb.SpeakerLiveTest do
     test "renders table structure", %{conn: conn} do
       conn
       |> visit("/speakers")
-      |> assert_has("div", text: "Full Name")
       |> assert_has("div", text: "First Name")
+      |> assert_has("div", text: "Agreed")
     end
 
     test "navigates to new speaker form", %{conn: conn} do
@@ -21,6 +21,45 @@ defmodule GutWeb.SpeakerLiveTest do
       |> visit("/speakers")
       |> click_link("Add Speaker")
       |> assert_has("h1", text: "Adding new speaker")
+    end
+
+    test "Agreed column reflects contract approval and filters work", %{conn: conn} do
+      generate(
+        speaker(
+          first_name: "Grace",
+          last_name: "Hopper",
+          full_name: "Grace Hopper",
+          contract_approved_at: ~U[2026-04-01 12:00:00.000000Z],
+          contract_approved_git_sha: "abc123"
+        )
+      )
+
+      generate(
+        speaker(
+          first_name: "Ada",
+          last_name: "Lovelace",
+          full_name: "Ada Lovelace"
+        )
+      )
+
+      # Unfiltered: both speakers shown, and the agreed row has the check icon.
+      # Cinder loads rows asynchronously, so the timeout lets the data arrive
+      # before we assert.
+      conn
+      |> visit("/speakers")
+      |> assert_has("td", text: "Grace", timeout: 500)
+      |> assert_has("td", text: "Ada")
+      |> assert_has("span.hero-check-circle")
+      # Filter to Agreed = True → only Grace remains, still has the check icon
+      |> choose("True")
+      |> assert_has("td", text: "Grace", timeout: 500)
+      |> refute_has("td", text: "Ada", timeout: 500)
+      |> assert_has("span.hero-check-circle")
+      # Filter to Agreed = False → only Ada remains and no checks are shown
+      |> choose("False")
+      |> assert_has("td", text: "Ada", timeout: 500)
+      |> refute_has("td", text: "Grace", timeout: 500)
+      |> refute_has("span.hero-check-circle")
     end
   end
 

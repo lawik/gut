@@ -66,19 +66,24 @@ defmodule GutWeb.SpeakersLive do
             actor={@current_user}
             url_state={@url_state}
             theme={GutWeb.CinderTheme}
+            query_opts={[load: [:agreed]]}
             page_size={[default: 25, options: [10, 25, 50, 100]]}
             row_click={fn speaker -> JS.navigate(~p"/speakers/#{speaker.id}") end}
           >
-            <:col :let={speaker} field="full_name" filter sort label="Full Name">
-              <div class="font-medium">{speaker.full_name}</div>
-            </:col>
-
             <:col :let={speaker} field="first_name" filter sort label="First Name">
               {speaker.first_name}
             </:col>
 
             <:col :let={speaker} field="last_name" filter sort label="Last Name">
               {speaker.last_name}
+            </:col>
+
+            <:col :let={speaker} field="agreed" filter={[type: :boolean]} sort label="Agreed">
+              <%= if speaker.agreed do %>
+                <.icon name="hero-check-circle" class="h-5 w-5 text-success" />
+              <% else %>
+                <span class="text-base-content/40">—</span>
+              <% end %>
             </:col>
 
             <:col :let={speaker} field="arrival_date" filter sort label="Arrival">
@@ -140,12 +145,6 @@ defmodule GutWeb.SpeakersLive do
               ]}>
                 {hotel_status_label(speaker.confirmed_with_hotel)}
               </span>
-            </:col>
-
-            <:col :let={speaker} field="inserted_at" sort label="Added">
-              <div class="text-sm text-base-content/50">
-                {Calendar.strftime(speaker.inserted_at, "%b %d, %Y")}
-              </div>
             </:col>
 
             <:col :let={speaker} label="Actions">

@@ -301,4 +301,10 @@ defmodule Gut.Conference.Speaker do
       public? true
     end
   end
+
+  calculations do
+    calculate :agreed, :boolean, expr(not is_nil(contract_approved_at)) do
+      public? true
+    end
+  end
 end
