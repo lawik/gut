@@ -41,6 +41,11 @@ defmodule GutWeb.Layouts do
       assigns
       |> assign(:git_sha, git_sha())
       |> assign(:staff?, assigns[:current_user] && assigns[:current_user].role == :staff)
+      |> assign(:speaker?, assigns[:current_user] && assigns[:current_user].role == :speaker)
+      |> assign(
+        :show_browse_workshops?,
+        assigns[:current_user] && assigns[:current_user].role in [:staff, :speaker]
+      )
 
     ~H"""
     <header class="navbar px-4 sm:px-6 lg:px-8">
@@ -54,6 +59,16 @@ defmodule GutWeb.Layouts do
         </div>
       </div>
       <div class="flex-none flex items-center gap-2">
+        <.link :if={@speaker?} navigate={~p"/my-travel"} class="btn btn-ghost">
+          Speaker details
+        </.link>
+        <.link
+          :if={@show_browse_workshops?}
+          navigate={~p"/workshops/browse"}
+          class="btn btn-ghost"
+        >
+          Browse workshops
+        </.link>
         <%!-- Mobile hamburger menu --%>
         <div :if={@staff?} class="dropdown dropdown-end sm:hidden">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
