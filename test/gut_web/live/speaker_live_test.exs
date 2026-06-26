@@ -17,6 +17,13 @@ defmodule GutWeb.SpeakerLiveTest do
       |> assert_has("div", text: "Agreed")
     end
 
+    # Flaky: navigating away from /speakers immediately races the sandbox
+    # teardown. SpeakersLive's cinder table loads via start_async/handle_async,
+    # an authorized read that re-checks the auth token (Token.revoked?, since
+    # require_token_presence_for_authentication? is on). That async DB work can
+    # run after the test's sandbox owner is stopped, raising an ownership error.
+    # Skipped until the teardown race is addressed.
+    @tag :skip
     test "navigates to new speaker form", %{conn: conn} do
       conn
       |> visit("/speakers")

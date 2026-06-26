@@ -112,7 +112,12 @@ defmodule Gut.Generators do
       defaults: [
         name: "Intro to Elixir",
         description: "A beginner workshop",
-        limit: 20
+        limit: 20,
+        # :create accepts these FKs, so Ash.Generator otherwise fills them with
+        # random UUIDs that reference no real room/timeslot, failing the FK check
+        # on some seeds. Default to nil; tests that need them pass overrides.
+        workshop_room_id: nil,
+        workshop_timeslot_id: nil
       ],
       overrides: opts
     )
