@@ -6,6 +6,7 @@ defmodule GutWeb.CsvExportController do
 
   @speaker_text_filters ~w(full_name first_name last_name)
   @speaker_atom_filters %{"confirmed_with_hotel" => ~w(unconfirmed confirmed changed)}
+  @speaker_boolean_filters ~w(agreed)
 
   @sponsor_boolean_filters ~w(responded interested confirmed logos_received announced not_happening)
   @sponsor_status_values ~w(cold warm ok dismissed)
@@ -17,8 +18,10 @@ defmodule GutWeb.CsvExportController do
     with {:ok, user} <- require_staff(conn) do
       query =
         Ash.Query.for_read(Gut.Conference.Speaker, :read)
+        |> Ash.Query.load([:agreed, :role])
         |> apply_text_filters(params, @speaker_text_filters)
         |> apply_atom_filters(params, @speaker_atom_filters)
+        |> apply_boolean_filters(params, @speaker_boolean_filters)
         |> apply_sort(params)
 
       {:ok, records} = Ash.read(query, actor: user, page: false)
@@ -27,6 +30,8 @@ defmodule GutWeb.CsvExportController do
         "Full Name",
         "First Name",
         "Last Name",
+        "Agreed",
+        "Role",
         "Arrival Date",
         "Arrival Time",
         "Leaving Date",
@@ -50,6 +55,8 @@ defmodule GutWeb.CsvExportController do
             s.full_name,
             s.first_name,
             s.last_name,
+            s.agreed,
+            s.role,
             s.arrival_date,
             s.arrival_time,
             s.leaving_date,

@@ -300,10 +300,25 @@ defmodule Gut.Conference.Speaker do
     belongs_to :user, Gut.Accounts.User do
       public? true
     end
+
+    has_many :workshop_speakers, Gut.Conference.WorkshopSpeaker do
+      public? true
+    end
   end
 
   calculations do
     calculate :agreed, :boolean, expr(not is_nil(contract_approved_at)) do
+      public? true
+    end
+
+    calculate :role, :string, Gut.Conference.Speaker.Calculations.Role do
+      public? true
+      load [:workshop_count, :sessionize_data]
+    end
+  end
+
+  aggregates do
+    count :workshop_count, :workshop_speakers do
       public? true
     end
   end

@@ -44,6 +44,7 @@ defmodule GutWeb.CsvExportTest do
             "Full Name",
             "First Name",
             "Last Name",
+            "Agreed",
             "Arrival Date",
             "Arrival Time",
             "Leaving Date",
@@ -109,6 +110,53 @@ defmodule GutWeb.CsvExportTest do
       assert resp.resp_body =~ "Alice Smith"
       assert resp.resp_body =~ "Bob Smithson"
       refute resp.resp_body =~ "Charlie Brown"
+    end
+
+    test "filters by agreed", %{conn: conn} do
+      generate(
+        speaker(
+          full_name: "Grace Hopper",
+          first_name: "Grace",
+          last_name: "Hopper",
+          contract_approved_at: ~U[2026-04-01 12:00:00.000000Z]
+        )
+      )
+
+      generate(speaker(full_name: "Ada Lovelace", first_name: "Ada", last_name: "Lovelace"))
+
+      agreed_only = get(conn, "/export/speakers?agreed=true")
+      assert agreed_only.resp_body =~ "Grace Hopper"
+      refute agreed_only.resp_body =~ "Ada Lovelace"
+
+      not_agreed_only = get(conn, "/export/speakers?agreed=false")
+      assert not_agreed_only.resp_body =~ "Ada Lovelace"
+      refute not_agreed_only.resp_body =~ "Grace Hopper"
+    end
+
+    test "includes Agreed column with true/false values", %{conn: conn} do
+      generate(
+        speaker(
+          full_name: "Approved Speaker",
+          first_name: "A",
+          last_name: "S",
+          contract_approved_at: ~U[2026-04-01 12:00:00.000000Z]
+        )
+      )
+
+      generate(speaker(full_name: "Pending Speaker", first_name: "P", last_name: "S"))
+
+      resp = get(conn, "/export/speakers")
+      lines = String.split(resp.resp_body, "\r\n")
+
+      header_cols = lines |> hd() |> String.split(",")
+      agreed_idx = Enum.find_index(header_cols, &(&1 == "Agreed"))
+      assert agreed_idx
+
+      approved_row = Enum.find(lines, &String.starts_with?(&1, "Approved Speaker,"))
+      pending_row = Enum.find(lines, &String.starts_with?(&1, "Pending Speaker,"))
+
+      assert Enum.at(String.split(approved_row, ","), agreed_idx) == "true"
+      assert Enum.at(String.split(pending_row, ","), agreed_idx) == "false"
     end
 
     test "filters by confirmed_with_hotel", %{conn: conn} do

@@ -7,6 +7,7 @@ defmodule GutWeb.SpeakerLiveTest do
       |> visit("/speakers")
       |> assert_has("button", text: "Sync from Sessionize")
       |> assert_has("a", text: "Add Speaker")
+      |> assert_has("a[href^='/export/speakers']", text: "Export CSV")
     end
 
     test "renders table structure", %{conn: conn} do

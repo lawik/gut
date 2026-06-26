@@ -66,7 +66,7 @@ defmodule GutWeb.SpeakersLive do
             actor={@current_user}
             url_state={@url_state}
             theme={GutWeb.CinderTheme}
-            query_opts={[load: [:agreed]]}
+            query_opts={[load: [:agreed, :role]]}
             page_size={[default: 25, options: [10, 25, 50, 100]]}
             row_click={fn speaker -> JS.navigate(~p"/speakers/#{speaker.id}") end}
           >
@@ -81,6 +81,19 @@ defmodule GutWeb.SpeakersLive do
             <:col :let={speaker} field="agreed" filter={[type: :boolean]} sort label="Agreed">
               <%= if speaker.agreed do %>
                 <.icon name="hero-check-circle" class="h-5 w-5 text-success" />
+              <% else %>
+                <span class="text-base-content/40">—</span>
+              <% end %>
+            </:col>
+
+            <:col :let={speaker} label="Role">
+              <%= if speaker.role do %>
+                <span class={[
+                  "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium",
+                  role_badge_class(speaker.role)
+                ]}>
+                  {speaker.role}
+                </span>
               <% else %>
                 <span class="text-base-content/40">—</span>
               <% end %>
@@ -237,6 +250,11 @@ defmodule GutWeb.SpeakersLive do
   defp hotel_status_class(:confirmed), do: "bg-success/20 text-success"
   defp hotel_status_class(:changed), do: "bg-warning/20 text-warning"
   defp hotel_status_class(_), do: "bg-base-300 text-base-content/60"
+
+  defp role_badge_class("Workshop"), do: "bg-info/20 text-info"
+  defp role_badge_class("Conference"), do: "bg-primary/20 text-primary"
+  defp role_badge_class("Both"), do: "bg-success/20 text-success"
+  defp role_badge_class(_), do: "bg-base-300 text-base-content/60"
 
   defp hotel_status_label(:confirmed), do: "Confirmed"
   defp hotel_status_label(:changed), do: "Changed"
