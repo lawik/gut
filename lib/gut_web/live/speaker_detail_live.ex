@@ -199,6 +199,20 @@ defmodule GutWeb.SpeakerDetailLive do
                       </div>
                     </div>
 
+                    <div>
+                      <dt class="text-sm font-medium text-base-content/50">Plus One</dt>
+                      <dd class="mt-1 text-sm text-base-content">
+                        <%= if @speaker.plus_one do %>
+                          <span class="flex items-center">
+                            <.icon name="hero-check" class="h-4 w-4 text-success mr-1" />
+                            Bringing a guest
+                          </span>
+                        <% else %>
+                          <span class="text-base-content/40">No</span>
+                        <% end %>
+                      </dd>
+                    </div>
+
                     <%= if @speaker.special_requests do %>
                       <div>
                         <dt class="text-sm font-medium text-base-content/50">Special Requests</dt>

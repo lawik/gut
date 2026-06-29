@@ -82,6 +82,110 @@ defmodule GutWeb.SpeakerLiveTest do
       |> assert_has("a", text: "Back to Speakers")
     end
 
+    test "shows plus one when the speaker is bringing a guest", %{conn: conn} do
+      speaker = generate(speaker(plus_one: true))
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("dt", text: "Plus One")
+      |> assert_has("dd", text: "Bringing a guest")
+    end
+
+    test "shows no plus one by default", %{conn: conn} do
+      speaker = generate(speaker())
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("dt", text: "Plus One")
+      |> refute_has("dd", text: "Bringing a guest")
+    end
+
+    test "shows the associated user account when linked", %{conn: conn} do
+      user = generate(user(email: "ada@speakers.test", role: :speaker))
+      speaker = generate(speaker(user_id: user.id))
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("p", text: "Associated with user account (ada@speakers.test)")
+    end
+
+    test "omits the user account line when unlinked", %{conn: conn} do
+      speaker = generate(speaker())
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> refute_has("p", text: "Associated with user account")
+    end
+
+    test "shows total stay duration when arrival and departure are set", %{conn: conn} do
+      speaker =
+        generate(
+          speaker(
+            arrival_date: ~D[2026-09-28],
+            leaving_date: ~D[2026-10-03]
+          )
+        )
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("p", text: "Total Stay Duration")
+      |> assert_has("p", text: "5 days")
+    end
+
+    test "shows empty states when travel and hotel data are unset", %{conn: conn} do
+      speaker = generate(speaker())
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("span", text: "Not scheduled")
+      |> assert_has("dd", text: "Not assigned")
+      |> assert_has("dd", text: "No one")
+      |> refute_has("p", text: "Total Stay Duration")
+    end
+
+    test "shows full coverage when the stay matches the covered nights", %{conn: conn} do
+      speaker =
+        generate(
+          speaker(
+            hotel_stay_start_date: ~D[2026-09-30],
+            hotel_stay_end_date: ~D[2026-10-03],
+            hotel_covered_start_date: ~D[2026-09-30],
+            hotel_covered_end_date: ~D[2026-10-03]
+          )
+        )
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("p", text: "Full Coverage")
+      |> refute_has("p", text: "Partial Coverage")
+    end
+
+    test "shows partial coverage with the uncovered night count", %{conn: conn} do
+      speaker =
+        generate(
+          speaker(
+            hotel_stay_start_date: ~D[2026-09-28],
+            hotel_stay_end_date: ~D[2026-10-03],
+            hotel_covered_start_date: ~D[2026-09-30],
+            hotel_covered_end_date: ~D[2026-10-03]
+          )
+        )
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("p", text: "Partial Coverage")
+      |> assert_has("p", text: "2 nights not covered by the conference")
+    end
+
+    test "shows system metadata timestamps", %{conn: conn} do
+      speaker = generate(speaker())
+
+      conn
+      |> visit("/speakers/#{speaker.id}")
+      |> assert_has("dt", text: "Added to system")
+      |> assert_has("dt", text: "Last updated")
+    end
+
     test "shows travel information when set", %{conn: conn} do
       speaker =
         generate(
