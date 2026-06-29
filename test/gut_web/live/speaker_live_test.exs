@@ -59,15 +59,49 @@ defmodule GutWeb.SpeakerLiveTest do
       |> assert_has("td", text: "Ada")
       |> assert_has("span.hero-check-circle")
       # Filter to Agreed = True → only Grace remains, still has the check icon
-      |> choose("True")
+      |> choose("input[name='filters[agreed]']", "True")
       |> assert_has("td", text: "Grace", timeout: 500)
       |> refute_has("td", text: "Ada", timeout: 500)
       |> assert_has("span.hero-check-circle")
       # Filter to Agreed = False → only Ada remains and no checks are shown
-      |> choose("False")
+      |> choose("input[name='filters[agreed]']", "False")
       |> assert_has("td", text: "Ada", timeout: 500)
       |> refute_has("td", text: "Grace", timeout: 500)
       |> refute_has("span.hero-check-circle")
+    end
+
+    test "Plus One column filters speakers by plus one status", %{conn: conn} do
+      generate(
+        speaker(
+          first_name: "Grace",
+          last_name: "Hopper",
+          full_name: "Grace Hopper",
+          plus_one: true
+        )
+      )
+
+      generate(
+        speaker(
+          first_name: "Ada",
+          last_name: "Lovelace",
+          full_name: "Ada Lovelace",
+          plus_one: false
+        )
+      )
+
+      # Unfiltered: both speakers shown
+      conn
+      |> visit("/speakers")
+      |> assert_has("td", text: "Grace", timeout: 500)
+      |> assert_has("td", text: "Ada")
+      # Filter to Plus One = True → only Grace remains
+      |> choose("input[name='filters[plus_one]']", "True")
+      |> assert_has("td", text: "Grace", timeout: 500)
+      |> refute_has("td", text: "Ada", timeout: 500)
+      # Filter to Plus One = False → only Ada remains
+      |> choose("input[name='filters[plus_one]']", "False")
+      |> assert_has("td", text: "Ada", timeout: 500)
+      |> refute_has("td", text: "Grace", timeout: 500)
     end
   end
 

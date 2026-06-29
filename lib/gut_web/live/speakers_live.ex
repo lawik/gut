@@ -160,6 +160,14 @@ defmodule GutWeb.SpeakersLive do
               </span>
             </:col>
 
+            <:col :let={speaker} field="plus_one" filter={[type: :boolean]} sort label="Plus One">
+              <%= if speaker.plus_one do %>
+                <.icon name="hero-check-circle" class="h-5 w-5 text-success" />
+              <% else %>
+                <span class="text-base-content/40">—</span>
+              <% end %>
+            </:col>
+
             <:col :let={speaker} label="Actions">
               <div class="flex space-x-2">
                 <.link
