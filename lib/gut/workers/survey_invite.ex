@@ -5,7 +5,10 @@ defmodule Gut.Workers.SurveyInvite do
   Enqueued per recipient when staff send a survey, so a delivery failure
   only retries that recipient instead of blocking or losing the rest.
   """
-  use Oban.Worker, queue: :default
+  use Oban.Worker,
+    queue: :default,
+    unique: [period: :infinity, keys: [:survey_id, :email]]
+
   use GutWeb, :verified_routes
 
   import Swoosh.Email

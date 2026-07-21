@@ -407,6 +407,76 @@ defmodule Gut.Conference.SurveyTest do
     end
   end
 
+  describe "late registrations after the survey was sent" do
+    setup do
+      context = workshop_with_organizer(limit: 1)
+      survey = sent_survey(context.workshop)
+      Map.put(context, :survey, survey)
+    end
+
+    test "registering after the send enqueues an invite", %{
+      workshop: workshop,
+      survey: survey
+    } do
+      %{user: late} = register_attendee(workshop)
+
+      assert [job] = all_enqueued(worker: Gut.Workers.SurveyInvite)
+      assert job.args["email"] == to_string(late.email)
+      assert job.args["survey_id"] == survey.id
+    end
+
+    test "a waitlisted late registration gets no invite until promoted", %{
+      workshop: workshop,
+      survey: survey
+    } do
+      # Limit is 1: the first registers, the second is waitlisted.
+      %{user: first, participation: first_participation} = register_attendee(workshop)
+      %{user: second, participation: participation} = register_attendee(workshop)
+      assert participation.status == :waitlisted
+
+      emails = all_enqueued(worker: Gut.Workers.SurveyInvite) |> Enum.map(& &1.args["email"])
+      assert emails == [to_string(first.email)]
+
+      # The first attendee leaves and the waitlist is promoted.
+      :ok =
+        Gut.Conference.destroy_workshop_participation(first_participation, actor: @system_actor)
+
+      {:ok, 1} = Gut.Conference.promote_waitlist(workshop.id, actor: @system_actor)
+
+      emails = all_enqueued(worker: Gut.Workers.SurveyInvite) |> Enum.map(& &1.args["email"])
+      assert to_string(second.email) in emails
+    end
+
+    test "re-registering does not produce a duplicate invite", %{workshop: workshop} do
+      %{user: late, participation: participation} = register_attendee(workshop)
+
+      :ok = Gut.Conference.destroy_workshop_participation(participation, actor: @system_actor)
+
+      {:ok, _} =
+        Gut.Conference.register_for_workshop(
+          %{
+            workshop_id: workshop.id,
+            workshop_participant_id: participation.workshop_participant_id
+          },
+          actor: @system_actor
+        )
+
+      jobs =
+        all_enqueued(worker: Gut.Workers.SurveyInvite)
+        |> Enum.filter(&(&1.args["email"] == to_string(late.email)))
+
+      assert length(jobs) == 1
+    end
+
+    test "no invite is enqueued when the workshop has no sent survey" do
+      other = workshop_with_organizer()
+      draft_survey(other.workshop, other.organizer)
+      register_attendee(other.workshop)
+
+      assert [] = all_enqueued(worker: Gut.Workers.SurveyInvite)
+    end
+  end
+
   describe "attendee visibility" do
     setup do
       workshop_with_organizer()

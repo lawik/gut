@@ -23,10 +23,15 @@ defmodule Gut.Conference.WorkshopParticipation do
 
       validate Gut.Conference.WorkshopParticipation.Validations.UniqueSlot
       change Gut.Conference.WorkshopParticipation.Changes.DetermineStatus
+      change Gut.Conference.WorkshopParticipation.Changes.InviteToSentSurvey
     end
 
     update :update do
+      require_atomic? false
+
       accept [:status]
+
+      change Gut.Conference.WorkshopParticipation.Changes.InviteToSentSurvey
     end
   end
 
