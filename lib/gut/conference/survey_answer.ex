@@ -49,6 +49,7 @@ defmodule Gut.Conference.SurveyAnswer do
     attribute :value, :string do
       allow_nil? false
       public? true
+      constraints max_length: 10_000
     end
 
     create_timestamp :inserted_at

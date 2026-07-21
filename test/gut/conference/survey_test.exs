@@ -877,6 +877,36 @@ defmodule Gut.Conference.SurveyTest do
       assert Exception.message(error) =~ "not accepting responses"
     end
 
+    test "answers are limited to a sane length", %{
+      workshop: workshop,
+      survey: survey,
+      questions: [question | _]
+    } do
+      %{user: attendee} = register_attendee(workshop)
+
+      assert {:error, %Ash.Error.Invalid{}} =
+               Gut.Conference.respond_to_survey(
+                 %{
+                   survey_id: survey.id,
+                   answers: [
+                     %{survey_question_id: question.id, value: String.duplicate("a", 10_001)}
+                   ]
+                 },
+                 actor: attendee
+               )
+
+      assert {:ok, _} =
+               Gut.Conference.respond_to_survey(
+                 %{
+                   survey_id: survey.id,
+                   answers: [
+                     %{survey_question_id: question.id, value: String.duplicate("a", 10_000)}
+                   ]
+                 },
+                 actor: attendee
+               )
+    end
+
     test "a user who is not signed up for the workshop cannot respond", %{
       survey: survey,
       questions: questions
