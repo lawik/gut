@@ -153,7 +153,7 @@ defmodule Gut.Accounts.User do
       constraints one_of: [:staff, :speaker, :sponsor, :attendee]
       allow_nil? false
       public? true
-      default :staff
+      default :attendee
     end
 
     attribute :activated_at, :utc_datetime_usec do

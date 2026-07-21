@@ -273,6 +273,19 @@ defmodule Gut.AuthorizationTest do
         )
 
       assert participant.user_id != nil
+
+      # Participants must never be granted staff by the side door.
+      {:ok, user} = Gut.Accounts.get_user(participant.user_id, actor: @system_actor)
+      assert user.role == :attendee
+    end
+
+    test "users created without an explicit role default to attendee" do
+      user =
+        Gut.Accounts.User
+        |> Ash.Changeset.for_create(:create, %{email: "no-role@test.com"})
+        |> Ash.create!(actor: @system_actor)
+
+      assert user.role == :attendee
     end
 
     test "DetermineStatus reads workshop data via system actor" do

@@ -19,7 +19,7 @@ defmodule Gut.Conference.WorkshopParticipant.Changes.HandleUser do
             user
 
           {:error, _} ->
-            Gut.Accounts.create_user!(email, :staff, actor: @system_actor)
+            Gut.Accounts.create_user!(email, :attendee, actor: @system_actor)
         end
 
       Ash.Changeset.force_change_attribute(changeset, :user_id, user.id)
