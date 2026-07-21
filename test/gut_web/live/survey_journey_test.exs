@@ -240,6 +240,25 @@ defmodule GutWeb.SurveyJourneyTest do
       |> refute_has("li", text: "Late Person")
     end
 
+    test "cannot submit a survey without questions to review", %{
+      conn: conn,
+      workshop: workshop,
+      organizer: organizer
+    } do
+      Gut.Conference.create_survey!(
+        %{title: "No questions yet", workshop_id: workshop.id},
+        actor: @system_actor
+      )
+
+      conn = log_in_user(conn, organizer)
+
+      conn
+      |> visit("/workshops/#{workshop.id}/survey")
+      |> click_button("Submit to Review")
+      |> assert_has("div", text: "the survey needs at least one question")
+      |> assert_has("span", text: "Draft")
+    end
+
     test "sees a read-only view once the survey is in review", %{
       conn: conn,
       workshop: workshop,

@@ -47,6 +47,8 @@ defmodule Gut.Conference.Survey do
       validate attribute_equals(:status, :draft),
         message: "only a draft survey can be submitted for review"
 
+      validate Gut.Conference.Survey.Validations.HasQuestions
+
       change set_attribute(:status, :in_review)
     end
 
@@ -68,6 +70,8 @@ defmodule Gut.Conference.Survey do
 
       validate attribute_equals(:status, :in_review),
         message: "only a survey in review can be sent"
+
+      validate Gut.Conference.Survey.Validations.HasQuestions
 
       change set_attribute(:status, :sent)
       change set_attribute(:sent_at, &DateTime.utc_now/0)

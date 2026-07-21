@@ -251,6 +251,19 @@ defmodule Gut.Conference.SurveyTest do
                Gut.Conference.submit_survey_for_review!(survey, actor: organizer)
     end
 
+    test "a survey without questions cannot be submitted for review", %{
+      workshop: _workshop,
+      organizer: _organizer
+    } do
+      other = workshop_with_organizer()
+      empty = draft_survey(other.workshop, other.organizer, [])
+
+      assert {:error, %Ash.Error.Invalid{} = error} =
+               Gut.Conference.submit_survey_for_review(empty, actor: other.organizer)
+
+      assert Exception.message(error) =~ "needs at least one question"
+    end
+
     test "a survey cannot be submitted twice", %{survey: survey, organizer: organizer} do
       survey = Gut.Conference.submit_survey_for_review!(survey, actor: organizer)
 

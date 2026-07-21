@@ -335,8 +335,19 @@ defmodule GutWeb.WorkshopSurveyLive do
          |> put_flash(:info, "Survey submitted for review")
          |> load_survey()}
 
-      {:error, _error} ->
-        {:noreply, put_flash(socket, :error, "Could not submit the survey for review.")}
+      {:error, error} ->
+        {:noreply, put_flash(socket, :error, submit_error_message(error))}
     end
   end
+
+  defp submit_error_message(%Ash.Error.Invalid{errors: errors}) do
+    Enum.find_value(errors, "Could not submit the survey for review.", fn error ->
+      case error do
+        %{message: message} when is_binary(message) -> message
+        _ -> nil
+      end
+    end)
+  end
+
+  defp submit_error_message(_error), do: "Could not submit the survey for review."
 end
