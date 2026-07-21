@@ -115,6 +115,33 @@ defmodule GutWeb.SurveyInviteTest do
     assert exp - iat == 30 * 60
   end
 
+  test "a survey link token can only be used once", %{conn: conn} do
+    %{workshop: workshop, survey: survey} = create_sent_survey()
+    register_attendee(workshop, "once@test.com")
+
+    {:ok, token} = Gut.Accounts.survey_link_token("once@test.com")
+
+    first =
+      conn
+      |> Plug.Test.init_test_session(%{return_to: "/surveys/#{survey.id}/respond"})
+      |> post("/auth/user/survey_link", %{"user" => %{"token" => token}})
+
+    assert redirected_to(first) == "/surveys/#{survey.id}/respond"
+    assert get_session(first, "user_token")
+
+    second =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Conn.put_req_header(
+        "user-agent",
+        Plug.Conn.get_req_header(conn, "user-agent") |> List.first()
+      )
+      |> Plug.Test.init_test_session(%{})
+      |> post("/auth/user/survey_link", %{"user" => %{"token" => token}})
+
+    assert redirected_to(second) == "/sign-in"
+    refute get_session(second, "user_token")
+  end
+
   test "a survey link token is not accepted by the regular magic-link sign-in", %{conn: conn} do
     %{workshop: workshop, survey: survey} = create_sent_survey()
     register_attendee(workshop, "crossover@test.com")

@@ -920,6 +920,48 @@ defmodule Gut.Conference.SurveyTest do
                )
     end
 
+    test "duplicate answers to the same question in one submission are rejected", %{
+      workshop: workshop,
+      survey: survey,
+      questions: [question | _]
+    } do
+      %{user: attendee} = register_attendee(workshop)
+
+      assert {:error, %Ash.Error.Invalid{}} =
+               Gut.Conference.respond_to_survey(
+                 %{
+                   survey_id: survey.id,
+                   answers: [
+                     %{survey_question_id: question.id, value: "First"},
+                     %{survey_question_id: question.id, value: "Second"}
+                   ]
+                 },
+                 actor: attendee
+               )
+
+      # The whole submission rolls back, so the attendee can try again.
+      assert {:ok, []} = Gut.Conference.list_survey_responses(actor: @system_actor)
+    end
+
+    test "the organizer of another workshop cannot read responses or answers", %{
+      workshop: workshop,
+      survey: survey,
+      questions: questions
+    } do
+      %{user: attendee} = register_attendee(workshop)
+
+      Gut.Conference.respond_to_survey!(
+        %{survey_id: survey.id, answers: answers_for(questions)},
+        actor: attendee
+      )
+
+      other = workshop_with_organizer()
+
+      assert {:ok, []} = Gut.Conference.list_surveys(actor: other.organizer)
+      assert {:ok, []} = Gut.Conference.list_survey_responses(actor: other.organizer)
+      assert {:ok, []} = Gut.Conference.list_survey_answers(actor: other.organizer)
+    end
+
     test "responses are visible to their owner, the organizer and staff but not other attendees",
          %{workshop: workshop, survey: survey, organizer: organizer, questions: questions} do
       %{user: attendee} = register_attendee(workshop)
