@@ -81,6 +81,10 @@ defmodule Gut.Conference.Survey do
     destroy :destroy do
       primary? true
       require_atomic? false
+
+      # Deleting a sent survey would cascade away collected responses.
+      validate attribute_does_not_equal(:status, :sent),
+        message: "a sent survey cannot be deleted"
     end
   end
 

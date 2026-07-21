@@ -238,6 +238,38 @@ defmodule Gut.Conference.SurveyTest do
       assert :ok = Gut.Conference.destroy_survey(survey, actor: organizer)
       assert {:ok, []} = Gut.Conference.list_surveys(actor: organizer)
     end
+
+    test "not even staff can delete a sent survey", %{workshop: _workshop} do
+      staff = generate(user(role: :staff))
+      other = workshop_with_organizer()
+      survey = sent_survey(other.workshop)
+      %{user: attendee} = register_attendee(other.workshop)
+      loaded_survey = loaded(survey, @system_actor)
+      [question | _] = loaded_survey.questions
+
+      Gut.Conference.respond_to_survey!(
+        %{
+          survey_id: survey.id,
+          answers: [%{survey_question_id: question.id, value: "Precious feedback"}]
+        },
+        actor: attendee
+      )
+
+      assert {:error, %Ash.Error.Invalid{} = error} =
+               Gut.Conference.destroy_survey(survey, actor: staff)
+
+      assert Exception.message(error) =~ "a sent survey cannot be deleted"
+      assert {:ok, [_]} = Gut.Conference.list_survey_responses(actor: staff)
+    end
+
+    test "staff can delete a survey in review", %{workshop: _workshop} do
+      staff = generate(user(role: :staff))
+      other = workshop_with_organizer()
+      survey = draft_survey(other.workshop, other.organizer)
+      survey = Gut.Conference.submit_survey_for_review!(survey, actor: other.organizer)
+
+      assert :ok = Gut.Conference.destroy_survey(survey, actor: staff)
+    end
   end
 
   describe "submitting to review" do
