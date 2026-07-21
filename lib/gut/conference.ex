@@ -85,5 +85,32 @@ defmodule Gut.Conference do
       define :update_workshop_participation, action: :update
       define :destroy_workshop_participation, action: :destroy
     end
+
+    resource Gut.Conference.Survey do
+      define :list_surveys, action: :read
+      define :get_survey, action: :read, get_by: [:id]
+      define :create_survey, action: :create
+      define :update_survey_draft, action: :update_draft
+      define :submit_survey_for_review, action: :submit_for_review
+      define :return_survey_to_draft, action: :return_to_draft
+      define :send_survey, action: :send
+      define :destroy_survey, action: :destroy
+    end
+
+    resource Gut.Conference.SurveyQuestion do
+      define :list_survey_questions, action: :read
+    end
+
+    resource Gut.Conference.SurveyQuestionOption
+
+    resource Gut.Conference.SurveyResponse do
+      define :list_survey_responses, action: :read
+      define :get_survey_response, action: :read, get_by: [:id]
+      define :respond_to_survey, action: :respond
+    end
+
+    resource Gut.Conference.SurveyAnswer do
+      define :list_survey_answers, action: :read
+    end
   end
 end

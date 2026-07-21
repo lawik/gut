@@ -28,14 +28,18 @@ defmodule Gut.Accounts do
   end
 
   def magic_link_url(email) do
-    strategy = AshAuthentication.Info.strategy!(Gut.Accounts.User, :magic_link)
-
-    case AshAuthentication.Strategy.MagicLink.request_token_for_identity(
-           strategy,
-           to_string(email)
-         ) do
+    case magic_link_token(email) do
       {:ok, token} -> {:ok, GutWeb.Endpoint.url() <> "/magic_link/#{token}"}
       error -> error
     end
+  end
+
+  def magic_link_token(email) do
+    strategy = AshAuthentication.Info.strategy!(Gut.Accounts.User, :magic_link)
+
+    AshAuthentication.Strategy.MagicLink.request_token_for_identity(
+      strategy,
+      to_string(email)
+    )
   end
 end

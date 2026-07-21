@@ -37,6 +37,7 @@ defmodule GutWeb.WorkshopBrowseLive do
       |> assign(:magic_link_sent, false)
       |> assign(:login_email, "")
       |> assign(:description_workshop, nil)
+      |> assign(:sent_surveys, [])
 
     {:ok, socket}
   end
@@ -153,6 +154,19 @@ defmodule GutWeb.WorkshopBrowseLive do
             <p class="text-base-content/60">
               Your workshop selections have been saved. You'll receive confirmation at the email provided.
             </p>
+            <div :if={@sent_surveys != []} class="mt-6 text-left bg-base-100 rounded-xl p-4">
+              <h3 class="font-semibold text-base-content mb-2">One more thing!</h3>
+              <p class="text-base-content/60 mb-3">
+                The organizers of your selected workshops would like you to answer a survey:
+              </p>
+              <ul class="space-y-2">
+                <li :for={%{survey: survey, workshop: workshop} <- @sent_surveys}>
+                  <.link navigate={~p"/surveys/#{survey.id}/respond"} class="link link-primary">
+                    Answer the survey for {workshop.name}
+                  </.link>
+                </li>
+              </ul>
+            </div>
             <button phx-click="reset" class="btn btn-primary mt-4">
               Modify Selections
             </button>
@@ -486,9 +500,17 @@ defmodule GutWeb.WorkshopBrowseLive do
     else
       case save_registrations(socket, name, email, phone_number) do
         {:ok, _participant} ->
+          sent_surveys =
+            load_sent_surveys(
+              socket.assigns.current_user,
+              Map.values(socket.assigns.selections),
+              socket.assigns.workshops
+            )
+
           {:noreply,
            socket
            |> assign(:submitted, true)
+           |> assign(:sent_surveys, sent_surveys)
            |> put_flash(:info, "Workshop registration saved!")}
 
         {:error, message} ->
@@ -520,6 +542,19 @@ defmodule GutWeb.WorkshopBrowseLive do
     errors = %{}
     name = String.trim(params["name"] || "")
     if name == "", do: Map.put(errors, :name, "Name is required"), else: errors
+  end
+
+  defp load_sent_surveys(_user, [], _workshops), do: []
+
+  defp load_sent_surveys(user, workshop_ids, workshops) do
+    require Ash.Query
+
+    Gut.Conference.Survey
+    |> Ash.Query.filter(workshop_id in ^workshop_ids and status == :sent)
+    |> Ash.read!(actor: user)
+    |> Enum.map(fn survey ->
+      %{survey: survey, workshop: Enum.find(workshops, &(&1.id == survey.workshop_id))}
+    end)
   end
 
   defp save_registrations(socket, name, email, phone_number) do

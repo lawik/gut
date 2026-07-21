@@ -123,6 +123,22 @@ defmodule Gut.Generators do
     )
   end
 
+  def survey(opts \\ []) do
+    changeset_generator(
+      Gut.Conference.Survey,
+      :create,
+      actor: Gut.system_actor("test"),
+      defaults: [
+        title: "Attendee survey",
+        description: "Help us make this workshop better",
+        # workshop_id must be passed by the caller; questions default to none
+        # so Ash.Generator does not invent random ones.
+        questions: []
+      ],
+      overrides: opts
+    )
+  end
+
   def workshop_participant(opts \\ []) do
     changeset_generator(
       Gut.Conference.WorkshopParticipant,
@@ -131,7 +147,11 @@ defmodule Gut.Generators do
       defaults: [
         name: sequence(:participant_name, &"Participant #{&1}"),
         phone_number: nil,
-        user_id: nil
+        user_id: nil,
+        # Stop Ash.Generator from auto-generating a random email argument that
+        # makes the HandleUser change relink the participant to a freshly
+        # created user, overriding any user_id we pass in.
+        email: nil
       ],
       overrides: opts
     )

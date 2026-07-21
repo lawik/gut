@@ -2,15 +2,14 @@
 #
 #     mix run priv/repo/seeds.exs
 #
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     Gut.Repo.insert!(%Gut.SomeSchema{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
+# The script is idempotent: it can be re-run against an existing database
+# without creating duplicates.
+
+require Ash.Query
 
 actor = Gut.system_actor("seeds")
+
+# --- Workshops -------------------------------------------------------------
 
 workshops = [
   {"Intro to Elixir", "Learn the basics of Elixir and functional programming.", 20},
@@ -45,15 +44,105 @@ workshops = [
   {"Type Specs & Dialyzer", "Static analysis and type checking.", 20}
 ]
 
-for {name, description, limit} <- workshops do
-  Ash.create!(
-    Ash.Changeset.for_create(Gut.Conference.Workshop, :create, %{
-      name: name,
-      description: description,
-      limit: limit
-    }),
+find_workshop = fn name ->
+  Gut.Conference.Workshop
+  |> Ash.Query.filter(name == ^name)
+  |> Ash.read_one!(actor: actor)
+end
+
+seeded_workshops =
+  for {name, description, limit} <- workshops do
+    find_workshop.(name) ||
+      Gut.Conference.create_workshop!(
+        %{name: name, description: description, limit: limit},
+        actor: actor
+      )
+  end
+
+IO.puts("Workshops: #{length(seeded_workshops)} present.")
+
+# --- Users of every role ----------------------------------------------------
+#
+# One functional user per role so every flow can be exercised in dev.
+# Sign in via magic link; in dev the email lands in /dev/mailbox.
+
+find_or_create_user = fn email, role ->
+  case Gut.Accounts.get_user_by_email(email, actor: actor) do
+    {:ok, user} -> user
+    {:error, _} -> Gut.Accounts.create_user!(email, role, actor: actor)
+  end
+end
+
+staff = find_or_create_user.("staff@example.com", :staff)
+organizer = find_or_create_user.("organizer@example.com", :speaker)
+attendee = find_or_create_user.("attendee@example.com", :attendee)
+sponsor_user = find_or_create_user.("sponsor@example.com", :sponsor)
+
+# Organizer: a speaker profile attached to a workshop, so they can manage
+# that workshop's survey via /my-workshops.
+
+speaker =
+  Gut.Conference.Speaker
+  |> Ash.Query.filter(user_id == ^organizer.id)
+  |> Ash.read_one!(actor: actor) ||
+    Gut.Conference.create_speaker!(
+      %{
+        full_name: "Orla Ganizer",
+        first_name: "Orla",
+        last_name: "Ganizer",
+        user_id: organizer.id
+      },
+      actor: actor
+    )
+
+organizer_workshop = List.first(seeded_workshops)
+
+unless Gut.Conference.WorkshopSpeaker
+       |> Ash.Query.filter(workshop_id == ^organizer_workshop.id and speaker_id == ^speaker.id)
+       |> Ash.exists?(actor: actor) do
+  Gut.Conference.create_workshop_speaker!(
+    %{workshop_id: organizer_workshop.id, speaker_id: speaker.id},
     actor: actor
   )
 end
 
-IO.puts("Seeded #{length(workshops)} workshops.")
+# Attendee: a workshop participant registered for the organizer's workshop,
+# so sent surveys reach and can be answered by this user.
+
+participant =
+  Gut.Conference.WorkshopParticipant
+  |> Ash.Query.filter(user_id == ^attendee.id)
+  |> Ash.read_one!(actor: actor) ||
+    Gut.Conference.create_workshop_participant!(
+      %{name: "Adda Tendee", user_id: attendee.id},
+      actor: actor
+    )
+
+unless Gut.Conference.WorkshopParticipation
+       |> Ash.Query.filter(
+         workshop_id == ^organizer_workshop.id and workshop_participant_id == ^participant.id
+       )
+       |> Ash.exists?(actor: actor) do
+  Gut.Conference.register_for_workshop!(
+    %{workshop_id: organizer_workshop.id, workshop_participant_id: participant.id},
+    actor: actor
+  )
+end
+
+# Sponsor: a sponsor organization linked to the sponsor user for /my-sponsor.
+
+Gut.Conference.Sponsor
+|> Ash.Query.filter(user_id == ^sponsor_user.id)
+|> Ash.read_one!(actor: actor) ||
+  Gut.Conference.create_sponsor!(
+    %{name: "Sponsorix AB", status: :ok, confirmed: true, user_id: sponsor_user.id},
+    actor: actor
+  )
+
+IO.puts("""
+Users seeded:
+  staff@example.com     (staff)
+  organizer@example.com (speaker, organizes "#{organizer_workshop.name}")
+  attendee@example.com  (attendee, registered for "#{organizer_workshop.name}")
+  sponsor@example.com   (sponsor, linked to Sponsorix AB)
+""")

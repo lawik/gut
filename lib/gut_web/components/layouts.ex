@@ -62,6 +62,9 @@ defmodule GutWeb.Layouts do
         <.link :if={@speaker?} navigate={~p"/my-travel"} class="btn btn-ghost">
           Speaker details
         </.link>
+        <.link :if={@speaker?} navigate={~p"/my-workshops"} class="btn btn-ghost">
+          My workshops
+        </.link>
         <.link
           :if={@show_browse_workshops?}
           navigate={~p"/workshops/browse"}
@@ -81,6 +84,7 @@ defmodule GutWeb.Layouts do
             <li><.link navigate={~p"/speakers"}>Speakers</.link></li>
             <li><.link navigate={~p"/sponsors"}>Sponsors</.link></li>
             <li><.link navigate={~p"/workshops"}>Workshops</.link></li>
+            <li><.link navigate={~p"/surveys"}>Surveys</.link></li>
             <li><.link navigate={~p"/users"}>Users</.link></li>
             <li class="menu-title">Create</li>
             <li>
@@ -110,6 +114,9 @@ defmodule GutWeb.Layouts do
           </li>
           <li>
             <.link navigate={~p"/workshops"} class="btn btn-ghost">Workshops</.link>
+          </li>
+          <li>
+            <.link navigate={~p"/surveys"} class="btn btn-ghost">Surveys</.link>
           </li>
           <li>
             <.link navigate={~p"/users"} class="btn btn-ghost">Users</.link>
