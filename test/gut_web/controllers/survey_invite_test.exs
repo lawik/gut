@@ -45,13 +45,13 @@ defmodule GutWeb.SurveyInviteTest do
     user
   end
 
-  test "invite with token forwards to the magic-link page and stores the survey as destination",
+  test "invite with token forwards to the survey-link page and stores the survey as destination",
        %{conn: conn} do
     survey_id = Ash.UUID.generate()
 
     conn = get(conn, "/survey-invite/#{survey_id}?token=tok123")
 
-    assert redirected_to(conn) == "/magic_link/tok123"
+    assert redirected_to(conn) == "/survey_link/tok123"
     assert get_session(conn, :return_to) == "/surveys/#{survey_id}/respond"
   end
 
@@ -77,18 +77,56 @@ defmodule GutWeb.SurveyInviteTest do
     assert redirected_to(conn) == "/surveys/#{survey_id}/respond"
   end
 
-  test "signing in via the emailed magic link lands on the survey", %{conn: conn} do
+  test "signing in via the emailed survey link lands on the survey", %{conn: conn} do
     %{workshop: workshop, survey: survey} = create_sent_survey()
     register_attendee(workshop, "invitee@test.com")
 
-    {:ok, token} = Gut.Accounts.magic_link_token("invitee@test.com")
+    {:ok, token} = Gut.Accounts.survey_link_token("invitee@test.com")
+
+    conn =
+      conn
+      |> Plug.Test.init_test_session(%{return_to: "/surveys/#{survey.id}/respond"})
+      |> post("/auth/user/survey_link", %{"user" => %{"token" => token}})
+
+    assert redirected_to(conn) == "/surveys/#{survey.id}/respond"
+    assert get_session(conn, "user_token")
+  end
+
+  test "the interstitial survey-link page renders a sign-in confirmation", %{conn: conn} do
+    %{workshop: workshop} = create_sent_survey()
+    register_attendee(workshop, "interstitial@test.com")
+
+    {:ok, token} = Gut.Accounts.survey_link_token("interstitial@test.com")
+
+    conn = get(conn, "/survey_link/#{token}")
+
+    assert html_response(conn, 200) =~ "Sign in"
+  end
+
+  test "survey link tokens live for seven days, login links for thirty minutes" do
+    generate(user(role: :attendee, email: "lifetime@test.com"))
+
+    {:ok, survey_token} = Gut.Accounts.survey_link_token("lifetime@test.com")
+    {:ok, %{"exp" => exp, "iat" => iat}} = AshAuthentication.Jwt.peek(survey_token)
+    assert exp - iat == 7 * 24 * 60 * 60
+
+    {:ok, login_token} = Gut.Accounts.magic_link_token("lifetime@test.com")
+    {:ok, %{"exp" => exp, "iat" => iat}} = AshAuthentication.Jwt.peek(login_token)
+    assert exp - iat == 30 * 60
+  end
+
+  test "a survey link token is not accepted by the regular magic-link sign-in", %{conn: conn} do
+    %{workshop: workshop, survey: survey} = create_sent_survey()
+    register_attendee(workshop, "crossover@test.com")
+
+    {:ok, token} = Gut.Accounts.survey_link_token("crossover@test.com")
 
     conn =
       conn
       |> Plug.Test.init_test_session(%{return_to: "/surveys/#{survey.id}/respond"})
       |> post("/auth/user/magic_link", %{"user" => %{"token" => token}})
 
-    assert redirected_to(conn) == "/surveys/#{survey.id}/respond"
-    assert get_session(conn, "user_token")
+    assert redirected_to(conn) == "/sign-in"
+    refute get_session(conn, "user_token")
   end
 end

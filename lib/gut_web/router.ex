@@ -124,6 +124,13 @@ defmodule GutWeb.Router do
       auth_routes_prefix: "/auth",
       overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.DaisyUI]
     )
+
+    # Long-lived sign-in links from survey invitation emails.
+    magic_sign_in_route(Gut.Accounts.User, :survey_link,
+      auth_routes_prefix: "/auth",
+      as: :survey_auth,
+      overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.DaisyUI]
+    )
   end
 
   scope "/mcp" do

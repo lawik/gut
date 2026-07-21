@@ -42,4 +42,18 @@ defmodule Gut.Accounts do
       to_string(email)
     )
   end
+
+  @doc """
+  Mints a long-lived sign-in token for survey invitation emails.
+
+  Accepted at /survey_link/:token rather than the regular magic-link page.
+  """
+  def survey_link_token(email) do
+    strategy = AshAuthentication.Info.strategy!(Gut.Accounts.User, :survey_link)
+
+    AshAuthentication.Strategy.MagicLink.request_token_for_identity(
+      strategy,
+      to_string(email)
+    )
+  end
 end

@@ -30,7 +30,7 @@ defmodule Gut.Workers.SurveyInvite do
 
   defp deliver(survey, workshop, email) do
     link =
-      case Gut.Accounts.magic_link_token(email) do
+      case Gut.Accounts.survey_link_token(email) do
         {:ok, token} -> url(~p"/survey-invite/#{survey.id}?token=#{token}")
         _ -> url(~p"/survey-invite/#{survey.id}")
       end

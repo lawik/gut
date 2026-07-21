@@ -48,6 +48,18 @@ defmodule Gut.Accounts.User do
         sender Gut.Accounts.User.Senders.SendMagicLinkEmail
       end
 
+      # Long-lived sign-in links for survey invitation emails, which are
+      # typically opened hours or days after delivery. Only minted by
+      # Gut.Workers.SurveyInvite; regular login links stay short-lived.
+      magic_link :survey_link do
+        identity_field :email
+        registration_enabled? false
+        require_interaction? true
+        token_lifetime {7, :days}
+
+        sender Gut.Accounts.User.Senders.SendSurveyLinkEmail
+      end
+
       api_key do
         api_key_relationship :valid_api_keys
         api_key_hash_attribute :api_key_hash

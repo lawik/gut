@@ -18,7 +18,7 @@ defmodule GutWeb.SurveyInviteController do
       token = params["token"] ->
         conn
         |> put_session(:return_to, return_to)
-        |> redirect(to: ~p"/magic_link/#{token}")
+        |> redirect(to: ~p"/survey_link/#{token}")
 
       true ->
         conn
