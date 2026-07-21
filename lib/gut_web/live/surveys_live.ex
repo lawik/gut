@@ -7,6 +7,24 @@ defmodule GutWeb.SurveysLive do
   on_mount {GutWeb.LiveUserAuth, :live_staff_required}
 
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Gut.PubSub, "surveys:changed")
+    end
+
+    socket =
+      socket
+      |> assign(:page_title, "Surveys")
+      |> assign(:current_scope, nil)
+      |> load_surveys()
+
+    {:ok, socket}
+  end
+
+  def handle_info(%{topic: "surveys:changed"}, socket) do
+    {:noreply, load_surveys(socket)}
+  end
+
+  defp load_surveys(socket) do
     surveys =
       Gut.Conference.list_surveys!(
         actor: socket.assigns.current_user,
@@ -14,13 +32,7 @@ defmodule GutWeb.SurveysLive do
       )
       |> Enum.sort_by(&status_order(&1.status))
 
-    socket =
-      socket
-      |> assign(:page_title, "Surveys")
-      |> assign(:current_scope, nil)
-      |> assign(:surveys, surveys)
-
-    {:ok, socket}
+    assign(socket, :surveys, surveys)
   end
 
   defp status_order(:in_review), do: 0

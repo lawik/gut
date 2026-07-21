@@ -388,6 +388,22 @@ defmodule GutWeb.SurveyJourneyTest do
       |> assert_has("div", text: "invitations queued for 1 of 2 registered attendees")
     end
 
+    test "the surveys list updates live when a survey is submitted", %{
+      conn: conn,
+      workshop: workshop
+    } do
+      survey = create_draft_survey(workshop)
+
+      session =
+        conn
+        |> visit("/surveys")
+        |> assert_has("span", text: "Draft")
+
+      Gut.Conference.submit_survey_for_review!(survey, actor: @system_actor)
+
+      assert_has(session, "span", text: "In review", timeout: 500)
+    end
+
     test "returns a submitted survey to the organizer for changes", %{
       conn: conn,
       workshop: workshop
