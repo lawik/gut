@@ -150,11 +150,23 @@ defmodule GutWeb.SurveyReviewLive do
       {:ok, survey} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Survey sent to attendees")
+         |> put_flash(:info, sent_message(survey))
          |> load_survey(survey.id)}
 
       {:error, _error} ->
         {:noreply, put_flash(socket, :error, "Could not send the survey.")}
+    end
+  end
+
+  defp sent_message(survey) do
+    enqueued = survey.__metadata__[:invites_enqueued]
+    registered = survey.__metadata__[:registered_count]
+
+    if enqueued == registered do
+      "Survey sent to attendees: #{enqueued} invitation(s) queued"
+    else
+      "Survey sent to attendees: invitations queued for #{enqueued} of #{registered} " <>
+        "registered attendees. The rest have no user account to email."
     end
   end
 

@@ -343,10 +343,30 @@ defmodule GutWeb.SurveyJourneyTest do
       |> assert_has("li", text: "What did you learn?")
       |> assert_has("li", text: "Yes")
       |> click_button("Send to attendees")
-      |> assert_has("div", text: "Survey sent to attendees")
+      |> assert_has("div", text: "Survey sent to attendees: 1 invitation(s) queued")
       |> assert_has("span", text: "Sent")
 
       assert %{status: :sent, sent_at: %DateTime{}} = reload_survey(survey)
+    end
+
+    test "sending reports skipped attendees who cannot be emailed", %{
+      conn: conn,
+      workshop: workshop
+    } do
+      survey = create_submitted_survey(workshop)
+      register_attendee(workshop, "reachable@test.com")
+      no_user = generate(workshop_participant(name: "No Account", user_id: nil))
+
+      {:ok, _} =
+        Gut.Conference.register_for_workshop(
+          %{workshop_id: workshop.id, workshop_participant_id: no_user.id},
+          actor: @system_actor
+        )
+
+      conn
+      |> visit("/surveys/#{survey.id}/review")
+      |> click_button("Send to attendees")
+      |> assert_has("div", text: "invitations queued for 1 of 2 registered attendees")
     end
 
     test "returns a submitted survey to the organizer for changes", %{

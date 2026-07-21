@@ -345,6 +345,29 @@ defmodule Gut.Conference.SurveyTest do
       refute to_string(waitlisted.email) in recipients
     end
 
+    test "sending reports how many registered attendees could be emailed", %{
+      survey: survey,
+      workshop: workshop
+    } do
+      staff = generate(user(role: :staff))
+
+      # One attendee with a user account, one participant without any user.
+      register_attendee(workshop)
+      no_user = generate(workshop_participant(name: "No Account", user_id: nil))
+
+      {:ok, _} =
+        Gut.Conference.register_for_workshop(
+          %{workshop_id: workshop.id, workshop_participant_id: no_user.id},
+          actor: @system_actor
+        )
+
+      sent = Gut.Conference.send_survey!(survey, actor: staff)
+
+      assert sent.__metadata__[:invites_enqueued] == 1
+      assert sent.__metadata__[:registered_count] == 2
+      assert length(all_enqueued(worker: Gut.Workers.SurveyInvite)) == 1
+    end
+
     test "the invite job delivers an email with an auth link", %{
       survey: survey,
       workshop: workshop
