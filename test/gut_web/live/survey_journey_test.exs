@@ -489,6 +489,30 @@ defmodule GutWeb.SurveyJourneyTest do
       assert Enum.any?(response.answers, &(&1.value == "Fine, here you go"))
     end
 
+    test "crafted nested answer params do not crash the respond page", %{
+      conn: conn,
+      workshop: workshop
+    } do
+      survey = create_sent_survey(workshop)
+      attendee = register_attendee(workshop, "crafty@test.com")
+      conn = log_in_user(conn, attendee)
+
+      conn
+      |> visit("/surveys/#{survey.id}/respond")
+      |> unwrap(fn view ->
+        Phoenix.LiveViewTest.render_change(view, "validate", %{
+          "answers" => %{"x" => %{"y" => "z"}}
+        })
+
+        Phoenix.LiveViewTest.render_submit(view, "submit", %{
+          "answers" => %{"x" => %{"y" => "z"}, "list" => ["a"]}
+        })
+      end)
+      |> assert_has("h1", text: "How did we do?")
+
+      assert {:ok, []} = Gut.Conference.list_survey_responses(actor: @system_actor)
+    end
+
     test "an all-blank submission is rejected without consuming the response", %{
       conn: conn,
       workshop: workshop

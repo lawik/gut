@@ -132,7 +132,7 @@ defmodule GutWeb.WorkshopSurveyPreviewLive do
   end
 
   def handle_event("validate", params, socket) do
-    answers = params["answers"] || %{}
+    answers = sanitize_answers(params["answers"])
 
     missing_ids =
       Enum.filter(socket.assigns.missing_ids, fn id ->
@@ -146,7 +146,7 @@ defmodule GutWeb.WorkshopSurveyPreviewLive do
   end
 
   def handle_event("submit", params, socket) do
-    answers = params["answers"] || %{}
+    answers = sanitize_answers(params["answers"])
     missing_ids = missing_required_ids(socket.assigns.survey.questions, answers)
 
     any_answer? =

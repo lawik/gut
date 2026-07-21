@@ -70,4 +70,16 @@ defmodule GutWeb.SurveyComponents do
       question.id
     end
   end
+
+  @doc """
+  Keeps only well-formed entries from client-supplied answer params.
+
+  Crafted payloads like `answers[x][y]=z` arrive as nested maps and would
+  otherwise crash `String.trim/1` or attribute rendering.
+  """
+  def sanitize_answers(params) when is_map(params) do
+    for {id, value} <- params, is_binary(id), is_binary(value), into: %{}, do: {id, value}
+  end
+
+  def sanitize_answers(_params), do: %{}
 end
