@@ -28,6 +28,7 @@ defmodule Gut.Conference.SurveyResponse do
 
       validate Gut.Conference.SurveyResponse.Validations.SurveyIsSent
       validate Gut.Conference.SurveyResponse.Validations.RequiredQuestionsAnswered
+      validate Gut.Conference.SurveyResponse.Validations.HasAnswers
 
       change relate_actor(:user)
       change manage_relationship(:answers, type: :create)

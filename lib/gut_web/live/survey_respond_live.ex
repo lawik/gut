@@ -140,28 +140,37 @@ defmodule GutWeb.SurveyRespondLive do
     answer_params = params["answers"] || %{}
     missing_ids = missing_required_ids(socket.assigns.survey.questions, answer_params)
 
-    if missing_ids != [] do
-      {:noreply,
-       socket
-       |> assign(:answers, answer_params)
-       |> assign(:missing_ids, missing_ids)}
-    else
-      answers =
-        for {question_id, value} <- answer_params,
-            String.trim(value) != "" do
-          %{survey_question_id: question_id, value: value}
-        end
-
-      case Gut.Conference.respond_to_survey(
-             %{survey_id: socket.assigns.survey.id, answers: answers},
-             actor: socket.assigns.current_user
-           ) do
-        {:ok, _response} ->
-          {:noreply, assign(socket, :submitted, true)}
-
-        {:error, error} ->
-          {:noreply, put_flash(socket, :error, submit_error_message(error))}
+    answers =
+      for {question_id, value} <- answer_params,
+          is_binary(value),
+          String.trim(value) != "" do
+        %{survey_question_id: question_id, value: value}
       end
+
+    cond do
+      missing_ids != [] ->
+        {:noreply,
+         socket
+         |> assign(:answers, answer_params)
+         |> assign(:missing_ids, missing_ids)}
+
+      answers == [] ->
+        {:noreply,
+         socket
+         |> assign(:answers, answer_params)
+         |> put_flash(:error, "Please answer at least one question.")}
+
+      true ->
+        case Gut.Conference.respond_to_survey(
+               %{survey_id: socket.assigns.survey.id, answers: answers},
+               actor: socket.assigns.current_user
+             ) do
+          {:ok, _response} ->
+            {:noreply, assign(socket, :submitted, true)}
+
+          {:error, error} ->
+            {:noreply, put_flash(socket, :error, submit_error_message(error))}
+        end
     end
   end
 

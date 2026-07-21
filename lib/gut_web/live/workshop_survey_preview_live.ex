@@ -149,13 +149,24 @@ defmodule GutWeb.WorkshopSurveyPreviewLive do
     answers = params["answers"] || %{}
     missing_ids = missing_required_ids(socket.assigns.survey.questions, answers)
 
+    any_answer? =
+      Enum.any?(answers, fn {_id, value} -> is_binary(value) and String.trim(value) != "" end)
+
     socket =
       socket
       |> assign(:answers, answers)
       |> assign(:missing_ids, missing_ids)
-      |> assign(:submitted, missing_ids == [])
 
-    {:noreply, socket}
+    cond do
+      missing_ids != [] ->
+        {:noreply, socket}
+
+      not any_answer? ->
+        {:noreply, put_flash(socket, :error, "Please answer at least one question.")}
+
+      true ->
+        {:noreply, assign(socket, :submitted, true)}
+    end
   end
 
   def handle_event("reset", _params, socket) do

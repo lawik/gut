@@ -700,7 +700,11 @@ defmodule Gut.Conference.SurveyTest do
       assert Enum.any?(answers, &(&1.value == "Emacs"))
     end
 
-    test "a waitlisted participant can also respond", %{workshop: workshop, survey: survey} do
+    test "a waitlisted participant can also respond", %{
+      workshop: workshop,
+      survey: survey,
+      questions: [question | _]
+    } do
       register_attendee(workshop)
       register_attendee(workshop)
       %{user: waitlisted, participation: participation} = register_attendee(workshop)
@@ -708,8 +712,46 @@ defmodule Gut.Conference.SurveyTest do
 
       assert {:ok, _} =
                Gut.Conference.respond_to_survey(
-                 %{survey_id: survey.id, answers: []},
+                 %{
+                   survey_id: survey.id,
+                   answers: [%{survey_question_id: question.id, value: "From the waitlist"}]
+                 },
                  actor: waitlisted
+               )
+    end
+
+    test "an empty submission is rejected and does not lock the attendee out", %{
+      workshop: workshop,
+      survey: survey,
+      questions: questions
+    } do
+      %{user: attendee} = register_attendee(workshop)
+
+      assert {:error, %Ash.Error.Invalid{} = error} =
+               Gut.Conference.respond_to_survey(
+                 %{survey_id: survey.id, answers: []},
+                 actor: attendee
+               )
+
+      assert Exception.message(error) =~ "must answer at least one question"
+
+      # Blank-only values are just as empty.
+      [question | _] = questions
+
+      assert {:error, %Ash.Error.Invalid{}} =
+               Gut.Conference.respond_to_survey(
+                 %{
+                   survey_id: survey.id,
+                   answers: [%{survey_question_id: question.id, value: "   "}]
+                 },
+                 actor: attendee
+               )
+
+      # The failed attempts must not consume the one-response-per-user slot.
+      assert {:ok, _} =
+               Gut.Conference.respond_to_survey(
+                 %{survey_id: survey.id, answers: answers_for(questions)},
+                 actor: attendee
                )
     end
 
@@ -767,11 +809,13 @@ defmodule Gut.Conference.SurveyTest do
         actor: attendee
       )
 
-      assert {:error, %Ash.Error.Invalid{}} =
+      assert {:error, %Ash.Error.Invalid{} = error} =
                Gut.Conference.respond_to_survey(
-                 %{survey_id: survey.id, answers: []},
+                 %{survey_id: survey.id, answers: answers_for(questions)},
                  actor: attendee
                )
+
+      assert Exception.message(error) =~ "already responded"
     end
 
     test "responses are only accepted for sent surveys", %{workshop: _workshop} do
@@ -788,12 +832,15 @@ defmodule Gut.Conference.SurveyTest do
       assert Exception.message(error) =~ "not accepting responses"
     end
 
-    test "a user who is not signed up for the workshop cannot respond", %{survey: survey} do
+    test "a user who is not signed up for the workshop cannot respond", %{
+      survey: survey,
+      questions: questions
+    } do
       bystander = generate(user(role: :attendee))
 
       assert {:error, %Ash.Error.Forbidden{}} =
                Gut.Conference.respond_to_survey(
-                 %{survey_id: survey.id, answers: []},
+                 %{survey_id: survey.id, answers: answers_for(questions)},
                  actor: bystander
                )
     end

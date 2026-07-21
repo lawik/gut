@@ -470,6 +470,38 @@ defmodule GutWeb.SurveyJourneyTest do
       assert Enum.any?(response.answers, &(&1.value == "Fine, here you go"))
     end
 
+    test "an all-blank submission is rejected without consuming the response", %{
+      conn: conn,
+      workshop: workshop
+    } do
+      survey =
+        Gut.Conference.create_survey!(
+          %{
+            title: "Optional only",
+            workshop_id: workshop.id,
+            questions: [%{prompt: "Optional thoughts?", question_type: :multiline}]
+          },
+          actor: @system_actor
+        )
+
+      survey = Gut.Conference.submit_survey_for_review!(survey, actor: @system_actor)
+      survey = Gut.Conference.send_survey!(survey, actor: @system_actor)
+
+      attendee = register_attendee(workshop, "blank@test.com")
+      conn = log_in_user(conn, attendee)
+
+      conn
+      |> visit("/surveys/#{survey.id}/respond")
+      |> click_button("Submit answers")
+      |> assert_has("div", text: "Please answer at least one question.")
+      |> refute_has("h1", text: "Thank you!")
+      |> fill_in("Optional thoughts?", with: "Second try")
+      |> click_button("Submit answers")
+      |> assert_has("h1", text: "Thank you!")
+
+      assert [_] = Gut.Conference.list_survey_responses!(actor: @system_actor)
+    end
+
     test "a survey that has not been sent is not available", %{
       conn: conn,
       workshop: workshop
