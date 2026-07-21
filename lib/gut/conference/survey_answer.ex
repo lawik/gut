@@ -11,7 +11,7 @@ defmodule Gut.Conference.SurveyAnswer do
 
     references do
       reference :survey_response, on_delete: :delete
-      reference :survey_question, on_delete: :delete
+      reference :survey_question, on_delete: :delete, index?: true
     end
   end
 

@@ -10,7 +10,7 @@ defmodule Gut.Conference.SurveyQuestionOption do
     repo Gut.Repo
 
     references do
-      reference :survey_question, on_delete: :delete
+      reference :survey_question, on_delete: :delete, index?: true
     end
   end
 
