@@ -180,6 +180,56 @@ defmodule GutWeb.CsvExportController do
     end
   end
 
+  def survey_responses(conn, %{"workshop_id" => workshop_id}) do
+    with {:ok, user, workshop} <- require_organizer(conn, workshop_id) do
+      survey =
+        Gut.Conference.Survey
+        |> Ash.Query.filter(workshop_id == ^workshop.id)
+        |> Ash.Query.load(questions: [])
+        |> Ash.read_one!(actor: user)
+
+      if survey do
+        responses =
+          Gut.Conference.SurveyResponse
+          |> Ash.Query.filter(survey_id == ^survey.id)
+          |> Ash.Query.load(:answers)
+          |> Ash.Query.sort(inserted_at: :asc)
+          |> Ash.read!(actor: user)
+
+        names =
+          Gut.Conference.WorkshopParticipation
+          |> Ash.Query.filter(workshop_id == ^workshop.id)
+          |> Ash.Query.load(:workshop_participant)
+          |> Ash.read!(actor: Gut.public_actor())
+          |> Map.new(fn participation ->
+            {participation.workshop_participant.user_id, participation.workshop_participant.name}
+          end)
+
+        headers = ["Attendee"] ++ Enum.map(survey.questions, & &1.prompt) ++ ["Submitted At"]
+
+        rows =
+          Enum.map(responses, fn response ->
+            answers =
+              Enum.map(survey.questions, fn question ->
+                case Enum.find(response.answers, &(&1.survey_question_id == question.id)) do
+                  nil -> nil
+                  answer -> answer.value
+                end
+              end)
+
+            [names[response.user_id] || "Unknown"] ++
+              answers ++ [Calendar.strftime(response.inserted_at, "%Y-%m-%d %H:%M UTC")]
+          end)
+
+        send_csv(conn, "survey-responses.csv", headers, rows)
+      else
+        conn |> put_status(:not_found) |> text("No survey for this workshop") |> halt()
+      end
+    else
+      {:error, conn} -> conn
+    end
+  end
+
   # Filter helpers
 
   defp apply_text_filters(query, params, fields) do
@@ -262,6 +312,20 @@ defmodule GutWeb.CsvExportController do
   defp require_staff(conn) do
     case conn.assigns[:current_user] do
       %{role: :staff} = user -> {:ok, user}
+      _ -> {:error, conn |> put_status(:forbidden) |> text("Forbidden") |> halt()}
+    end
+  end
+
+  defp require_organizer(conn, workshop_id) do
+    with %{} = user <- conn.assigns[:current_user],
+         {:ok, workshop} <-
+           Gut.Conference.get_workshop(workshop_id,
+             load: [:speakers],
+             actor: Gut.public_actor()
+           ),
+         true <- user.role == :staff or Enum.any?(workshop.speakers, &(&1.user_id == user.id)) do
+      {:ok, user, workshop}
+    else
       _ -> {:error, conn |> put_status(:forbidden) |> text("Forbidden") |> halt()}
     end
   end

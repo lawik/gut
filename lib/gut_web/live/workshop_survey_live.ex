@@ -135,6 +135,13 @@ defmodule GutWeb.WorkshopSurveyLive do
           </div>
           <div :if={@survey} class="flex items-center gap-3">
             <.link
+              :if={@survey.status == :sent}
+              navigate={~p"/workshops/#{@workshop.id}/survey/results"}
+              class="btn btn-ghost btn-sm"
+            >
+              <.icon name="hero-chart-bar" class="size-4" /> Results
+            </.link>
+            <.link
               navigate={~p"/workshops/#{@workshop.id}/survey/preview"}
               class="btn btn-ghost btn-sm"
             >

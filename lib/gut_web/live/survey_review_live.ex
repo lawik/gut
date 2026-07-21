@@ -129,9 +129,15 @@ defmodule GutWeb.SurveyReviewLive do
                 </button>
               </div>
             <% :sent -> %>
-              <p class="text-base-content/70">
+              <p class="text-base-content/70 mb-4">
                 Sent {Calendar.strftime(@survey.sent_at, "%Y-%m-%d %H:%M UTC")}. {@survey.response_count} response(s) so far.
               </p>
+              <.link
+                navigate={~p"/workshops/#{@survey.workshop_id}/survey/results"}
+                class="btn btn-primary btn-sm"
+              >
+                View results
+              </.link>
           <% end %>
         </div>
       </div>

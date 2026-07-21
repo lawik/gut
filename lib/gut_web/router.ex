@@ -64,6 +64,7 @@ defmodule GutWeb.Router do
       live "/workshops/:id/edit", WorkshopFormLive
       live "/workshops/:id/survey", WorkshopSurveyLive
       live "/workshops/:id/survey/preview", WorkshopSurveyPreviewLive
+      live "/workshops/:id/survey/results", WorkshopSurveyResultsLive
 
       live "/my-workshops", MyWorkshopsLive
 
@@ -95,6 +96,7 @@ defmodule GutWeb.Router do
     pipe_through :browser
 
     get "/survey-invite/:id", SurveyInviteController, :show
+    get "/export/survey-responses/:workshop_id", CsvExportController, :survey_responses
     get "/export/speakers", CsvExportController, :speakers
     get "/export/workshops", CsvExportController, :workshops
     get "/export/sponsors", CsvExportController, :sponsors

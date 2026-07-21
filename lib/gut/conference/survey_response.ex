@@ -17,6 +17,10 @@ defmodule Gut.Conference.SurveyResponse do
   actions do
     defaults [:read]
 
+    read :list do
+      pagination offset?: true, default_limit: 25, countable: :by_default
+    end
+
     create :respond do
       accept [:survey_id]
 
@@ -31,7 +35,7 @@ defmodule Gut.Conference.SurveyResponse do
   end
 
   policies do
-    policy action(:read) do
+    policy action([:read, :list]) do
       authorize_if Gut.Checks.SystemActor
       authorize_if Gut.Checks.StaffActor
       authorize_if expr(user_id == ^actor(:id))

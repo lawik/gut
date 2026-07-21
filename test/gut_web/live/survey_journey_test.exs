@@ -377,6 +377,7 @@ defmodule GutWeb.SurveyJourneyTest do
       |> visit("/surveys/#{survey.id}/respond")
       |> assert_has("h1", text: "How did we do?")
       |> assert_has("p", text: "attendees of")
+      |> assert_has("p", text: "your answers are not anonymous")
       |> fill_in("What did you learn?", with: "So much about LiveView")
       |> select("Would you recommend the workshop?", option: "Yes")
       |> fill_in("Anything else?", with: "More coffee please")
@@ -473,6 +474,123 @@ defmodule GutWeb.SurveyJourneyTest do
       conn
       |> visit("/surveys/#{survey.id}/respond")
       |> assert_has("h1", text: "Survey not available")
+    end
+  end
+
+  describe "survey results" do
+    setup [:create_workshop_with_organizer]
+
+    defp respond_as(workshop, survey, name, email) do
+      user = generate(user(role: :attendee, email: email))
+      participant = generate(workshop_participant(user_id: user.id, name: name))
+
+      {:ok, _} =
+        Gut.Conference.register_for_workshop(
+          %{workshop_id: workshop.id, workshop_participant_id: participant.id},
+          actor: @system_actor
+        )
+
+      %{questions: [learn, recommend, _extra]} = reload_survey(survey)
+
+      Gut.Conference.respond_to_survey!(
+        %{
+          survey_id: survey.id,
+          answers: [
+            %{survey_question_id: learn.id, value: "Answer from #{name}"},
+            %{survey_question_id: recommend.id, value: "Yes"}
+          ]
+        },
+        actor: user
+      )
+    end
+
+    test "organizer sees attendee names with answers in question columns, paged", %{
+      conn: conn,
+      workshop: workshop,
+      organizer: organizer
+    } do
+      survey = create_sent_survey(workshop)
+
+      for n <- 1..11 do
+        name = "Attendee #{String.pad_leading(to_string(n), 2, "0")}"
+        respond_as(workshop, survey, name, "results-attendee-#{n}@test.com")
+      end
+
+      conn = log_in_user(conn, organizer)
+
+      conn
+      |> visit("/workshops/#{workshop.id}/survey/results")
+      |> assert_has("th", text: "Attendee")
+      |> assert_has("th", text: "What did you learn?")
+      |> assert_has("th", text: "Would you recommend the workshop?")
+      |> assert_has("td", text: "Attendee 01", timeout: 500)
+      |> assert_has("td", text: "Answer from Attendee 01")
+      |> assert_has("td", text: "Yes")
+      |> assert_has("a", text: "Export CSV")
+      |> refute_has("td", text: "Attendee 11")
+
+      conn
+      |> visit("/workshops/#{workshop.id}/survey/results?page=2")
+      |> assert_has("td", text: "Attendee 11", timeout: 500)
+      |> refute_has("td", text: "Attendee 01")
+    end
+
+    test "unanswered optional questions show a placeholder", %{
+      conn: conn,
+      workshop: workshop,
+      organizer: organizer
+    } do
+      survey = create_sent_survey(workshop)
+      user = generate(user(role: :attendee, email: "sparse@test.com"))
+      participant = generate(workshop_participant(user_id: user.id, name: "Sparse Answerer"))
+
+      {:ok, _} =
+        Gut.Conference.register_for_workshop(
+          %{workshop_id: workshop.id, workshop_participant_id: participant.id},
+          actor: @system_actor
+        )
+
+      %{questions: [learn | _]} = reload_survey(survey)
+
+      Gut.Conference.respond_to_survey!(
+        %{
+          survey_id: survey.id,
+          answers: [%{survey_question_id: learn.id, value: "Only the required one"}]
+        },
+        actor: user
+      )
+
+      conn = log_in_user(conn, organizer)
+
+      conn
+      |> visit("/workshops/#{workshop.id}/survey/results")
+      |> assert_has("td", text: "Sparse Answerer", timeout: 500)
+      |> assert_has("td", text: "Only the required one")
+    end
+
+    test "a speaker from another workshop cannot see the results", %{
+      conn: conn,
+      workshop: workshop
+    } do
+      create_sent_survey(workshop)
+      other_speaker_user = generate(user(role: :speaker, email: "other-speaker@test.com"))
+      generate(speaker(user_id: other_speaker_user.id))
+      conn = log_in_user(conn, other_speaker_user)
+
+      conn
+      |> visit("/workshops/#{workshop.id}/survey/results")
+      |> assert_path("/my-travel")
+    end
+
+    test "staff reach the results from the review page", %{conn: conn, workshop: workshop} do
+      survey = create_sent_survey(workshop)
+      respond_as(workshop, survey, "Reviewed Person", "reviewed@test.com")
+
+      conn
+      |> visit("/surveys/#{survey.id}/review")
+      |> click_link("View results")
+      |> assert_has("td", text: "Reviewed Person", timeout: 500)
+      |> assert_has("th", text: "What did you learn?")
     end
   end
 

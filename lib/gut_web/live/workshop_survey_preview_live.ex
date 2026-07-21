@@ -104,6 +104,10 @@ defmodule GutWeb.WorkshopSurveyPreviewLive do
             <p :if={@survey.description} class="text-base-content/70 mt-4">
               {@survey.description}
             </p>
+            <p class="text-sm text-base-content/50 mt-4">
+              Please note that your answers are not anonymous: your name is shared with
+              the workshop organizer.
+            </p>
           </div>
 
           <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl p-6">
