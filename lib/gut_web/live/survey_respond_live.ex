@@ -27,7 +27,9 @@ defmodule GutWeb.SurveyRespondLive do
            actor: user,
            load: [questions: [:options]]
          ) do
-      {:ok, survey} ->
+      # Organizers and staff can read unsent surveys, but only a sent survey
+      # accepts responses; anything else shows the unavailable panel.
+      {:ok, %{status: :sent} = survey} ->
         # Workshops are public data but only readable via the public actor.
         workshop = Gut.Conference.get_workshop!(survey.workshop_id, actor: @public_actor)
 
@@ -45,7 +47,7 @@ defmodule GutWeb.SurveyRespondLive do
 
         {:ok, socket}
 
-      {:error, _} ->
+      _not_available ->
         socket =
           socket
           |> assign(:page_title, "Survey")

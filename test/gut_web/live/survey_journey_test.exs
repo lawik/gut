@@ -515,6 +515,17 @@ defmodule GutWeb.SurveyJourneyTest do
       |> assert_has("h1", text: "Survey not available")
     end
 
+    test "the organizer sees the unavailable panel instead of a form for their unsent survey",
+         %{conn: conn, workshop: workshop, organizer: organizer} do
+      survey = create_draft_survey(workshop)
+      conn = log_in_user(conn, organizer)
+
+      conn
+      |> visit("/surveys/#{survey.id}/respond")
+      |> assert_has("h1", text: "Survey not available")
+      |> refute_has("button", text: "Submit answers")
+    end
+
     test "a sent survey is not available to someone not signed up for the workshop", %{
       conn: conn,
       workshop: workshop
