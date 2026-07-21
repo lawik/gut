@@ -21,12 +21,14 @@ defmodule Gut.Accounts.User.Senders.SendSurveyLinkEmail do
         email -> email
       end
 
+    escaped_email = Plug.HTML.html_escape(to_string(email))
+
     new()
     |> from({"Goatmire", Mailer.from_email()})
     |> to(to_string(email))
     |> subject("Your login link")
     |> html_body("""
-    <p>Hello, #{email}! Click this link to sign in:</p>
+    <p>Hello, #{escaped_email}! Click this link to sign in:</p>
     <p><a href="#{url(~p"/survey_link/#{token}")}">#{url(~p"/survey_link/#{token}")}</a></p>
     """)
     |> Mailer.deliver!()

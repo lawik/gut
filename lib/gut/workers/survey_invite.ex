@@ -38,6 +38,11 @@ defmodule Gut.Workers.SurveyInvite do
         _ -> url(~p"/survey-invite/#{survey.id}")
       end
 
+    # Titles are organizer-controlled and workshop names come from
+    # Sessionize; escape both before interpolating into HTML.
+    workshop_name = Plug.HTML.html_escape(workshop.name)
+    title = Plug.HTML.html_escape(survey.title)
+
     new()
     |> from({"Goatmire", Mailer.from_email()})
     |> to(email)
@@ -45,8 +50,8 @@ defmodule Gut.Workers.SurveyInvite do
     |> html_body("""
     <p>Hello!</p>
     <p>
-      The organizer of the workshop <strong>#{workshop.name}</strong> would like
-      you to answer the survey <strong>#{survey.title}</strong>.
+      The organizer of the workshop <strong>#{workshop_name}</strong> would like
+      you to answer the survey <strong>#{title}</strong>.
     </p>
     <p><a href="#{link}">Answer the survey</a></p>
     <p>The link signs you in and takes you straight to the survey.</p>

@@ -30,9 +30,10 @@ defmodule Gut.Accounts.User.Senders.SendMagicLinkEmail do
 
   defp body(params) do
     # NOTE: You may have to change this to match your magic link acceptance URL.
+    email = Plug.HTML.html_escape(to_string(params[:email]))
 
     """
-    <p>Hello, #{params[:email]}! Click this link to sign in:</p>
+    <p>Hello, #{email}! Click this link to sign in:</p>
     <p><a href="#{url(~p"/magic_link/#{params[:token]}")}">#{url(~p"/magic_link/#{params[:token]}")}</a></p>
     """
   end

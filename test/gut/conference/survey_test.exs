@@ -389,6 +389,34 @@ defmodule Gut.Conference.SurveyTest do
       assert email.html_body =~ "/survey-invite/#{survey.id}?token="
     end
 
+    test "the invite email escapes organizer-controlled HTML", %{workshop: _workshop} do
+      other = workshop_with_organizer()
+
+      survey =
+        Gut.Conference.create_survey!(
+          %{
+            title: ~s|<script>alert("pwned")</script>|,
+            workshop_id: other.workshop.id,
+            questions: [%{prompt: "Q?", question_type: :single_line}]
+          },
+          actor: @system_actor
+        )
+
+      survey = Gut.Conference.submit_survey_for_review!(survey, actor: @system_actor)
+      survey = Gut.Conference.send_survey!(survey, actor: @system_actor)
+      %{user: attendee} = register_attendee(other.workshop)
+
+      assert :ok =
+               perform_job(Gut.Workers.SurveyInvite, %{
+                 "survey_id" => survey.id,
+                 "email" => to_string(attendee.email)
+               })
+
+      assert_receive {:email, email}
+      refute email.html_body =~ "<script>"
+      assert email.html_body =~ "&lt;script&gt;"
+    end
+
     test "the invite job cancels when the survey is gone or no longer sent", %{
       survey: survey
     } do
