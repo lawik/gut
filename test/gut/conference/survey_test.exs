@@ -9,6 +9,7 @@ defmodule Gut.Conference.SurveyTest do
   3. Attendees of the workshop can then read the survey and respond once.
   """
   use Gut.DataCase
+  use Oban.Testing, repo: Gut.Repo
 
   @system_actor Gut.system_actor("test")
   @public_actor Gut.public_actor()
@@ -323,7 +324,7 @@ defmodule Gut.Conference.SurveyTest do
       assert sent.sent_at != nil
     end
 
-    test "sending emails all registered attendees with an auth link, skipping the waitlist",
+    test "sending enqueues an invite job per registered attendee, skipping the waitlist",
          %{survey: survey, workshop: workshop} do
       staff = generate(user(role: :staff))
 
@@ -335,23 +336,53 @@ defmodule Gut.Conference.SurveyTest do
 
       Gut.Conference.send_survey!(survey, actor: staff)
 
-      assert_receive {:email, email1}
-      assert_receive {:email, email2}
-      refute_receive {:email, _}
-
       recipients =
-        [email1, email2]
-        |> Enum.flat_map(& &1.to)
-        |> Enum.map(fn {_name, address} -> address end)
+        all_enqueued(worker: Gut.Workers.SurveyInvite)
+        |> Enum.map(& &1.args["email"])
         |> Enum.sort()
 
       assert recipients == Enum.sort([to_string(first.email), to_string(second.email)])
       refute to_string(waitlisted.email) in recipients
+    end
 
-      for email <- [email1, email2] do
-        assert email.subject =~ "Survey for"
-        assert email.html_body =~ "/survey-invite/#{survey.id}?token="
-      end
+    test "the invite job delivers an email with an auth link", %{
+      survey: survey,
+      workshop: workshop
+    } do
+      staff = generate(user(role: :staff))
+      %{user: attendee} = register_attendee(workshop)
+      Gut.Conference.send_survey!(survey, actor: staff)
+
+      assert :ok =
+               perform_job(Gut.Workers.SurveyInvite, %{
+                 "survey_id" => survey.id,
+                 "email" => to_string(attendee.email)
+               })
+
+      assert_receive {:email, email}
+      assert [{_, to}] = email.to
+      assert to == to_string(attendee.email)
+      assert email.subject =~ "Survey for"
+      assert email.html_body =~ "/survey-invite/#{survey.id}?token="
+    end
+
+    test "the invite job cancels when the survey is gone or no longer sent", %{
+      survey: survey
+    } do
+      assert {:cancel, _} =
+               perform_job(Gut.Workers.SurveyInvite, %{
+                 "survey_id" => Ash.UUID.generate(),
+                 "email" => "whoever@test.com"
+               })
+
+      # The setup survey is still :in_review.
+      assert {:cancel, _} =
+               perform_job(Gut.Workers.SurveyInvite, %{
+                 "survey_id" => survey.id,
+                 "email" => "whoever@test.com"
+               })
+
+      refute_receive {:email, _}
     end
 
     test "organizer cannot send the survey", %{survey: survey, organizer: organizer} do
