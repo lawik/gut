@@ -158,18 +158,6 @@ defmodule GutWeb.SurveyReviewLive do
     end
   end
 
-  defp sent_message(survey) do
-    enqueued = survey.__metadata__[:invites_enqueued]
-    registered = survey.__metadata__[:registered_count]
-
-    if enqueued == registered do
-      "Survey sent to attendees: #{enqueued} invitation(s) queued"
-    else
-      "Survey sent to attendees: invitations queued for #{enqueued} of #{registered} " <>
-        "registered attendees. The rest have no user account to email."
-    end
-  end
-
   def handle_event("return_to_draft", _params, socket) do
     case Gut.Conference.return_survey_to_draft(socket.assigns.survey,
            actor: socket.assigns.current_user
@@ -182,6 +170,18 @@ defmodule GutWeb.SurveyReviewLive do
 
       {:error, _error} ->
         {:noreply, put_flash(socket, :error, "Could not return the survey to draft.")}
+    end
+  end
+
+  defp sent_message(survey) do
+    enqueued = survey.__metadata__[:invites_enqueued]
+    registered = survey.__metadata__[:registered_count]
+
+    if enqueued == registered do
+      "Survey sent to attendees: #{enqueued} invitation(s) queued"
+    else
+      "Survey sent to attendees: invitations queued for #{enqueued} of #{registered} " <>
+        "registered attendees. The rest have no user account to email."
     end
   end
 end
