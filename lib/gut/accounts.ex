@@ -44,16 +44,27 @@ defmodule Gut.Accounts do
   end
 
   @doc """
-  Mints a long-lived sign-in token for survey invitation emails.
+  Mints a long-lived magic-link token for survey invitation emails, which
+  are typically opened hours or days after delivery.
 
-  Accepted at /survey_link/:token rather than the regular magic-link page.
+  Same claims as a regular magic-link token (accepted at /magic_link/:token,
+  single use), only the lifetime differs; interactive login links stay
+  short-lived.
   """
   def survey_link_token(email) do
-    strategy = AshAuthentication.Info.strategy!(Gut.Accounts.User, :survey_link)
+    strategy = AshAuthentication.Info.strategy!(Gut.Accounts.User, :magic_link)
 
-    AshAuthentication.Strategy.MagicLink.request_token_for_identity(
-      strategy,
-      to_string(email)
-    )
+    case AshAuthentication.Jwt.token_for_resource(
+           Gut.Accounts.User,
+           %{
+             "act" => strategy.sign_in_action_name,
+             "identity" => to_string(email)
+           },
+           [token_lifetime: {7, :days}, purpose: :magic_link],
+           %{}
+         ) do
+      {:ok, token, _claims} -> {:ok, token}
+      :error -> :error
+    end
   end
 end
