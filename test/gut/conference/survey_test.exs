@@ -283,6 +283,34 @@ defmodule Gut.Conference.SurveyTest do
                Gut.Conference.submit_survey_for_review!(survey, actor: organizer)
     end
 
+    test "submitting notifies staff on Discord with a link to the review page", %{
+      survey: survey,
+      organizer: organizer
+    } do
+      Gut.Conference.submit_survey_for_review!(survey, actor: organizer)
+
+      assert [job] = all_enqueued(worker: Gut.Workers.DiscordNotification)
+      assert job.args["message"] =~ "Survey submitted for review: #{survey.title}"
+      assert job.args["message"] =~ "/surveys/#{survey.id}/review"
+
+      # The message-shaped job performs cleanly.
+      assert :ok = perform_job(Gut.Workers.DiscordNotification, job.args)
+    end
+
+    test "returning to draft and sending do not ping Discord", %{
+      survey: survey,
+      organizer: organizer
+    } do
+      staff = generate(user(role: :staff))
+      survey = Gut.Conference.submit_survey_for_review!(survey, actor: organizer)
+      survey = Gut.Conference.return_survey_to_draft!(survey, actor: staff)
+      survey = Gut.Conference.submit_survey_for_review!(survey, actor: organizer)
+      Gut.Conference.send_survey!(survey, actor: staff)
+
+      # Two submissions produced exactly two notifications, nothing more.
+      assert length(all_enqueued(worker: Gut.Workers.DiscordNotification)) == 2
+    end
+
     test "a survey without questions cannot be submitted for review", %{
       workshop: _workshop,
       organizer: _organizer
@@ -981,6 +1009,75 @@ defmodule Gut.Conference.SurveyTest do
       assert {:ok, answers} = Gut.Conference.list_survey_answers(actor: organizer)
       assert length(answers) == 3
       assert {:ok, []} = Gut.Conference.list_survey_answers(actor: other_attendee)
+    end
+  end
+
+  describe "removing responses" do
+    setup do
+      context = workshop_with_organizer()
+      survey = loaded(sent_survey(context.workshop), @system_actor)
+      Map.merge(context, %{survey: survey, questions: survey.questions})
+    end
+
+    test "staff can destroy a response, its answers go with it and the attendee can respond again",
+         %{workshop: workshop, survey: survey, questions: questions} do
+      %{user: attendee} = register_attendee(workshop)
+      staff = generate(user(role: :staff))
+
+      response =
+        Gut.Conference.respond_to_survey!(
+          %{survey_id: survey.id, answers: answers_for(questions)},
+          actor: attendee
+        )
+
+      Gut.Conference.destroy_survey_response!(response, actor: staff)
+
+      assert {:ok, []} = Gut.Conference.list_survey_responses(actor: @system_actor)
+      assert {:ok, []} = Gut.Conference.list_survey_answers(actor: @system_actor)
+
+      assert {:ok, _} =
+               Gut.Conference.respond_to_survey(
+                 %{survey_id: survey.id, answers: answers_for(questions)},
+                 actor: attendee
+               )
+    end
+
+    test "clear_survey_responses removes every response for the survey and returns the count",
+         %{workshop: workshop, survey: survey, questions: questions} do
+      for _ <- 1..2 do
+        %{user: attendee} = register_attendee(workshop)
+
+        Gut.Conference.respond_to_survey!(
+          %{survey_id: survey.id, answers: answers_for(questions)},
+          actor: attendee
+        )
+      end
+
+      assert 2 = Gut.Conference.clear_survey_responses!(survey.id, actor: @system_actor)
+      assert {:ok, []} = Gut.Conference.list_survey_responses(actor: @system_actor)
+      assert {:ok, []} = Gut.Conference.list_survey_answers(actor: @system_actor)
+    end
+
+    test "attendee and organizer cannot remove responses",
+         %{workshop: workshop, survey: survey, organizer: organizer, questions: questions} do
+      %{user: attendee} = register_attendee(workshop)
+
+      response =
+        Gut.Conference.respond_to_survey!(
+          %{survey_id: survey.id, answers: answers_for(questions)},
+          actor: attendee
+        )
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Gut.Conference.destroy_survey_response(response, actor: attendee)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Gut.Conference.destroy_survey_response(response, actor: organizer)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Gut.Conference.clear_survey_responses(survey.id, actor: organizer)
+
+      assert {:ok, [_]} = Gut.Conference.list_survey_responses(actor: @system_actor)
     end
   end
 end

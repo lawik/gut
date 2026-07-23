@@ -107,6 +107,8 @@ defmodule Gut.Conference do
       define :list_survey_responses, action: :read
       define :get_survey_response, action: :read, get_by: [:id]
       define :respond_to_survey, action: :respond
+      define :destroy_survey_response, action: :destroy
+      define :clear_survey_responses, action: :clear_for_survey, args: [:survey_id]
     end
 
     resource Gut.Conference.SurveyAnswer do

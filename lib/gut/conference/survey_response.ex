@@ -15,10 +15,29 @@ defmodule Gut.Conference.SurveyResponse do
   end
 
   actions do
-    defaults [:read]
+    defaults [:read, :destroy]
 
     read :list do
       pagination offset?: true, default_limit: 25, countable: :by_default
+    end
+
+    action :clear_for_survey, :integer do
+      argument :survey_id, :uuid, allow_nil?: false
+
+      run fn input, context ->
+        require Ash.Query
+
+        result =
+          __MODULE__
+          |> Ash.Query.filter(survey_id == ^input.arguments.survey_id)
+          |> Ash.bulk_destroy!(
+            :destroy,
+            %{},
+            Ash.Context.to_opts(context, return_records?: true, return_errors?: true)
+          )
+
+        {:ok, length(result.records || [])}
+      end
     end
 
     create :respond do
@@ -46,6 +65,11 @@ defmodule Gut.Conference.SurveyResponse do
     policy action(:respond) do
       authorize_if Gut.Checks.SystemActor
       authorize_if Gut.Conference.SurveyResponse.Checks.ActorIsWorkshopParticipant
+    end
+
+    policy action([:destroy, :clear_for_survey]) do
+      authorize_if Gut.Checks.SystemActor
+      authorize_if Gut.Checks.StaffActor
     end
   end
 

@@ -50,6 +50,7 @@ defmodule Gut.Conference.Survey do
       validate Gut.Conference.Survey.Validations.HasQuestions
 
       change set_attribute(:status, :in_review)
+      change Gut.Conference.Survey.Changes.NotifyStaffOfReview
     end
 
     update :return_to_draft do
