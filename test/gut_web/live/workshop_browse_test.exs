@@ -67,6 +67,53 @@ defmodule GutWeb.WorkshopBrowseLiveTest do
     end
   end
 
+  describe "day counts" do
+    setup [:create_workshop_data]
+
+    test "shows registered and waitlist totals for the day", %{
+      pid: pid,
+      slot: slot,
+      workshop: workshop
+    } do
+      small_room = generate(workshop_room(name: "Small Room", limit: 1))
+
+      small_workshop =
+        generate(
+          workshop(
+            name: "Tiny Workshop",
+            limit: 1,
+            workshop_room_id: small_room.id,
+            workshop_timeslot_id: slot.id
+          )
+        )
+
+      actor = Gut.system_actor("test")
+
+      for w <- [workshop, small_workshop] do
+        participant = generate(workshop_participant())
+
+        Gut.Conference.register_for_workshop!(
+          %{workshop_id: w.id, workshop_participant_id: participant.id},
+          actor: actor
+        )
+      end
+
+      waitlisted = generate(workshop_participant())
+
+      Gut.Conference.register_for_workshop!(
+        %{workshop_id: small_workshop.id, workshop_participant_id: waitlisted.id},
+        actor: actor
+      )
+
+      conn = build_unauthenticated_conn(pid)
+
+      conn
+      |> visit("/workshops/browse")
+      |> assert_has("span", text: "2 registered")
+      |> assert_has("span", text: "1 on waitlist")
+    end
+  end
+
   describe "read more modal" do
     setup [:create_workshop_data]
 

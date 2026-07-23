@@ -43,7 +43,15 @@ defmodule Gut.Conference.Workshop do
     end
 
     read :browse do
-      prepare build(load: [:workshop_room, :workshop_timeslot, :speakers, :registration_count])
+      prepare build(
+                load: [
+                  :workshop_room,
+                  :workshop_timeslot,
+                  :speakers,
+                  :registration_count,
+                  :waitlist_count
+                ]
+              )
     end
 
     create :create do

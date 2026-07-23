@@ -117,7 +117,12 @@ defmodule GutWeb.WorkshopBrowseLive do
         |> Enum.group_by(& &1.workshop_timeslot)
         |> Enum.sort_by(fn {ts, _} -> ts.start end, DateTime)
 
-      {date, slots}
+      counts = %{
+        registered: ws |> Enum.map(&(&1.registration_count || 0)) |> Enum.sum(),
+        waitlisted: ws |> Enum.map(&(&1.waitlist_count || 0)) |> Enum.sum()
+      }
+
+      {date, slots, counts}
     end)
   end
 
@@ -214,11 +219,16 @@ defmodule GutWeb.WorkshopBrowseLive do
           <% end %>
 
           <%!-- Workshop grid --%>
-          <%= for {date, slots} <- @workshops_by_day do %>
+          <%= for {date, slots, counts} <- @workshops_by_day do %>
             <div class="mb-8">
-              <h2 class="text-xl font-semibold text-base-content mb-4 border-b border-base-300 pb-2">
-                {Calendar.strftime(date, "%A, %B %d, %Y")}
-              </h2>
+              <div class="flex flex-wrap items-baseline justify-between gap-x-4 mb-4 border-b border-base-300 pb-2">
+                <h2 class="text-xl font-semibold text-base-content">
+                  {Calendar.strftime(date, "%A, %B %d, %Y")}
+                </h2>
+                <span class="text-sm text-base-content/60">
+                  {counts.registered} registered &middot; {counts.waitlisted} on waitlist
+                </span>
+              </div>
 
               <%= for {timeslot, workshops} <- slots do %>
                 <div class="mb-6">
