@@ -38,6 +38,10 @@ defmodule GutWeb.WorkshopBrowseLive do
       |> assign(:login_email, "")
       |> assign(:description_workshop, nil)
       |> assign(:sent_surveys, [])
+      |> assign(
+        :attendee_surveys,
+        load_attendee_surveys(socket.assigns[:current_user], existing_participations, workshops)
+      )
 
     {:ok, socket}
   end
@@ -177,6 +181,38 @@ defmodule GutWeb.WorkshopBrowseLive do
             </button>
           </div>
         <% else %>
+          <%!-- Surveys for workshops the attendee is signed up for --%>
+          <div
+            :if={@attendee_surveys != []}
+            id="attendee-surveys"
+            class="bg-base-200 rounded-xl p-6 mb-8"
+          >
+            <h2 class="text-xl font-semibold text-base-content mb-2">Workshop surveys</h2>
+            <p class="text-base-content/60 mb-3">
+              The organizers of your workshops would like some feedback from you.
+            </p>
+            <ul class="space-y-2">
+              <li
+                :for={
+                  %{survey: survey, workshop: workshop, answered?: answered?} <- @attendee_surveys
+                }
+                class="flex items-center gap-2"
+              >
+                <%= if answered? do %>
+                  <.icon name="hero-check-circle" class="size-5 text-success" />
+                  <span class="text-base-content/70">
+                    Survey for {workshop.name} answered. Thank you!
+                  </span>
+                <% else %>
+                  <.icon name="hero-arrow-right" class="size-5 text-primary" />
+                  <.link navigate={~p"/surveys/#{survey.id}/respond"} class="link link-primary">
+                    Answer the survey for {workshop.name}
+                  </.link>
+                <% end %>
+              </li>
+            </ul>
+          </div>
+
           <%!-- Top section: login prompt for unauthenticated users --%>
           <%= if !@current_user do %>
             <div class="bg-base-200 rounded-xl p-6 mb-8">
@@ -544,6 +580,10 @@ defmodule GutWeb.WorkshopBrowseLive do
       |> assign(:participant, participant)
       |> assign(:existing_participations, existing_participations)
       |> assign(:submitted, false)
+      |> assign(
+        :attendee_surveys,
+        load_attendee_surveys(socket.assigns[:current_user], existing_participations, workshops)
+      )
 
     {:noreply, socket}
   end
@@ -552,6 +592,33 @@ defmodule GutWeb.WorkshopBrowseLive do
     errors = %{}
     name = String.trim(params["name"] || "")
     if name == "", do: Map.put(errors, :name, "Name is required"), else: errors
+  end
+
+  # Sent surveys for the workshops the user is signed up for, with a flag
+  # for whether they have already responded.
+  defp load_attendee_surveys(nil, _participations, _workshops), do: []
+  defp load_attendee_surveys(_user, [], _workshops), do: []
+
+  defp load_attendee_surveys(user, participations, workshops) do
+    require Ash.Query
+
+    workshop_ids = Enum.map(participations, & &1.workshop_id)
+
+    surveys =
+      Gut.Conference.Survey
+      |> Ash.Query.filter(workshop_id in ^workshop_ids and status == :sent)
+      |> Ash.read!(actor: user)
+
+    answered =
+      Gut.Conference.SurveyResponse
+      |> Ash.Query.filter(user_id == ^user.id and survey_id in ^Enum.map(surveys, & &1.id))
+      |> Ash.read!(actor: user)
+      |> MapSet.new(& &1.survey_id)
+
+    for survey <- surveys,
+        workshop = Enum.find(workshops, &(&1.id == survey.workshop_id)) do
+      %{survey: survey, workshop: workshop, answered?: MapSet.member?(answered, survey.id)}
+    end
   end
 
   defp load_sent_surveys(_user, [], _workshops), do: []

@@ -437,7 +437,8 @@ defmodule GutWeb.SurveyJourneyTest do
       |> select("Would you recommend the workshop?", option: "Yes")
       |> fill_in("Anything else?", with: "More coffee please")
       |> click_button("Submit answers")
-      |> assert_has("h1", text: "Thank you!")
+      |> assert_path("/workshops/browse")
+      |> assert_has("div", text: "Thank you! Your answers have been recorded.")
 
       [response] =
         Gut.Conference.list_survey_responses!(actor: @system_actor, load: [:answers])
@@ -477,7 +478,8 @@ defmodule GutWeb.SurveyJourneyTest do
       |> assert_has("h1", text: "How did we do?")
       |> fill_in("What did you learn?", with: "Signed up and answering already")
       |> click_button("Submit answers")
-      |> assert_has("h1", text: "Thank you!")
+      |> assert_path("/workshops/browse")
+      |> assert_has("div", text: "Thank you! Your answers have been recorded.")
 
       [response] = Gut.Conference.list_survey_responses!(actor: @system_actor)
       assert response.survey_id == survey.id
@@ -496,13 +498,55 @@ defmodule GutWeb.SurveyJourneyTest do
       |> fill_in("Anything else?", with: "Skipping the required one")
       |> click_button("Submit answers")
       |> assert_has("p", text: "This question is required.")
-      |> refute_has("h1", text: "Thank you!")
+      |> refute_has("div", text: "Thank you! Your answers have been recorded.")
       |> fill_in("What did you learn?", with: "Fine, here you go")
       |> click_button("Submit answers")
-      |> assert_has("h1", text: "Thank you!")
+      |> assert_path("/workshops/browse")
+      |> assert_has("div", text: "Thank you! Your answers have been recorded.")
 
       [response] = Gut.Conference.list_survey_responses!(actor: @system_actor, load: [:answers])
       assert Enum.any?(response.answers, &(&1.value == "Fine, here you go"))
+    end
+
+    test "the registration page links pending surveys and checkmarks answered ones", %{
+      conn: conn,
+      workshop: workshop
+    } do
+      survey = create_sent_survey(workshop)
+      attendee = register_attendee(workshop, "pending@test.com")
+      conn = log_in_user(conn, attendee)
+
+      # Pending: linked from the registration page.
+      conn
+      |> visit("/workshops/browse")
+      |> assert_has("#attendee-surveys h2", text: "Workshop surveys")
+      |> assert_has("#attendee-surveys a", text: "Answer the survey for LiveView Deep Dive")
+      |> refute_has("#attendee-surveys .hero-check-circle")
+      |> click_link("Answer the survey for LiveView Deep Dive")
+      |> fill_in("What did you learn?", with: "Browsing and answering")
+      |> click_button("Submit answers")
+      # Submitting flashes the thank-you and lands back on the registration
+      # page, where the survey now shows a checkmark instead of a link.
+      |> assert_path("/workshops/browse")
+      |> assert_has("div", text: "Thank you! Your answers have been recorded.")
+      |> assert_has("#attendee-surveys span", text: "answered. Thank you!")
+      |> assert_has("#attendee-surveys .hero-check-circle")
+      |> refute_has("#attendee-surveys a", text: "Answer the survey")
+
+      assert [_] = Gut.Conference.list_survey_responses!(actor: @system_actor)
+    end
+
+    test "the registration page shows no survey section without a sent survey", %{
+      conn: conn,
+      workshop: workshop
+    } do
+      create_draft_survey(workshop)
+      attendee = register_attendee(workshop, "nothing-yet@test.com")
+      conn = log_in_user(conn, attendee)
+
+      conn
+      |> visit("/workshops/browse")
+      |> refute_has("#attendee-surveys")
     end
 
     test "crafted nested answer params do not crash the respond page", %{
@@ -553,10 +597,11 @@ defmodule GutWeb.SurveyJourneyTest do
       |> visit("/surveys/#{survey.id}/respond")
       |> click_button("Submit answers")
       |> assert_has("div", text: "Please answer at least one question.")
-      |> refute_has("h1", text: "Thank you!")
+      |> refute_has("div", text: "Thank you! Your answers have been recorded.")
       |> fill_in("Optional thoughts?", with: "Second try")
       |> click_button("Submit answers")
-      |> assert_has("h1", text: "Thank you!")
+      |> assert_path("/workshops/browse")
+      |> assert_has("div", text: "Thank you! Your answers have been recorded.")
 
       assert [_] = Gut.Conference.list_survey_responses!(actor: @system_actor)
     end

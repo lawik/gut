@@ -21,7 +21,6 @@ defmodule GutWeb.SurveyRespondLive do
       |> assign(:current_scope, nil)
       |> assign(:answers, %{})
       |> assign(:missing_ids, [])
-      |> assign(:submitted, false)
 
     case Gut.Conference.get_survey(id,
            actor: user,
@@ -75,11 +74,6 @@ defmodule GutWeb.SurveyRespondLive do
               <p class="text-base-content/60">
                 This survey does not exist, has not been sent out yet, or is not addressed to you.
               </p>
-            </div>
-          <% @submitted -> %>
-            <div class="bg-success/10 border border-success/20 rounded-xl p-8 text-center">
-              <h1 class="text-2xl font-bold text-success mb-2">Thank you!</h1>
-              <p class="text-base-content/60">Your answers have been recorded.</p>
             </div>
           <% @existing_response != nil -> %>
             <div class="bg-base-200 rounded-xl p-8 text-center">
@@ -168,7 +162,10 @@ defmodule GutWeb.SurveyRespondLive do
                actor: socket.assigns.current_user
              ) do
           {:ok, _response} ->
-            {:noreply, assign(socket, :submitted, true)}
+            {:noreply,
+             socket
+             |> put_flash(:info, "Thank you! Your answers have been recorded.")
+             |> push_navigate(to: ~p"/workshops/browse")}
 
           {:error, error} ->
             {:noreply, put_flash(socket, :error, submit_error_message(error))}
