@@ -338,7 +338,7 @@ defmodule GutWeb.WorkshopBrowseLive do
                   <button
                     type="submit"
                     class="btn btn-primary"
-                    disabled={map_size(@selections) == 0}
+                    disabled={map_size(@selections) == 0 and @existing_participations == []}
                   >
                     <%= if @participant do %>
                       Save Changes
@@ -346,7 +346,7 @@ defmodule GutWeb.WorkshopBrowseLive do
                       Register
                     <% end %>
                   </button>
-                  <%= if map_size(@selections) == 0 do %>
+                  <%= if map_size(@selections) == 0 and @existing_participations == [] do %>
                     <span class="text-sm text-base-content/50 ml-3">
                       Select at least one workshop to register.
                     </span>

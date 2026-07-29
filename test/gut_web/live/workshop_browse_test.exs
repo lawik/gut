@@ -182,4 +182,33 @@ defmodule GutWeb.WorkshopBrowseLiveTest do
       |> assert_has("h2", text: "Registration Complete!")
     end
   end
+
+  describe "unsubscribing from all workshops" do
+    setup [:create_workshop_data]
+
+    test "can deselect the only workshop and save to free the spot", %{
+      conn: conn,
+      user: user,
+      workshop: workshop,
+      slot: slot
+    } do
+      participant =
+        generate(workshop_participant(user_id: user.id, name: "Existing Attendee"))
+
+      Gut.Conference.register_for_workshop!(
+        %{workshop_id: workshop.id, workshop_participant_id: participant.id},
+        actor: Gut.system_actor("test")
+      )
+
+      conn
+      |> visit("/workshops/browse")
+      |> assert_has("button", text: "Save Changes")
+      |> select_workshop(workshop, slot)
+      |> click_button("Save Changes")
+      |> assert_has("h2", text: "Registration Complete!")
+
+      assert Gut.Conference.WorkshopParticipation
+             |> Ash.read!(actor: Gut.system_actor("test")) == []
+    end
+  end
 end
