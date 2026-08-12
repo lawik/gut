@@ -298,7 +298,12 @@ defmodule GutWeb.WorkshopBrowseLive do
           <%= if @current_user do %>
             <div class="bg-base-200 rounded-xl p-6 mt-8">
               <h2 class="text-xl font-semibold text-base-content mb-4">Your Information</h2>
-              <form phx-submit="save" phx-change="validate" class="space-y-4">
+              <form
+                id="workshop-browse-info-form"
+                phx-submit="save"
+                phx-change="validate"
+                class="space-y-4"
+              >
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label class="label" for="name">

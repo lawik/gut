@@ -98,7 +98,12 @@ defmodule GutWeb.SurveyRespondLive do
             </div>
 
             <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl p-6">
-              <form phx-submit="submit" phx-change="validate" class="space-y-6">
+              <form
+                id="survey-respond-form"
+                phx-submit="submit"
+                phx-change="validate"
+                class="space-y-6"
+              >
                 <.question_fields
                   questions={@survey.questions}
                   answers={@answers}
