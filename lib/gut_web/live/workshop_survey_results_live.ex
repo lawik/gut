@@ -6,7 +6,7 @@ defmodule GutWeb.WorkshopSurveyResultsLive do
   contact information) and one column per question, plus a CSV export.
   """
   use GutWeb, :live_view
-  use Cinder.Table.UrlSync
+  use Cinder.UrlSync
 
   require Ash.Query
 
@@ -52,7 +52,7 @@ defmodule GutWeb.WorkshopSurveyResultsLive do
   end
 
   def handle_params(params, uri, socket) do
-    {:noreply, Cinder.Table.UrlSync.handle_params(params, uri, socket)}
+    {:noreply, Cinder.UrlSync.handle_params(params, uri, socket)}
   end
 
   defp organizer?(workshop, user) do

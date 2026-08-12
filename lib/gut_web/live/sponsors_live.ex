@@ -1,6 +1,6 @@
 defmodule GutWeb.SponsorsLive do
   use GutWeb, :live_view
-  use Cinder.Table.UrlSync
+  use Cinder.UrlSync
 
   require Ash.Query
   require Ash.Expr
@@ -25,7 +25,7 @@ defmodule GutWeb.SponsorsLive do
       |> Map.put_new("not_happening", "false")
 
     socket =
-      Cinder.Table.UrlSync.handle_params(params, uri, socket)
+      Cinder.UrlSync.handle_params(params, uri, socket)
       |> assign(:filter_params, params)
       |> assign(:pipeline_value, compute_pipeline_value(params, socket.assigns.current_user))
 
@@ -217,7 +217,7 @@ defmodule GutWeb.SponsorsLive do
     socket =
       socket
       |> assign(:pipeline_value, pipeline_value)
-      |> Cinder.Table.Refresh.refresh_table("sponsors-table")
+      |> Cinder.Refresh.refresh_table("sponsors-table")
 
     {:noreply, socket}
   end
@@ -228,7 +228,7 @@ defmodule GutWeb.SponsorsLive do
         socket =
           socket
           |> put_flash(:info, "Sponsor deleted successfully")
-          |> Cinder.Table.Refresh.refresh_table("sponsors-table")
+          |> Cinder.Refresh.refresh_table("sponsors-table")
 
         {:noreply, socket}
 

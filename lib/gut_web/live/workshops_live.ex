@@ -1,6 +1,6 @@
 defmodule GutWeb.WorkshopsLive do
   use GutWeb, :live_view
-  use Cinder.Table.UrlSync
+  use Cinder.UrlSync
 
   require Logger
 
@@ -18,7 +18,7 @@ defmodule GutWeb.WorkshopsLive do
   end
 
   def handle_params(params, uri, socket) do
-    socket = Cinder.Table.UrlSync.handle_params(params, uri, socket)
+    socket = Cinder.UrlSync.handle_params(params, uri, socket)
     {:noreply, socket}
   end
 
@@ -169,7 +169,7 @@ defmodule GutWeb.WorkshopsLive do
     socket =
       socket
       |> assign(:any_missing?, any_missing_workshops?(socket.assigns.current_user))
-      |> Cinder.Table.Refresh.refresh_table("workshops-table")
+      |> Cinder.Refresh.refresh_table("workshops-table")
 
     {:noreply, socket}
   end
@@ -180,7 +180,7 @@ defmodule GutWeb.WorkshopsLive do
         socket =
           socket
           |> put_flash(:info, "Sessionize sync complete: #{workshops_synced} workshops synced")
-          |> Cinder.Table.Refresh.refresh_table("workshops-table")
+          |> Cinder.Refresh.refresh_table("workshops-table")
 
         {:noreply, socket}
 
@@ -199,7 +199,7 @@ defmodule GutWeb.WorkshopsLive do
         socket =
           socket
           |> put_flash(:info, "Workshop deleted successfully")
-          |> Cinder.Table.Refresh.refresh_table("workshops-table")
+          |> Cinder.Refresh.refresh_table("workshops-table")
 
         {:noreply, socket}
 

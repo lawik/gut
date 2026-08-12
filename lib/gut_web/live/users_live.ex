@@ -1,6 +1,6 @@
 defmodule GutWeb.UsersLive do
   use GutWeb, :live_view
-  use Cinder.Table.UrlSync
+  use Cinder.UrlSync
 
   require Logger
 
@@ -19,7 +19,7 @@ defmodule GutWeb.UsersLive do
   end
 
   def handle_params(params, uri, socket) do
-    socket = Cinder.Table.UrlSync.handle_params(params, uri, socket)
+    socket = Cinder.UrlSync.handle_params(params, uri, socket)
     {:noreply, socket}
   end
 
@@ -101,7 +101,7 @@ defmodule GutWeb.UsersLive do
   defp role_badge_class(_), do: "bg-base-200 text-base-content/70"
 
   def handle_info(%{topic: "users:changed"}, socket) do
-    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "users-table")}
+    {:noreply, Cinder.Refresh.refresh_table(socket, "users-table")}
   end
 
   def handle_event("delete", %{"id" => id}, socket) do
@@ -110,7 +110,7 @@ defmodule GutWeb.UsersLive do
         socket =
           socket
           |> put_flash(:info, "User deleted successfully")
-          |> Cinder.Table.Refresh.refresh_table("users-table")
+          |> Cinder.Refresh.refresh_table("users-table")
 
         {:noreply, socket}
 

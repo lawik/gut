@@ -55,8 +55,8 @@ defmodule GutWeb.SponsorDetailLive do
               </div>
             </div>
           </div>
-          
-    <!-- Content -->
+
+          <!-- Content -->
           <div class="px-6 py-8">
             <!-- Pipeline Progress -->
             <div class="mb-8">
@@ -88,8 +88,8 @@ defmodule GutWeb.SponsorDetailLive do
                   </div>
                 </div>
               </div>
-              
-    <!-- Sponsorship Details -->
+
+              <!-- Sponsorship Details -->
               <div class="space-y-6">
                 <div>
                   <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
@@ -136,8 +136,8 @@ defmodule GutWeb.SponsorDetailLive do
                 </div>
               </div>
             </div>
-            
-    <!-- Metadata -->
+
+            <!-- Metadata -->
             <div class="mt-8 pt-8 border-t border-base-300">
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>

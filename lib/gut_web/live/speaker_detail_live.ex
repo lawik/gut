@@ -57,8 +57,8 @@ defmodule GutWeb.SpeakerDetailLive do
               </div>
             </div>
           </div>
-          
-    <!-- Content -->
+
+          <!-- Content -->
           <div class="px-6 py-8">
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
               <!-- Travel Information -->
@@ -107,8 +107,8 @@ defmodule GutWeb.SpeakerDetailLive do
                     </div>
                   </div>
                 </div>
-                
-    <!-- Travel Duration -->
+
+                <!-- Travel Duration -->
                 <%= if @speaker.arrival_date && @speaker.leaving_date do %>
                   <div class="bg-info/10 border border-info/30 rounded-lg p-4">
                     <div class="flex items-center">
@@ -123,8 +123,8 @@ defmodule GutWeb.SpeakerDetailLive do
                   </div>
                 <% end %>
               </div>
-              
-    <!-- Hotel Information -->
+
+              <!-- Hotel Information -->
               <div class="space-y-6">
                 <div>
                   <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
@@ -246,8 +246,8 @@ defmodule GutWeb.SpeakerDetailLive do
                     </div>
                   </div>
                 </div>
-                
-    <!-- Coverage Status -->
+
+                <!-- Coverage Status -->
                 <%= if not is_nil(@speaker.hotel_stay_start_date) and not is_nil(@speaker.hotel_stay_end_date) and
                        not is_nil(@speaker.hotel_covered_start_date) and not is_nil(@speaker.hotel_covered_end_date) do %>
                   <div class={[
@@ -280,8 +280,8 @@ defmodule GutWeb.SpeakerDetailLive do
                 <% end %>
               </div>
             </div>
-            
-    <!-- Notes -->
+
+            <!-- Notes -->
             <%= if @speaker.notes do %>
               <div class="mt-8 pt-8 border-t border-base-300">
                 <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
@@ -292,8 +292,8 @@ defmodule GutWeb.SpeakerDetailLive do
                 </div>
               </div>
             <% end %>
-            
-    <!-- Sessionize Data -->
+
+            <!-- Sessionize Data -->
             <%= if @speaker.sessionize_data && @speaker.sessionize_data != %{} do %>
               <div class="mt-8 pt-8 border-t border-base-300">
                 <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center">
@@ -314,8 +314,8 @@ defmodule GutWeb.SpeakerDetailLive do
                 </div>
               </div>
             <% end %>
-            
-    <!-- Metadata -->
+
+            <!-- Metadata -->
             <div class="mt-8 pt-8 border-t border-base-300">
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>

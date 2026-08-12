@@ -1,6 +1,6 @@
 defmodule GutWeb.WorkshopParticipantsLive do
   use GutWeb, :live_view
-  use Cinder.Table.UrlSync
+  use Cinder.UrlSync
 
   require Logger
 
@@ -20,7 +20,7 @@ defmodule GutWeb.WorkshopParticipantsLive do
   end
 
   def handle_params(params, uri, socket) do
-    socket = Cinder.Table.UrlSync.handle_params(params, uri, socket)
+    socket = Cinder.UrlSync.handle_params(params, uri, socket)
     {:noreply, socket}
   end
 
@@ -131,11 +131,11 @@ defmodule GutWeb.WorkshopParticipantsLive do
   end
 
   def handle_info(%{topic: "workshop_participants:changed"}, socket) do
-    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "workshop-participants-table")}
+    {:noreply, Cinder.Refresh.refresh_table(socket, "workshop-participants-table")}
   end
 
   def handle_info(%{topic: "workshop_participations:changed"}, socket) do
-    {:noreply, Cinder.Table.Refresh.refresh_table(socket, "workshop-participants-table")}
+    {:noreply, Cinder.Refresh.refresh_table(socket, "workshop-participants-table")}
   end
 
   def handle_event("remove_participation", %{"id" => id}, socket) do
@@ -144,7 +144,7 @@ defmodule GutWeb.WorkshopParticipantsLive do
         socket =
           socket
           |> put_flash(:info, "Workshop registration removed")
-          |> Cinder.Table.Refresh.refresh_table("workshop-participants-table")
+          |> Cinder.Refresh.refresh_table("workshop-participants-table")
 
         {:noreply, socket}
 
@@ -160,7 +160,7 @@ defmodule GutWeb.WorkshopParticipantsLive do
         socket =
           socket
           |> put_flash(:info, "Participant deleted successfully")
-          |> Cinder.Table.Refresh.refresh_table("workshop-participants-table")
+          |> Cinder.Refresh.refresh_table("workshop-participants-table")
 
         {:noreply, socket}
 

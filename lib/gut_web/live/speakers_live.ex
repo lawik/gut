@@ -1,6 +1,6 @@
 defmodule GutWeb.SpeakersLive do
   use GutWeb, :live_view
-  use Cinder.Table.UrlSync
+  use Cinder.UrlSync
 
   require Logger
 
@@ -18,7 +18,7 @@ defmodule GutWeb.SpeakersLive do
   end
 
   def handle_params(params, uri, socket) do
-    socket = Cinder.Table.UrlSync.handle_params(params, uri, socket)
+    socket = Cinder.UrlSync.handle_params(params, uri, socket)
     {:noreply, socket}
   end
 
@@ -197,7 +197,7 @@ defmodule GutWeb.SpeakersLive do
     socket =
       socket
       |> assign(:any_missing?, any_missing_speakers?(socket.assigns.current_user))
-      |> Cinder.Table.Refresh.refresh_table("speakers-table")
+      |> Cinder.Refresh.refresh_table("speakers-table")
 
     {:noreply, socket}
   end
@@ -208,7 +208,7 @@ defmodule GutWeb.SpeakersLive do
         socket =
           socket
           |> put_flash(:info, "Sessionize sync complete: #{synced} speakers synced")
-          |> Cinder.Table.Refresh.refresh_table("speakers-table")
+          |> Cinder.Refresh.refresh_table("speakers-table")
 
         {:noreply, socket}
 
@@ -227,7 +227,7 @@ defmodule GutWeb.SpeakersLive do
         socket =
           socket
           |> put_flash(:info, "Speaker deleted successfully")
-          |> Cinder.Table.Refresh.refresh_table("speakers-table")
+          |> Cinder.Refresh.refresh_table("speakers-table")
 
         {:noreply, socket}
 
