@@ -7,6 +7,8 @@ defmodule GutWeb.WorkshopSurveyLive do
   """
   use GutWeb, :live_view
 
+  import GutWeb.SurveyComponents, only: [markdown: 1]
+
   require Ash.Query
 
   on_mount {GutWeb.LiveUserAuth, :live_user_required}
@@ -158,7 +160,12 @@ defmodule GutWeb.WorkshopSurveyLive do
             <.form for={@form} id="survey-form" phx-change="validate" phx-submit="save">
               <div class="space-y-6">
                 <.input field={@form[:title]} type="text" label="Survey title" required />
-                <.input field={@form[:description]} type="textarea" label="Description" />
+                <div>
+                  <.input field={@form[:description]} type="textarea" label="Description" />
+                  <p class="text-xs text-base-content/50 mt-1">
+                    Line breaks are kept. Basic Markdown works: **bold**, _italics_, lists and links.
+                  </p>
+                </div>
 
                 <h2 class="text-lg font-semibold text-base-content pt-2">Questions</h2>
 
@@ -259,9 +266,7 @@ defmodule GutWeb.WorkshopSurveyLive do
             </p>
 
             <h2 class="text-lg font-semibold text-base-content mb-2">{@survey.title}</h2>
-            <p :if={@survey.description} class="text-base-content/60 mb-4">
-              {@survey.description}
-            </p>
+            <.markdown text={@survey.description} class="text-base-content/60 mb-4" />
 
             <ol class="space-y-3 list-decimal list-inside">
               <li :for={question <- @survey.questions}>

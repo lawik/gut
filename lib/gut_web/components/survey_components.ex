@@ -60,6 +60,36 @@ defmodule GutWeb.SurveyComponents do
   end
 
   @doc """
+  Renders survey description text written in basic Markdown.
+
+  Organizers write descriptions in a plain textarea, so single newlines are
+  treated as hard line breaks (the way people expect from a textarea) in
+  addition to the usual paragraph, emphasis, list and link syntax. Raw HTML in
+  the source is sanitized away.
+  """
+  attr :text, :string, default: nil
+  attr :class, :string, default: nil
+
+  def markdown(assigns) do
+    ~H"""
+    <div :if={@text} class={["survey-markdown", @class]}>
+      {Phoenix.HTML.raw(render_markdown(@text))}
+    </div>
+    """
+  end
+
+  @doc "Converts Markdown to sanitized HTML. Returns `\"\"` for nil or blank input."
+  def render_markdown(nil), do: ""
+
+  def render_markdown(text) when is_binary(text) do
+    MDEx.to_html!(text,
+      extension: [strikethrough: true, autolink: true],
+      render: [hardbreaks: true, escape: true],
+      sanitize: MDEx.Document.default_sanitize_options()
+    )
+  end
+
+  @doc """
   Returns the ids of required questions that have no non-blank answer in the
   given `answers` params map (keyed by question id).
   """

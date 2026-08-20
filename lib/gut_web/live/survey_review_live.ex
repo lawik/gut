@@ -5,6 +5,8 @@ defmodule GutWeb.SurveyReviewLive do
   """
   use GutWeb, :live_view
 
+  import GutWeb.SurveyComponents, only: [markdown: 1]
+
   on_mount {GutWeb.LiveUserAuth, :live_staff_required}
 
   def mount(%{"id" => id}, _session, socket) do
@@ -79,9 +81,7 @@ defmodule GutWeb.SurveyReviewLive do
         </div>
 
         <div class="bg-base-100 shadow-sm ring-1 ring-base-content/5 rounded-xl p-6 mb-8">
-          <p :if={@survey.description} class="text-base-content/70 mb-4">
-            {@survey.description}
-          </p>
+          <.markdown text={@survey.description} class="text-base-content/70 mb-4" />
 
           <h2 class="text-lg font-semibold text-base-content mb-2">Questions</h2>
           <p :if={@survey.questions == []} class="text-base-content/50">

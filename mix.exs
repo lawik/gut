@@ -42,6 +42,7 @@ defmodule Gut.MixProject do
   defp deps do
     [
       {:cinder, "~> 0.6"},
+      {:mdex, "~> 0.13"},
       {:ash_ai, "~> 0.2"},
       {:usage_rules, "~> 1.2", only: [:dev]},
       {:picosat_elixir, "~> 0.2"},

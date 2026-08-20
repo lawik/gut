@@ -101,9 +101,7 @@ defmodule GutWeb.WorkshopSurveyPreviewLive do
             <p class="text-base-content/60 mt-1">
               A survey for attendees of <span class="font-medium">{@workshop.name}</span>
             </p>
-            <p :if={@survey.description} class="text-base-content/70 mt-4">
-              {@survey.description}
-            </p>
+            <.markdown text={@survey.description} class="text-base-content/70 mt-4" />
             <p class="text-sm text-base-content/50 mt-4">
               Please note that your answers are not anonymous: your name is shared with
               the workshop organizer.
