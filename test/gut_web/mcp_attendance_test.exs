@@ -63,6 +63,7 @@ defmodule GutWeb.McpAttendanceTest do
     assert text =~ "registration_count"
     assert text =~ "waitlist_count"
     assert text =~ "spots_remaining"
+    assert text =~ "capacity"
     assert text =~ "Morning Stats Slot"
     assert text =~ "Stats Room"
 

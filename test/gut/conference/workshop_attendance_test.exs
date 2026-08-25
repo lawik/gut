@@ -37,6 +37,28 @@ defmodule Gut.Conference.WorkshopAttendanceTest do
     assert fetched.registration_count == 2
   end
 
+  test "capacity and spots remaining respect the room limit when it is lower" do
+    small_room = generate(workshop_room(name: "Small Room", limit: 2))
+    roomy = generate(workshop(name: "Room-capped", limit: 50, workshop_room_id: small_room.id))
+
+    # Room holds 2: third sign-up is waitlisted despite the workshop limit of 50.
+    for _ <- 1..3, do: register(roomy)
+
+    staff = generate(user(role: :staff))
+    stats = Gut.Conference.get_workshop_attendance!(roomy.id, actor: staff)
+
+    assert stats.capacity == 2
+    assert stats.registration_count == 2
+    assert stats.waitlist_count == 1
+    assert stats.spots_remaining == 0
+
+    roomless = generate(workshop(name: "Roomless", limit: 5))
+    stats = Gut.Conference.get_workshop_attendance!(roomless.id, actor: staff)
+
+    assert stats.capacity == 5
+    assert stats.spots_remaining == 5
+  end
+
   test "totals attendance per timeslot across its workshops" do
     slot = generate(workshop_timeslot(name: "Morning"))
     other_slot = generate(workshop_timeslot(name: "Afternoon"))

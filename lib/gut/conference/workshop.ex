@@ -87,7 +87,13 @@ defmodule Gut.Conference.Workshop do
       """
 
       prepare build(
-                load: [:registration_count, :waitlist_count, :participant_count, :spots_remaining],
+                load: [
+                  :capacity,
+                  :registration_count,
+                  :waitlist_count,
+                  :participant_count,
+                  :spots_remaining
+                ],
                 sort: [:name]
               )
     end
@@ -173,9 +179,25 @@ defmodule Gut.Conference.Workshop do
   end
 
   calculations do
+    # Effective capacity is the lower of the workshop limit and its room's
+    # limit (registration works the same way, see DetermineStatus). LEAST
+    # ignores NULL, so workshops without a room fall back to their own limit.
+    calculate :capacity,
+              :integer,
+              expr(fragment("LEAST(?, ?)", limit, workshop_room.limit)) do
+      public? true
+    end
+
     calculate :spots_remaining,
               :integer,
-              expr(fragment("GREATEST(? - ?, 0)", limit, registration_count)) do
+              expr(
+                fragment(
+                  "GREATEST(LEAST(?, ?) - ?, 0)",
+                  limit,
+                  workshop_room.limit,
+                  registration_count
+                )
+              ) do
       public? true
     end
   end

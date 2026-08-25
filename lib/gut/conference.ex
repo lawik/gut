@@ -19,6 +19,7 @@ defmodule Gut.Conference do
 
     tool :list_workshop_attendance, Gut.Conference.Workshop, :attendance,
       load: [
+        :capacity,
         :registration_count,
         :waitlist_count,
         :participant_count,
@@ -29,6 +30,7 @@ defmodule Gut.Conference do
 
     tool :get_workshop_attendance, Gut.Conference.Workshop, :attendance,
       load: [
+        :capacity,
         :registration_count,
         :waitlist_count,
         :participant_count,
