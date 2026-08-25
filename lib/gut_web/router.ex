@@ -140,7 +140,10 @@ defmodule GutWeb.Router do
         :get_sponsor,
         :create_sponsor,
         :update_sponsor,
-        :destroy_sponsor
+        :destroy_sponsor,
+        :list_workshop_attendance,
+        :get_workshop_attendance,
+        :list_timeslot_attendance
       ],
       protocol_version_statement: "2024-11-05",
       otp_app: :gut

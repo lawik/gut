@@ -21,6 +21,18 @@ defmodule Gut.Conference.WorkshopTimeslot do
     update :update do
       accept [:name, :start, :end]
     end
+
+    read :attendance do
+      description """
+      Attendance statistics per timeslot: how many workshops run in the slot
+      and the total registered and waitlisted attendees across all of them.
+      """
+
+      prepare build(
+                load: [:workshop_count, :registered_attendees, :waitlisted_attendees],
+                sort: [:start]
+              )
+    end
   end
 
   policies do
@@ -66,5 +78,21 @@ defmodule Gut.Conference.WorkshopTimeslot do
 
   relationships do
     has_many :workshops, Gut.Conference.Workshop
+  end
+
+  aggregates do
+    count :workshop_count, :workshops do
+      public? true
+    end
+
+    count :registered_attendees, [:workshops, :workshop_participations] do
+      public? true
+      filter expr(status == :registered)
+    end
+
+    count :waitlisted_attendees, [:workshops, :workshop_participations] do
+      public? true
+      filter expr(status == :waitlisted)
+    end
   end
 end

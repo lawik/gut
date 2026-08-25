@@ -16,6 +16,29 @@ defmodule Gut.Conference do
     tool :create_sponsor, Gut.Conference.Sponsor, :create
     tool :update_sponsor, Gut.Conference.Sponsor, :update
     tool :destroy_sponsor, Gut.Conference.Sponsor, :destroy
+
+    tool :list_workshop_attendance, Gut.Conference.Workshop, :attendance,
+      load: [
+        :registration_count,
+        :waitlist_count,
+        :participant_count,
+        :spots_remaining,
+        :workshop_timeslot,
+        :workshop_room
+      ]
+
+    tool :get_workshop_attendance, Gut.Conference.Workshop, :attendance,
+      load: [
+        :registration_count,
+        :waitlist_count,
+        :participant_count,
+        :spots_remaining,
+        :workshop_timeslot,
+        :workshop_room
+      ]
+
+    tool :list_timeslot_attendance, Gut.Conference.WorkshopTimeslot, :attendance,
+      load: [:workshop_count, :registered_attendees, :waitlisted_attendees]
   end
 
   resources do
@@ -46,6 +69,7 @@ defmodule Gut.Conference do
       define :create_workshop_timeslot, action: :create
       define :update_workshop_timeslot, action: :update
       define :destroy_workshop_timeslot, action: :destroy
+      define :list_timeslot_attendance, action: :attendance
     end
 
     resource Gut.Conference.WorkshopRoom do
@@ -64,6 +88,8 @@ defmodule Gut.Conference do
       define :update_workshop, action: :update
       define :destroy_workshop, action: :destroy
       define :promote_waitlist, action: :promote_waitlist, args: [:workshop_id]
+      define :list_workshop_attendance, action: :attendance
+      define :get_workshop_attendance, action: :attendance, get_by: [:id]
     end
 
     resource Gut.Conference.WorkshopSpeaker do

@@ -80,6 +80,18 @@ defmodule Gut.Conference.Workshop do
       ]
     end
 
+    read :attendance do
+      description """
+      Attendance statistics for workshops: capacity limit, registered and
+      waitlisted counts, and remaining spots.
+      """
+
+      prepare build(
+                load: [:registration_count, :waitlist_count, :participant_count, :spots_remaining],
+                sort: [:name]
+              )
+    end
+
     action :promote_waitlist, :integer do
       argument :workshop_id, :uuid, allow_nil?: false
 
@@ -160,16 +172,28 @@ defmodule Gut.Conference.Workshop do
     end
   end
 
+  calculations do
+    calculate :spots_remaining,
+              :integer,
+              expr(fragment("GREATEST(? - ?, 0)", limit, registration_count)) do
+      public? true
+    end
+  end
+
   aggregates do
     count :registration_count, :workshop_participations do
+      public? true
       filter expr(status == :registered)
     end
 
     count :waitlist_count, :workshop_participations do
+      public? true
       filter expr(status == :waitlisted)
     end
 
-    count :participant_count, :workshop_participations
+    count :participant_count, :workshop_participations do
+      public? true
+    end
   end
 
   identities do
