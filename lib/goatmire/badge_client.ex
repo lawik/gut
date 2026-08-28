@@ -212,7 +212,7 @@ defmodule Goatmire.BadgeClient do
     size = byte_size(url) - 1
 
     case url do
-      <<prefix::binary-size(size), "/">> -> prefix
+      <<prefix::binary-size(^size), "/">> -> prefix
       _ -> url
     end
   end
