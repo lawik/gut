@@ -1,0 +1,21 @@
+<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+  <div class="max-w-xl text-center space-y-6">
+    <%= if @verified? do %>
+      <h1 class="text-4xl font-bold tracking-tight text-base-content">
+        You're logged in!
+      </h1>
+      <p class="text-base text-base-content/70">
+        Your badge login is confirmed. Check your device &mdash; it should be
+        signed in within a few seconds.
+      </p>
+    <% else %>
+      <h1 class="text-4xl font-bold tracking-tight text-base-content">
+        This link is invalid or has expired
+      </h1>
+      <p class="text-base text-base-content/70">
+        Badge login links only work for a short while. Please start the login
+        again on your device to get a fresh link.
+      </p>
+    <% end %>
+  </div>
+</div>

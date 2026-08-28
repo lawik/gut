@@ -15,7 +15,7 @@ config :gut, Oban,
   notifier: Oban.Notifiers.Postgres,
   queues: [default: 10, discord: 5],
   repo: Gut.Repo,
-  plugins: [{Oban.Plugins.Cron, []}]
+  plugins: [{Oban.Plugins.Cron, crontab: [{"*/15 * * * *", Gut.Workers.TitoEmailSync}]}]
 
 config :ash,
   tracer: [OpentelemetryAsh],

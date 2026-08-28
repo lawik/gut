@@ -44,3 +44,10 @@ config :phoenix_live_view,
 config :phoenix_test, :endpoint, GutWeb.Endpoint
 
 config :opentelemetry, traces_exporter: :none
+
+# Tito API: never hit the real API in tests; requests go to a Req.Test stub
+config :gut,
+  tito_api_key: "tito-test-key",
+  tito_req_options: [plug: {Req.Test, Gut.Tito}, retry: false]
+
+config :gut, tito_cache_refresh_on_boot: false

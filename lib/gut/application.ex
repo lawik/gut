@@ -26,6 +26,9 @@ defmodule Gut.Application do
            Application.fetch_env!(:gut, Oban)
          )},
         {Phoenix.PubSub, name: Gut.PubSub},
+        %{id: :pg, start: {:pg, :start_link, [Gut.BadgeAuth.pg_scope()]}},
+        Gut.TitoEmailCache,
+        Gut.BadgeAuth,
         Gut.Tracer,
         GutWeb.Endpoint,
         {AshAuthentication.Supervisor, [otp_app: :gut]}

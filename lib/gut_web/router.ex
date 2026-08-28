@@ -22,6 +22,10 @@ defmodule GutWeb.Router do
     plug :set_actor, :user
   end
 
+  pipeline :badge_api do
+    plug :accepts, ["json"]
+  end
+
   pipeline :mcp do
     plug AshAuthentication.Strategy.ApiKey.Plug,
       resource: Gut.Accounts.User,
@@ -96,6 +100,7 @@ defmodule GutWeb.Router do
     pipe_through :browser
 
     get "/survey-invite/:id", SurveyInviteController, :show
+    get "/badge_login/verify/:token", BadgeVerifyController, :show
     get "/export/survey-responses/:workshop_id", CsvExportController, :survey_responses
     get "/export/speakers", CsvExportController, :speakers
     get "/export/workshops", CsvExportController, :workshops
@@ -124,6 +129,15 @@ defmodule GutWeb.Router do
       auth_routes_prefix: "/auth",
       overrides: [GutWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.DaisyUI]
     )
+  end
+
+  # Badge hardware device login. Deliberately unauthenticated: this flow
+  # logs in a *device*, never a Gut user.
+  scope "/api", GutWeb do
+    pipe_through :badge_api
+
+    post "/badge_login", BadgeLoginController, :create
+    get "/badge_login/:token", BadgeLoginController, :status
   end
 
   scope "/mcp" do
