@@ -131,6 +131,11 @@ defmodule Gut.Conference do
       define :send_blast, action: :send
     end
 
+    resource Gut.Conference.StatusMailing do
+      define :list_status_mailings, action: :read
+      define :send_status_mailing, action: :send
+    end
+
     resource Gut.Conference.SurveyQuestion do
       define :list_survey_questions, action: :read
     end

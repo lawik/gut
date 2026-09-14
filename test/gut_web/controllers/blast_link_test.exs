@@ -69,4 +69,18 @@ defmodule GutWeb.BlastLinkTest do
     assert redirected_to(conn) == "/blasts/#{blast.id}"
     assert get_session(conn, "user_token")
   end
+
+  test "the browse link stores the browse page as destination", %{conn: conn} do
+    conn = get(conn, "/browse-link?token=tok123")
+
+    assert redirected_to(conn) == "/magic_link/tok123"
+    assert get_session(conn, :return_to) == "/workshops/browse"
+  end
+
+  test "the browse link without a token forwards to sign-in", %{conn: conn} do
+    conn = get(conn, "/browse-link")
+
+    assert redirected_to(conn) == "/sign-in"
+    assert get_session(conn, :return_to) == "/workshops/browse"
+  end
 end

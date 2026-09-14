@@ -139,10 +139,130 @@ Gut.Conference.Sponsor
     actor: actor
   )
 
+# --- Timeslots, rooms and a full schedule ------------------------------------
+#
+# Only workshops with a timeslot show up on the browse page, and the status
+# email suggests alternatives per timeslot, so give the first few workshops a
+# schedule. The "Lab" room seats two, which makes the Nerves workshop fill up
+# and puts later registrations on its waitlist.
+
+find_or_create_timeslot = fn name, start, finish ->
+  Gut.Conference.WorkshopTimeslot
+  |> Ash.Query.filter(name == ^name)
+  |> Ash.read_one!(actor: actor) ||
+    Gut.Conference.create_workshop_timeslot!(%{name: name, start: start, end: finish},
+      actor: actor
+    )
+end
+
+find_or_create_room = fn name, limit ->
+  Gut.Conference.WorkshopRoom
+  |> Ash.Query.filter(name == ^name)
+  |> Ash.read_one!(actor: actor) ||
+    Gut.Conference.create_workshop_room!(%{name: name, limit: limit}, actor: actor)
+end
+
+day1_morning =
+  find_or_create_timeslot.("Day 1 morning", ~U[2026-10-06 09:00:00Z], ~U[2026-10-06 12:00:00Z])
+
+day1_afternoon =
+  find_or_create_timeslot.("Day 1 afternoon", ~U[2026-10-06 13:00:00Z], ~U[2026-10-06 16:00:00Z])
+
+day2_morning =
+  find_or_create_timeslot.("Day 2 morning", ~U[2026-10-07 09:00:00Z], ~U[2026-10-07 12:00:00Z])
+
+aula = find_or_create_room.("Aula", 40)
+lab = find_or_create_room.("Lab", 2)
+
+schedule = [
+  {"Intro to Elixir", day1_morning, aula},
+  {"Nerves: Embedded Elixir", day1_morning, lab},
+  {"Phoenix LiveView Deep Dive", day1_morning, nil},
+  {"Building APIs with Ash", day1_afternoon, aula},
+  {"OTP Patterns in Practice", day1_afternoon, nil},
+  {"Ecto Beyond Basics", day2_morning, aula},
+  {"Testing Elixir Applications", day2_morning, nil}
+]
+
+scheduled =
+  for {name, slot, room} <- schedule, into: %{} do
+    workshop = find_workshop.(name)
+
+    workshop =
+      if workshop.workshop_timeslot_id == slot.id and
+           workshop.workshop_room_id == (room && room.id) do
+        workshop
+      else
+        Gut.Conference.update_workshop!(
+          workshop,
+          %{workshop_timeslot_id: slot.id, workshop_room_id: room && room.id},
+          actor: actor
+        )
+      end
+
+    {name, workshop}
+  end
+
+# --- Participants in every status combination --------------------------------
+
+find_or_create_participant = fn name, user ->
+  query =
+    if user do
+      Ash.Query.filter(Gut.Conference.WorkshopParticipant, user_id == ^user.id)
+    else
+      Ash.Query.filter(Gut.Conference.WorkshopParticipant, name == ^name and is_nil(user_id))
+    end
+
+  Ash.read_one!(query, actor: actor) ||
+    Gut.Conference.create_workshop_participant!(
+      %{name: name, user_id: user && user.id},
+      actor: actor
+    )
+end
+
+ensure_participation = fn workshop, participant ->
+  Gut.Conference.WorkshopParticipation
+  |> Ash.Query.filter(workshop_id == ^workshop.id and workshop_participant_id == ^participant.id)
+  |> Ash.read_one!(actor: actor) ||
+    Gut.Conference.register_for_workshop!(
+      %{workshop_id: workshop.id, workshop_participant_id: participant.id},
+      actor: actor
+    )
+end
+
+nerves = scheduled["Nerves: Embedded Elixir"]
+
+# Two participants without accounts fill the Nerves workshop (Lab seats two).
+# They cannot be emailed, so the status mailing skips them.
+for name <- ["Filler One", "Filler Two"] do
+  ensure_participation.(nerves, find_or_create_participant.(name, nil))
+end
+
+# attendee@example.com has two seats and no waitlists.
+ensure_participation.(scheduled["Building APIs with Ash"], participant)
+
+# waitlisted@example.com has a seat in one workshop and is waitlisted for Nerves.
+waitlisted_user = find_or_create_user.("waitlisted@example.com", :attendee)
+waitlisted = find_or_create_participant.("Wanda Waitlist", waitlisted_user)
+ensure_participation.(nerves, waitlisted)
+ensure_participation.(scheduled["OTP Patterns in Practice"], waitlisted)
+
+# onlywaitlist@example.com is waitlisted for Nerves and has no seat anywhere.
+onlywait_user = find_or_create_user.("onlywaitlist@example.com", :attendee)
+onlywait = find_or_create_participant.("Wally Onlywait", onlywait_user)
+ensure_participation.(nerves, onlywait)
+
+# A participant with an account but no workshops: not a mailing recipient.
+idle_user = find_or_create_user.("noworkshops@example.com", :attendee)
+find_or_create_participant.("Ida Idle", idle_user)
+
 IO.puts("""
 Users seeded:
   staff@example.com     (staff)
   organizer@example.com (speaker, organizes "#{organizer_workshop.name}")
-  attendee@example.com  (attendee, registered for "#{organizer_workshop.name}")
+  attendee@example.com  (attendee, seats in "#{organizer_workshop.name}" and "Building APIs with Ash")
+  waitlisted@example.com (attendee, seat in "OTP Patterns in Practice", waitlisted for "Nerves: Embedded Elixir")
+  onlywaitlist@example.com (attendee, waitlisted for "Nerves: Embedded Elixir" only)
+  noworkshops@example.com (attendee, participant record but no workshops)
   sponsor@example.com   (sponsor, linked to Sponsorix AB)
 """)

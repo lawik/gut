@@ -157,6 +157,16 @@ defmodule GutWeb.Layouts do
       {render_slot(@inner_block)}
     </main>
 
+    <footer
+      :if={@current_user}
+      class="px-4 sm:px-6 lg:px-8 py-6 mt-8 border-t border-base-300 flex items-center justify-end gap-3 text-sm text-base-content/60"
+    >
+      <span class="truncate">{@current_user.email}</span>
+      <.link href={~p"/sign-out"} method="delete" class="link link-hover" id="footer-log-out">
+        Log out
+      </.link>
+    </footer>
+
     <.flash_group flash={@flash} />
     """
   end
@@ -259,6 +269,11 @@ defmodule GutWeb.Layouts do
             label="Participants"
             href={~p"/workshop-participants"}
             active={@active == "participants"}
+          />
+          <.subnav_tab
+            label="Status emails"
+            href={~p"/workshops/status-mailing"}
+            active={@active == "status-mailing"}
           />
         </nav>
         <div class="flex flex-wrap gap-2 py-2">
