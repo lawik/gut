@@ -100,6 +100,7 @@ defmodule Gut.Conference.Workshop do
 
     action :promote_waitlist, :integer do
       argument :workshop_id, :uuid, allow_nil?: false
+      transaction? true
 
       run Gut.Conference.Workshop.Actions.PromoteWaitlist
     end

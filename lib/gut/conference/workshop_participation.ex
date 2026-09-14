@@ -31,6 +31,7 @@ defmodule Gut.Conference.WorkshopParticipation do
 
       accept [:status]
 
+      change Gut.Conference.WorkshopParticipation.Changes.NotifyPromotion
       change Gut.Conference.WorkshopParticipation.Changes.InviteToSentSurvey
     end
   end

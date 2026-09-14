@@ -67,6 +67,39 @@ defmodule GutWeb.WorkshopBrowseLiveTest do
     end
   end
 
+  describe "waitlist holds freed seats" do
+    setup [:create_workshop_data]
+
+    test "a workshop with people waiting shows as full even with a free seat", %{
+      pid: pid,
+      slot: slot
+    } do
+      tiny = generate(workshop(name: "Tiny", limit: 1, workshop_timeslot_id: slot.id))
+      seated = generate(workshop_participant(name: "Seated"))
+      waiting = generate(workshop_participant(name: "Waiting"))
+
+      {:ok, seated_participation} =
+        Gut.Conference.register_for_workshop(
+          %{workshop_id: tiny.id, workshop_participant_id: seated.id},
+          actor: Gut.system_actor("test")
+        )
+
+      {:ok, _} =
+        Gut.Conference.register_for_workshop(
+          %{workshop_id: tiny.id, workshop_participant_id: waiting.id},
+          actor: Gut.system_actor("test")
+        )
+
+      Gut.Conference.destroy_workshop_participation!(seated_participation,
+        actor: Gut.system_actor("test")
+      )
+
+      build_unauthenticated_conn(pid)
+      |> visit("/workshops/browse")
+      |> assert_has("div[phx-value-workshop_id='#{tiny.id}']", text: "Full (waitlist available)")
+    end
+  end
+
   describe "day counts" do
     setup [:create_workshop_data]
 

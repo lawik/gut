@@ -38,7 +38,8 @@ defmodule Gut.Emails.WorkshopStatus do
 
   Returns a map with the participant's name, their registered and waitlisted
   workshops (each with timeslot and room), and for every waitlisted workshop
-  the alternatives in the same timeslot that still have seats.
+  the alternatives in the same timeslot that still have seats and no
+  waitlist of their own (a free seat there would go to the waitlist first).
   """
   def build(participant, intro) do
     participations =
@@ -48,7 +49,7 @@ defmodule Gut.Emails.WorkshopStatus do
 
     workshops =
       Gut.Conference.Workshop
-      |> Ash.Query.load([:workshop_timeslot, :workshop_room, :spots_remaining])
+      |> Ash.Query.load([:workshop_timeslot, :workshop_room, :spots_remaining, :waitlist_count])
       |> Ash.read!(actor: @system_actor)
       |> Map.new(&{&1.id, &1})
 
@@ -68,7 +69,8 @@ defmodule Gut.Emails.WorkshopStatus do
             other.id != w.id and
               other.workshop_timeslot_id == w.workshop_timeslot_id and
               not is_nil(other.workshop_timeslot_id) and
-              (other.spots_remaining || 0) > 0
+              (other.spots_remaining || 0) > 0 and
+              (other.waitlist_count || 0) == 0
           end)
           |> Enum.sort_by(&(-(&1.spots_remaining || 0)))
 

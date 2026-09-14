@@ -146,8 +146,10 @@ defmodule GutWeb.WorkshopBrowseLive do
     effective_limit(workshop) - (workshop.registration_count || 0)
   end
 
+  # A workshop with people waiting is full for newcomers even if a seat has
+  # just been freed: that seat goes to the waitlist first.
   defp workshop_full?(workshop) do
-    spots_remaining(workshop) <= 0
+    spots_remaining(workshop) <= 0 or (workshop.waitlist_count || 0) > 0
   end
 
   def render(assigns) do
