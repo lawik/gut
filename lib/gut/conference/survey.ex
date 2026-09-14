@@ -104,7 +104,7 @@ defmodule Gut.Conference.Survey do
     policy action(:create) do
       authorize_if Gut.Checks.SystemActor
       authorize_if Gut.Checks.StaffActor
-      authorize_if Gut.Conference.Survey.Checks.ActorOrganizesWorkshop
+      authorize_if Gut.Conference.Checks.ActorOrganizesWorkshop
     end
 
     policy action([:update_draft, :submit_for_review]) do

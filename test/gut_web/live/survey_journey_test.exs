@@ -519,7 +519,7 @@ defmodule GutWeb.SurveyJourneyTest do
       # Pending: linked from the registration page.
       conn
       |> visit("/workshops/browse")
-      |> assert_has("#attendee-surveys h2", text: "Workshop surveys")
+      |> assert_has("#attendee-updates h2", text: "From your workshops")
       |> assert_has("#attendee-surveys a", text: "Answer the survey for LiveView Deep Dive")
       |> refute_has("#attendee-surveys .hero-check-circle")
       |> click_link("Answer the survey for LiveView Deep Dive")
@@ -546,7 +546,7 @@ defmodule GutWeb.SurveyJourneyTest do
 
       conn
       |> visit("/workshops/browse")
-      |> refute_has("#attendee-surveys")
+      |> refute_has("#attendee-updates")
     end
 
     test "crafted nested answer params do not crash the respond page", %{

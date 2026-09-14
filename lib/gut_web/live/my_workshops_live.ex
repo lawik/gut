@@ -30,6 +30,12 @@ defmodule GutWeb.MyWorkshopsLive do
       |> Ash.read!(actor: user)
       |> Map.new(&{&1.workshop_id, &1})
 
+    blast_counts =
+      Gut.Conference.Blast
+      |> Ash.Query.filter(workshop_id in ^workshop_ids)
+      |> Ash.read!(actor: user)
+      |> Enum.frequencies_by(& &1.workshop_id)
+
     participations =
       Gut.Conference.WorkshopParticipation
       |> Ash.Query.filter(workshop_id in ^workshop_ids)
@@ -43,6 +49,7 @@ defmodule GutWeb.MyWorkshopsLive do
       |> assign(:current_scope, nil)
       |> assign(:workshops, workshops)
       |> assign(:surveys, surveys)
+      |> assign(:blast_counts, blast_counts)
       |> assign(:participations, participations)
 
     {:ok, socket}
@@ -81,7 +88,8 @@ defmodule GutWeb.MyWorkshopsLive do
         <div class="mb-8">
           <h1 class="text-2xl font-semibold text-base-content">My Workshops</h1>
           <p class="text-base-content/60 mt-1">
-            Workshops you organize. You can create a survey for your attendees for each one.
+            Workshops you organize. For each one you can email an update to your attendees
+            or create a survey for them.
           </p>
         </div>
 
@@ -124,7 +132,18 @@ defmodule GutWeb.MyWorkshopsLive do
                 </p>
               </div>
 
-              <div class="mt-6 flex justify-end">
+              <div class="mt-6 flex justify-end items-center gap-2">
+                <span :if={@blast_counts[workshop.id]} class="text-xs text-base-content/50 mr-auto">
+                  {@blast_counts[workshop.id]} {if @blast_counts[workshop.id] == 1,
+                    do: "update",
+                    else: "updates"} sent
+                </span>
+                <.link
+                  navigate={~p"/workshops/#{workshop.id}/blasts"}
+                  class="btn btn-sm btn-secondary"
+                >
+                  Send update
+                </.link>
                 <.link
                   navigate={~p"/workshops/#{workshop.id}/survey"}
                   class="btn btn-sm btn-primary"

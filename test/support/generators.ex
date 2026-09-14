@@ -139,6 +139,20 @@ defmodule Gut.Generators do
     )
   end
 
+  def blast(opts \\ []) do
+    changeset_generator(
+      Gut.Conference.Blast,
+      :send,
+      actor: Gut.system_actor("test"),
+      defaults: [
+        title: "Bring a laptop",
+        # workshop_id must be passed by the caller.
+        body: "Please bring a **charged** laptop.\n\nSee you there!"
+      ],
+      overrides: opts
+    )
+  end
+
   def workshop_participant(opts \\ []) do
     changeset_generator(
       Gut.Conference.WorkshopParticipant,

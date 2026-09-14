@@ -125,6 +125,12 @@ defmodule Gut.Conference do
       define :destroy_survey, action: :destroy
     end
 
+    resource Gut.Conference.Blast do
+      define :list_blasts, action: :read
+      define :get_blast, action: :read, get_by: [:id]
+      define :send_blast, action: :send
+    end
+
     resource Gut.Conference.SurveyQuestion do
       define :list_survey_questions, action: :read
     end

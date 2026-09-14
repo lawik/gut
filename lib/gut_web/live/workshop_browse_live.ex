@@ -42,6 +42,10 @@ defmodule GutWeb.WorkshopBrowseLive do
         :attendee_surveys,
         load_attendee_surveys(socket.assigns[:current_user], existing_participations, workshops)
       )
+      |> assign(
+        :attendee_blasts,
+        load_attendee_blasts(socket.assigns[:current_user], existing_participations, workshops)
+      )
 
     {:ok, socket}
   end
@@ -181,17 +185,18 @@ defmodule GutWeb.WorkshopBrowseLive do
             </button>
           </div>
         <% else %>
-          <%!-- Surveys for workshops the attendee is signed up for --%>
+          <%!-- Updates and surveys for workshops the attendee is signed up for --%>
           <div
-            :if={@attendee_surveys != []}
-            id="attendee-surveys"
+            :if={@attendee_surveys != [] or @attendee_blasts != []}
+            id="attendee-updates"
             class="bg-base-200 rounded-xl p-6 mb-8"
           >
-            <h2 class="text-xl font-semibold text-base-content mb-2">Workshop surveys</h2>
+            <h2 class="text-xl font-semibold text-base-content mb-2">From your workshops</h2>
             <p class="text-base-content/60 mb-3">
-              The organizers of your workshops would like some feedback from you.
+              Updates and surveys from the organizers of the workshops you signed up for.
             </p>
-            <ul class="space-y-2">
+
+            <ul :if={@attendee_surveys != []} id="attendee-surveys" class="space-y-2 mb-4">
               <li
                 :for={
                   %{survey: survey, workshop: workshop, answered?: answered?} <- @attendee_surveys
@@ -209,6 +214,23 @@ defmodule GutWeb.WorkshopBrowseLive do
                     Answer the survey for {workshop.name}
                   </.link>
                 <% end %>
+              </li>
+            </ul>
+
+            <ul :if={@attendee_blasts != []} id="attendee-blasts" class="space-y-2">
+              <li
+                :for={%{blast: blast, workshop: workshop} <- @attendee_blasts}
+                class="flex items-start gap-2"
+              >
+                <.icon name="hero-envelope" class="size-5 text-primary mt-0.5" />
+                <span>
+                  <.link navigate={~p"/blasts/#{blast.id}"} class="link link-primary">
+                    {blast.title}
+                  </.link>
+                  <span class="text-sm text-base-content/60">
+                    &middot; {workshop.name} &middot; {Calendar.strftime(blast.sent_at, "%b %d")}
+                  </span>
+                </span>
               </li>
             </ul>
           </div>
@@ -589,6 +611,10 @@ defmodule GutWeb.WorkshopBrowseLive do
         :attendee_surveys,
         load_attendee_surveys(socket.assigns[:current_user], existing_participations, workshops)
       )
+      |> assign(
+        :attendee_blasts,
+        load_attendee_blasts(socket.assigns[:current_user], existing_participations, workshops)
+      )
 
     {:noreply, socket}
   end
@@ -624,6 +650,27 @@ defmodule GutWeb.WorkshopBrowseLive do
         workshop = Enum.find(workshops, &(&1.id == survey.workshop_id)) do
       %{survey: survey, workshop: workshop, answered?: MapSet.member?(answered, survey.id)}
     end
+  end
+
+  # Blasts sent to the workshops the user is signed up for, newest first.
+  defp load_attendee_blasts(nil, _participations, _workshops), do: []
+  defp load_attendee_blasts(_user, [], _workshops), do: []
+
+  defp load_attendee_blasts(user, participations, workshops) do
+    require Ash.Query
+
+    workshop_ids = Enum.map(participations, & &1.workshop_id)
+
+    Gut.Conference.Blast
+    |> Ash.Query.filter(workshop_id in ^workshop_ids)
+    |> Ash.Query.sort(sent_at: :desc)
+    |> Ash.read!(actor: user)
+    |> Enum.flat_map(fn blast ->
+      case Enum.find(workshops, &(&1.id == blast.workshop_id)) do
+        nil -> []
+        workshop -> [%{blast: blast, workshop: workshop}]
+      end
+    end)
   end
 
   defp load_sent_surveys(_user, [], _workshops), do: []
