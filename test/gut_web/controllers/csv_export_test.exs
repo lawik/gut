@@ -31,7 +31,7 @@ defmodule GutWeb.CsvExportTest do
       assert resp.status == 200
 
       for i <- 1..30 do
-        assert resp.resp_body =~ "Speaker #{i},"
+        assert resp.resp_body =~ "Speaker #{i};"
       end
     end
 
@@ -148,15 +148,44 @@ defmodule GutWeb.CsvExportTest do
       resp = get(conn, "/export/speakers")
       lines = String.split(resp.resp_body, "\r\n")
 
-      header_cols = lines |> hd() |> String.split(",")
+      header_cols = lines |> hd() |> String.trim_leading("\uFEFF") |> String.split(";")
       agreed_idx = Enum.find_index(header_cols, &(&1 == "Agreed"))
       assert agreed_idx
 
-      approved_row = Enum.find(lines, &String.starts_with?(&1, "Approved Speaker,"))
-      pending_row = Enum.find(lines, &String.starts_with?(&1, "Pending Speaker,"))
+      approved_row = Enum.find(lines, &String.starts_with?(&1, "Approved Speaker;"))
+      pending_row = Enum.find(lines, &String.starts_with?(&1, "Pending Speaker;"))
 
-      assert Enum.at(String.split(approved_row, ","), agreed_idx) == "true"
-      assert Enum.at(String.split(pending_row, ","), agreed_idx) == "false"
+      assert Enum.at(String.split(approved_row, ";"), agreed_idx) == "true"
+      assert Enum.at(String.split(pending_row, ";"), agreed_idx) == "false"
+    end
+
+    test "is Excel friendly: BOM, semicolons, quoting and no line breaks in fields", %{
+      conn: conn
+    } do
+      generate(
+        speaker(
+          full_name: "Åsa Öberg",
+          first_name: "Åsa",
+          last_name: "Öberg",
+          special_requests: "Vegan; no nuts",
+          notes: "Line one\r\nLine two\n\nSays \"hi\""
+        )
+      )
+
+      resp = get(conn, "/export/speakers")
+
+      assert String.starts_with?(resp.resp_body, "\uFEFF")
+
+      [header | rows] = resp.resp_body |> String.trim_leading("\uFEFF") |> String.split("\r\n")
+      assert header =~ "Full Name;First Name;Last Name;"
+
+      row = Enum.find(rows, &String.starts_with?(&1, "Åsa Öberg;"))
+      assert row
+      # A field containing the separator is quoted, one with quotes is doubled up,
+      # and line breaks are flattened so every record stays on one line.
+      assert row =~ ~s("Vegan; no nuts")
+      assert row =~ ~s("Line one Line two Says ""hi""")
+      assert length(rows) == 1
     end
 
     test "filters by confirmed_with_hotel", %{conn: conn} do
@@ -255,7 +284,7 @@ defmodule GutWeb.CsvExportTest do
       assert resp.status == 200
 
       for i <- 1..30 do
-        assert resp.resp_body =~ "Workshop #{i},"
+        assert resp.resp_body =~ "Workshop #{i};"
       end
     end
 

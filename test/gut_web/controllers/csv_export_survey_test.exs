@@ -90,8 +90,8 @@ defmodule GutWeb.CsvExportSurveyTest do
     assert response_content_type(conn, :csv) =~ "text/csv"
     body = response(conn, 200)
 
-    assert body =~ ~s(Attendee,"Say, something?",Pick one,Submitted At)
-    assert body =~ ~s("Comma, Person",It was nice,Yes,)
+    assert body =~ ~s(Attendee;Say, something?;Pick one;Submitted At)
+    assert body =~ ~s(Comma, Person;It was nice;Yes;)
   end
 
   test "staff can download responses as CSV", %{conn: conn, workshop: workshop} do

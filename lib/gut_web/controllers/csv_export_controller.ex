@@ -331,6 +331,17 @@ defmodule GutWeb.CsvExportController do
   end
 
   # CSV encoding
+  #
+  # Tuned for opening directly in Excel with a European locale: fields are
+  # separated by semicolons (Excel's list separator when the decimal
+  # separator is a comma) and the file starts with a UTF-8 byte order mark so
+  # non-ASCII names are decoded correctly. Fields containing the separator
+  # or quotes are quoted per RFC 4180. CSV has no escape for line breaks (a
+  # quoted field can span lines, but Excel's Text Import Wizard mishandles
+  # that), so line breaks inside a field are flattened to a single space.
+
+  @separator ";"
+  @utf8_bom "\uFEFF"
 
   defp send_csv(conn, filename, headers, rows) do
     csv_data =
@@ -340,13 +351,13 @@ defmodule GutWeb.CsvExportController do
     conn
     |> put_resp_content_type("text/csv")
     |> put_resp_header("content-disposition", ~s(attachment; filename="#{filename}"))
-    |> send_resp(200, csv_data)
+    |> send_resp(200, @utf8_bom <> csv_data)
   end
 
   defp encode_csv_row(values) do
     values
     |> Enum.map(&encode_csv_field/1)
-    |> Enum.join(",")
+    |> Enum.join(@separator)
   end
 
   defp encode_csv_field(nil), do: ""
@@ -356,12 +367,18 @@ defmodule GutWeb.CsvExportController do
   defp encode_csv_field(value) when is_atom(value), do: Atom.to_string(value)
 
   defp encode_csv_field(value) do
-    str = to_string(value)
+    str = value |> to_string() |> flatten_line_breaks()
 
-    if String.contains?(str, [",", "\"", "\n", "\r"]) do
+    if String.contains?(str, [@separator, "\""]) do
       "\"" <> String.replace(str, "\"", "\"\"") <> "\""
     else
       str
     end
+  end
+
+  defp flatten_line_breaks(str) do
+    str
+    |> String.replace(~r/[ \t]*(\r\n|\r|\n)+[ \t]*/, " ")
+    |> String.trim()
   end
 end
